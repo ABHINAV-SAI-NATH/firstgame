@@ -1,0 +1,2262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rebirth: The Long Road of Humankind - Story Edition</title>
+<style>
+:root {
+  --bg: #0d0a08;
+  --fg: #f4ebd9;
+  --accent: #e5a958;
+  --cyan: #3fc5d9;
+  --gold: #ffd15c;
+  --red: #e04b4b;
+  --green: #48bb78;
+  --purple: #9b5de5;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0d0a08; --fg: #f4ebd9; }
+}
+:root[data-theme="dark"] { --bg: #0d0a08; --fg: #f4ebd9; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  display: flex;
+  flex-direction: column;
+  font-family: Georgia, "Times New Roman", serif;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  overflow: hidden;
+}
+
+/* Top Navigation Bar */
+#top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 14px;
+  background: rgba(8, 6, 5, 0.7);
+  border-bottom: 1px solid rgba(244, 235, 217, 0.15);
+  font-size: 13px;
+  z-index: 10;
+}
+.brand-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.coin-badge {
+  background: rgba(255, 209, 92, 0.15);
+  border: 1px solid rgba(255, 209, 92, 0.4);
+  padding: 3px 8px;
+  border-radius: 12px;
+  color: var(--gold);
+  font-weight: bold;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.hud-btn {
+  background: rgba(244, 235, 217, 0.1);
+  border: 1px solid rgba(244, 235, 217, 0.25);
+  color: var(--fg);
+  padding: 4px 9px;
+  border-radius: 4px;
+  font-family: Georgia, serif;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.hud-btn:hover {
+  background: rgba(244, 235, 217, 0.25);
+  border-color: var(--accent);
+}
+.hud-btn.gold {
+  border-color: rgba(255, 209, 92, 0.5);
+  background: rgba(255, 209, 92, 0.18);
+  color: var(--gold);
+}
+
+/* Canvas Display */
+canvas {
+  width: 100%;
+  max-height: 72%;
+  aspect-ratio: 16/9;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+  background: #000;
+  box-shadow: 0 4px 28px rgba(0,0,0,0.85);
+}
+
+/* Controls Pad */
+#pad {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 16px;
+  gap: 10px;
+  background: rgba(0, 0, 0, 0.32);
+}
+.g { display: flex; gap: 10px; }
+button.ctrl {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  border: 2px solid rgba(244, 235, 217, 0.32);
+  background: rgba(244, 235, 217, 0.1);
+  color: var(--fg);
+  font-size: 24px;
+  touch-action: none;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.08s, background 0.08s, border-color 0.08s;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+button.ctrl:active, button.ctrl.on {
+  background: rgba(244, 235, 217, 0.45);
+  border-color: var(--accent);
+  transform: scale(0.93);
+}
+button.ctrl.act-btn {
+  border-color: rgba(63, 197, 217, 0.6);
+  background: rgba(63, 197, 217, 0.15);
+}
+button.ctrl.door-btn {
+  border-color: rgba(255, 209, 92, 0.6);
+  background: rgba(255, 209, 92, 0.15);
+  font-size: 20px;
+}
+
+/* Modals & Overlays */
+.game-modal {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(8, 6, 5, 0.95);
+  backdrop-filter: blur(8px);
+  z-index: 100;
+  display: none;
+  flex-direction: column;
+  padding: 16px 22px;
+  overflow: hidden;
+}
+.game-modal.visible { display: flex; }
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(244, 235, 217, 0.2);
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+}
+.modal-title { font-size: 20px; font-weight: bold; color: var(--accent); display: flex; align-items: center; gap: 8px; }
+.modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+/* Shop Grid Items */
+.shop-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+  margin-top: 10px;
+}
+.shop-card {
+  background: rgba(244, 235, 217, 0.06);
+  border: 1px solid rgba(244, 235, 217, 0.2);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.2s;
+}
+.shop-card:hover {
+  border-color: var(--accent);
+  background: rgba(244, 235, 217, 0.1);
+}
+.shop-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.shop-card-name { font-size: 15px; font-weight: bold; color: #fff; }
+.shop-card-cost { color: var(--gold); font-size: 13px; font-weight: bold; }
+.shop-card-desc { font-size: 12px; opacity: 0.85; line-height: 1.4; margin-bottom: 10px; }
+.shop-buy-btn {
+  background: rgba(229, 169, 88, 0.25);
+  border: 1px solid var(--accent);
+  color: var(--fg);
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: Georgia, serif;
+  font-size: 12px;
+  font-weight: bold;
+  align-self: flex-start;
+  transition: all 0.15s;
+}
+.shop-buy-btn:hover {
+  background: var(--accent);
+  color: #000;
+}
+.shop-buy-btn.bought {
+  background: rgba(72, 187, 120, 0.2);
+  border-color: var(--green);
+  color: var(--green);
+  cursor: default;
+}
+
+/* Timeline Level Grid */
+.era-section { margin-bottom: 16px; }
+.era-section-title {
+  font-size: 13px; font-weight: bold; color: var(--cyan);
+  margin-bottom: 6px; border-bottom: 1px dashed rgba(244, 235, 217, 0.2); padding-bottom: 3px;
+}
+.level-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 6px;
+}
+.lvl-btn {
+  background: rgba(244, 235, 217, 0.08); border: 1px solid rgba(244, 235, 217, 0.2);
+  border-radius: 5px; padding: 5px 3px; text-align: center; cursor: pointer; color: var(--fg);
+  font-size: 11px; transition: all 0.15s;
+}
+.lvl-btn:hover { background: rgba(244, 235, 217, 0.25); border-color: var(--accent); }
+.lvl-btn.active { background: rgba(229, 169, 88, 0.3); border-color: var(--accent); font-weight: bold; }
+.lvl-btn.beaten { border-color: #55c777; color: #a3e8b7; }
+.lvl-btn-num { font-size: 13px; font-weight: bold; display: block; }
+.lvl-btn-name { font-size: 9px; opacity: 0.8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Interactive Story Banner */
+#story-dialog {
+  position: absolute;
+  bottom: 84px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 680px;
+  background: rgba(14, 11, 9, 0.94);
+  border: 1px solid rgba(229, 169, 88, 0.5);
+  border-radius: 8px;
+  padding: 12px 18px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.85);
+  z-index: 50;
+  display: none;
+  align-items: center;
+  gap: 14px;
+  pointer-events: auto;
+}
+#story-dialog.show { display: flex; }
+#speaker-avatar {
+  font-size: 38px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+  width: 54px;
+  height: 54px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+  border: 1px solid rgba(229, 169, 88, 0.4);
+}
+#speaker-content { flex: 1; }
+#speaker-name { font-size: 13px; font-weight: bold; color: var(--accent); margin-bottom: 3px; }
+#speaker-text { font-size: 13px; line-height: 1.45; color: var(--fg); }
+#btn-story-dismiss {
+  background: rgba(244, 235, 217, 0.12);
+  border: 1px solid rgba(244, 235, 217, 0.3);
+  color: var(--fg);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  align-self: flex-end;
+}
+#btn-story-dismiss:hover { background: var(--accent); color: #000; }
+</style>
+</head>
+<body>
+
+<div id="top-bar">
+  <div class="brand-box">
+    <div style="font-weight:bold;">Rebirth: Humankind</div>
+    <div class="coin-badge">🪙 <span id="hud-coin-val">0</span></div>
+  </div>
+  <div style="display:flex;gap:6px;">
+    <button class="hud-btn gold" id="btn-open-shop">🛒 Shop (B)</button>
+    <button class="hud-btn" id="btn-open-story">📜 Story Quest</button>
+    <button class="hud-btn" id="btn-open-map">🗺️ Epochs (1-100)</button>
+    <button class="hud-btn" id="btn-download-game">💾 Save</button>
+    <button class="hud-btn" id="btn-sound-toggle">🔊 Sound</button>
+  </div>
+</div>
+
+<canvas id="c"></canvas>
+
+<!-- Interactive Story Dialogue Notification -->
+<div id="story-dialog">
+  <div id="speaker-avatar">🧬</div>
+  <div id="speaker-content">
+    <div id="speaker-name">Protocell Mother • 4.1 Ga</div>
+    <div id="speaker-text">Self-assembling lipid vesicles enclose catalytic RNA. Master ocean currents, collect amber DNA coins, and discover the hidden hydrothermal chamber!</div>
+  </div>
+  <button id="btn-story-dismiss">Got it ❯</button>
+</div>
+
+<!-- Touch Controls Pad -->
+<div id="pad">
+  <div class="g">
+    <button class="ctrl" id="L">◀</button>
+    <button class="ctrl" id="R">▶</button>
+  </div>
+  <div class="g">
+    <button class="ctrl door-btn" id="E" title="Enter Nested Sub-Chamber / Talk">🚪</button>
+    <button class="ctrl act-btn" id="A" title="Action: Hunt / Shoot / Disinfect">⚔️</button>
+    <button class="ctrl" id="J">▲</button>
+  </div>
+</div>
+
+<!-- Evolution Upgrade Shop Modal -->
+<div class="game-modal" id="modal-shop">
+  <div class="modal-header">
+    <div class="modal-title"><span>🛒</span> Evolution Mutation Shop & Upgrades</div>
+    <button class="hud-btn" id="btn-close-shop">✕ Close</button>
+  </div>
+  <div class="modal-body">
+    <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,209,92,0.1); padding:10px 14px; border-radius:6px; margin-bottom:12px;">
+      <div>Your Evolution Shards: <strong style="color:var(--gold); font-size:16px;">🪙 <span id="shop-coin-display">0</span></strong></div>
+      <div style="font-size:12px; opacity:0.85;">Permanent upgrades persist across all 100 epochs!</div>
+    </div>
+    <div class="shop-grid" id="shop-grid-items">
+      <!-- Injected dynamically via JS -->
+    </div>
+  </div>
+</div>
+
+<!-- Story Chronicle Modal -->
+<div class="game-modal" id="modal-story">
+  <div class="modal-header">
+    <div class="modal-title"><span>📜</span> Epoch Chronicle & Quest Dossier</div>
+    <button class="hud-btn" id="btn-close-story">✕ Close</button>
+  </div>
+  <div class="modal-body" id="story-modal-content">
+    <!-- Populated per current level -->
+  </div>
+</div>
+
+<!-- 100-Epochs Timeline Map Modal -->
+<div class="game-modal" id="modal-map">
+  <div class="modal-header">
+    <div class="modal-title"><span>🌍</span> The 100 Epochs of Evolution</div>
+    <button class="hud-btn" id="btn-close-map">✕ Close</button>
+  </div>
+  <div class="modal-body" id="map-modal-body"></div>
+</div>
+
+<script>
+const C = document.getElementById('c'), X = C.getContext('2d'), W = 800, H = 450;
+C.width = W; C.height = H;
+
+// ==========================================
+// 100-EPOCH RICH NARRATIVE & QUEST DATABASE
+// Every single level is its own individual story
+// with narrative chronicles and quest objectives!
+// ==========================================
+const ERAS = [
+  // --- ERA 1: Primordial Dawn (Levels 1 - 10) ---
+  ['1. Protocell Genesis', '4.1 billion years ago', 'Self-assembling lipid vesicles enclose catalytic RNA inside boiling hydrothermal ocean vents.', '#071821', '#103844', 'Awaken RNA catalysts & find the hidden Vent Core chamber.'],
+  ['2. Archaea Extremophiles', '3.8 billion years ago', 'Anaerobic extremophiles thrive in oxygen-free boiling waters, metabolizing volcanic gases.', '#091c26', '#13404d', 'Survive toxic sulfur vents and scavenge thermophilic enzymes.'],
+  ['3. Cyanobacteria Awakening', '3.5 billion years ago', 'Photosynthesis awakens! Colonial stromatolites release the first oxygen into the world.', '#0d292f', '#185055', 'Harness solar rays and build oxygen stromatolite colonies.'],
+  ['4. Eukaryote Endosymbiosis', '2.1 billion years ago', 'An archaean host engulfs an aerobic bacterium, giving birth to cellular mitochondria.', '#0f333b', '#1f6164', 'Engulf the bacterial symbiont to power cellular respiration.'],
+  ['5. Ciliate Micro-Hunter', '1.6 billion years ago', 'Coordinated beating cilia propel a single-celled microscopic predator through primordial shallows.', '#123943', '#257074', 'Hunt nutrient microbes with ciliary dash.'],
+  ['6. Volvox Colony', '1.2 billion years ago', 'Multicellular cooperation begins as thousands of flagellated green cells unite in a hollow sphere.', '#143d46', '#2d7c7b', 'Coordinate colony rotation and navigate ocean currents.'],
+  ['7. Placozoa Tissue', '800 million years ago', 'The simplest animal tissue: a flat crawling sheet of digestive cells grazing across marine mats.', '#123842', '#2f7c75', 'Crawl across benthic microbial carpets and digest organic mats.'],
+  ['8. Porifera (The Sea Sponge)', '650 million years ago', 'Porous filter feeders pump water through silica spicules, surviving the great Snowball Earth.', '#10343e', '#2c736a', 'Filter ocean currents through silica spicule chambers.'],
+  ['9. Cnidarian Hydromedusa', '600 million years ago', 'The first neuromuscular system! Pulsating jelly bell with stinging pressurized nematocysts.', '#0f2f3c', '#286862', 'Fire nematocyst stingers to fend off deep-sea predators.'],
+  ['10. Dickinsonia Pioneer', '558 million years ago', 'Ediacaran pioneer: quilted ribbed bilateral organism gliding peacefully over microbial carpets.', '#112b3a', '#245b58', 'Pioneer bilateral symmetry before the Cambrian dawn.'],
+
+  // --- ERA 2: Cambrian Seas to Land (Levels 11 - 20) ---
+  ['11. Trilobite Armor', '521 million years ago', 'The Cambrian Explosion! Calcite crystal compound eyes and mineralized jointed armor.', '#0a2336', '#1c4962', 'Navigate the coral reef and roll into defensive carapace.'],
+  ['12. Anomalocaris (Apex Hunt)', '508 million years ago', 'The world’s first apex predator, wielding raptorial grasping claws and lateral swimming lobes.', '#0d283c', '#20536c', 'Hunt giant trilobites and enter the Coral Lair chamber.'],
+  ['13. Pikaia (First Notochord)', '500 million years ago', 'Our earliest direct chordate ancestor! Sinuous swimming ribbon possessing a dorsal nerve cord.', '#102c40', '#255b74', 'Pioneer the spinal cord and dart through predatory waters.'],
+  ['14. Orthocone Nautiloid', '460 million years ago', 'Straight conical-shelled cephalopod controlling gas buoyancy chambers with jet propulsion.', '#133248', '#2b657e', 'Vent siphuncle gas buoyancy to traverse abyssal chasms.'],
+  ['15. Eurypterid (Sea Scorpion)', '430 million years ago', 'Two-meter armored chelicerate arthropod hunting brackish estuaries with crushing pincers.', '#17364b', '#306980', 'Crush rocky barriers with massive chitinous chelae.'],
+  ['16. Dunkleosteus Leviathan', '380 million years ago', 'Giant placoderm armored fish wielding self-sharpening bone shears with titanic bite force.', '#1a3346', '#336275', 'Sever armored placoderm foes in deep Devonian trenches.'],
+  ['17. Lobe-Finned Coelacanth', '375 million years ago', 'Fleshy, bone-jointed paired fins that contain the exact skeletal blueprint for arms and legs.', '#1d3443', '#39636f', 'Scull paired bony fins across shallow muddy deltas.'],
+  ['18. Tiktaalik (The Fishapod)', '375 million years ago', 'Articulated wrist joints, push-up forearms, and a flexible neck peer above the waterline.', '#203740', '#416668', 'Perform wrist pushups to breathe air and cross gravel banks.'],
+  ['19. Acanthostega Swamps', '365 million years ago', 'Eight-digited tetrapod roams tangled freshwater marshes with dual gills and lungs.', '#22383c', '#46685f', 'Navigate weed-choked swamps with 8-digited limbs.'],
+  ['20. Ichthyostega Shores', '360 million years ago', 'Robust ribcage and muscular shoulders drag pioneer limbs out of the water onto dry mud.', '#233835', '#4d6957', 'Conquer terra firma! Haul pioneer limbs onto dry land.'],
+
+  // --- ERA 3: Conquering the Land (Levels 21 - 30) ---
+  ['21. Lycophyte Rainforests', '350 million years ago', 'Dense 40-meter clubmoss rainforests carpet the continents, generating the Earth’s coal seams.', '#182b1d', '#3d5c33', 'Clamber over gigantic lycophyte root tangles.'],
+  ['22. Arthropleura Titan', '320 million years ago', 'Fueled by an oxygen-rich atmosphere (35% O2), a 2.5-meter giant millipede rumbles through ferns.', '#1c2e1c', '#446636', 'Trample decaying primeval logs under high-oxygen air.'],
+  ['23. Meganeura (Sky Hunter)', '305 million years ago', 'Master of primeval skies with a 75-centimeter wingspan, hawking prey like an aerial eagle.', '#20331e', '#4c6f3a', 'Soar over swamp canopies and catch flying insects.'],
+  ['24. Hylonomus (First Egg)', '312 million years ago', 'The amniotic waterproof egg severs the eternal umbilical cord to open water. True reptiles arise.', '#24341f', '#52723d', 'Protect the amniotic egg and scamper across dry leaves.'],
+  ['25. Dimetrodon Solar Sail', '295 million years ago', 'Proto-mammal synapsid with a majestic vascularized dorsal sail used for morning thermoregulation.', '#2b3020', '#5c6e3b', 'Bask sail in morning sunlight to hunt cold-blooded prey.'],
+  ['26. Edaphosaurus Herbivore', '290 million years ago', 'Early herbivorous sail-backed synapsid developing a specialized gut for fermenting tough ferns.', '#2d2e1e', '#616738', 'Browse tough Permian ferns and ferment plant fiber.'],
+  ['27. Gorgonopsid Apex Hunt', '260 million years ago', 'Saber-toothed apex carnivore of the Permian, bringing down armored pareiasaurs with swift bites.', '#33291c', '#635332', 'Track prey trails and strike with saber fangs.'],
+  ['28. Lystrosaurus Survivor', '252 million years ago', 'Weathering the catastrophic Permian-Triassic Great Dying extinction to inherit Earth.', '#38281b', '#6b4d2f', 'Burrow underground to weather Siberian Traps fallout.'],
+  ['29. Cynodont (Warm Blood)', '248 million years ago', 'Warm-blooded mammal ancestor with sensory whiskers, fur insulation, and a secondary palate.', '#3d2b1f', '#735033', 'Navigate nocturnal burrows using sensory whiskers.'],
+  ['30. Eoraptor Dawn Runner', '231 million years ago', 'The dawn runner! Agile bipedal sprint and hollow bones launch the reign of the dinosaurs.', '#3d2e23', '#745437', 'Outrun rival archosaurs across Triassic river valleys.'],
+
+  // --- ERA 4: Age of Dinosaurs (Levels 31 - 40) ---
+  ['31. Morganucodon Shadows', '205 million years ago', 'Tiny nocturnal mammal scurries under tree roots, developing acute inner ear hearing.', '#362b2d', '#694c4d', 'Scuttle beneath Jurassic dinosaur feet in shadow.'],
+  ['32. Archaeopteryx Wings', '150 million years ago', 'Feathered transitional marvel: dinosaur teeth and bony tail paired with true avian wings.', '#382f3c', '#6d5469', 'Gliding leap between limestone cliffs of Solnhofen.'],
+  ['33. Stegosaurus Thagomizer', '155 million years ago', 'Heavy plated herbivore with vascularized dorsal armor and a deadly spiked tail thagomizer.', '#3f3536', '#725c56', 'Defend against stalking Allosaurus with tail spikes.'],
+  ['34. Pterosaur Thermals', '120 million years ago', 'Soaring on aerodynamic skin membranes stretched across an elongated fourth finger.', '#353c48', '#5b6a7a', 'Catch ocean thermals and soar across Cretaceous cliffs.'],
+  ['35. Velociraptor Pack', '75 million years ago', 'Feathered pack predator armed with keen stereoscopic eyes and a lethal curved sickle claw.', '#443831', '#7c5f49', 'Coordinate with pack companions to ambush prey.'],
+  ['36. Triceratops Shield', '68 million years ago', 'Six-ton ceratopsian fortress with a massive solid bone neck frill and meter-long brow horns.', '#473229', '#7f533a', 'Form defensive horns against attacking tyrannosaurs.'],
+  ['37. Tyrannosaurus Rex', '66 million years ago', 'Apex theropod possessing bone-crushing 12,000-pound jaw pressure and depth-perceiving vision.', '#4c2d25', '#844733', 'Rule Hell Creek and crush armor plates with bite force.'],
+  ['38. Chicxulub Cataclysm', '66 million years ago', 'A 10-kilometer bolide strikes. Firestorms erupt as burrowing mammals shelter deep underground.', '#3a1f1b', '#623126', 'Dodge falling asteroid fragments and reach deep shelter.'],
+  ['39. Purgatorius Forest', '65 million years ago', 'Tiny arboreal survivor in recovering post-impact forests: the ancestor of all primates.', '#342629', '#634346', 'Climb flowering angiosperm trees to gather fruit.'],
+  ['40. Gastornis Terror Bird', '50 million years ago', 'Giant two-meter flightless bird ruling dense Eocene subtropical jungles with shearing beaks.', '#352d24', '#665337', 'Stalk early mammalian herbivores through dense jungle.'],
+
+  // --- ERA 5: Mammals & Primates (Levels 41 - 50) ---
+  ['41. Ambulocetus Walking Whale', '48 million years ago', 'The whale that could walk! Amphibious mammal paddling through shallow coastal lagoons.', '#24333b', '#415a63', 'Paddle coastal bays and transition toward the sea.'],
+  ['42. Paraceratherium Titan', '30 million years ago', 'The largest land mammal in history: an eight-meter hornless rhino browsing high treetops.', '#31332c', '#5a5c48', 'Browse towering tree canopies across Eurasian plains.'],
+  ['43. Smilodon Ambush', '2.5 million years ago', 'Powerful ambush cat with 28-centimeter canine daggers hunting Pleistocene megafauna.', '#3d3023', '#6e5233', 'Ambush giant bison and avoid counter-charges.'],
+  ['44. Aegyptopithecus Canopy', '33 million years ago', 'Early primate developing forward-facing stereoscopic color vision to navigate forest canopies.', '#373222', '#695c34', 'Judge branch depths with stereoscopic vision.'],
+  ['45. Proconsul Brachiation', '18 million years ago', 'Miocene tailless ape with flexible shoulders, swinging with agile branch dexterity.', '#343825', '#606439', 'Swing branch to branch across East African forests.'],
+  ['46. Sahelanthropus (Toumai)', '7 million years ago', 'The dawn of hominids: anterior foramen magnum marks the earliest shift toward upright posture.', '#3e3427', '#6d5a3c', 'Stand upright to peer over tall savannah grasses.'],
+  ['47. Ardipithecus (Ardi)', '4.4 million years ago', 'Facultative biped in Afar woodlands, balancing tree climbing with upright walking.', '#443729', '#755d3e', 'Balance dual climbing feet and ground walking stride.'],
+  ['48. Australopithecus (Lucy)', '3.2 million years ago', 'Habitual biped of the savanna, leaving human-like footprints in Laetoli volcanic ash.', '#4c3929', '#7f5d3d', 'Cross open savanna trackways with free hands.'],
+  ['49. Homo Habilis Knapper', '2.3 million years ago', 'First toolmaker! Chipping Oldowan stone flakes to butcher marrow-rich animal bones.', '#503827', '#855938', 'Knap sharp flint flakes and scavenge bone marrow.'],
+  ['50. Homo Erectus & Fire', '1.8 million years ago', 'Controlled hearth fire predigests food, shrinking the gut and supercharging brain growth.', '#522b1c', '#853e20', 'Carry the burning firebrand to light the night cave.'],
+
+  // --- ERA 6: Stone Age, Mammoth Hunt & Farming (Levels 51 - 60) ---
+  ['51. Neanderthal Hearth', '120,000 years ago', 'Cold-adapted humans in Eurasian caves, burying their dead and wearing red ochre body art.', '#3a343b', '#61545e', 'Gather herbal medicines and decorate with red ochre.'],
+  ['52. Homo Sapiens Migration', '70,000 years ago', 'Syntactical language and symbolic thought ignite global migration across oceans and continents.', '#453835', '#73574d', 'Communicate abstract concepts and lead clan migration.'],
+  ['53. Mammoth Steppe Hunt', '30,000 years ago', 'Throw spears with mechanical atlatls to bring down towering ice-age woolly mammoths.', '#3e3943', '#685c6d', 'Hunt the woolly mammoth with spear-throwers!'],
+  ['54. Lascaux Cave Art', '17,000 years ago', 'Deep limestone sanctuaries lit by animal-fat lamps externalize human consciousness.', '#433430', '#74534a', 'Blow pigment upon limestone walls to tell our story.'],
+  ['55. Natufian Settlement', '12,500 years ago', 'The first stone hamlet settlements; harvesting wild rye with flint-toothed curved sickles.', '#473d32', '#7b664d', 'Harvest wild grains with curved flint sickles.'],
+  ['56. Neolithic Farming Dawn', '10,000 years ago', 'Fertile Crescent farmers domesticate emmer wheat, goats, and sheep. Surpluses build towns.', '#45442f', '#777348', 'Cultivate emmer wheat and protect herd pastures.'],
+  ['57. Pottery & Weaving', '7,500 years ago', 'Fired clay pots preserve olive oil and grain reserves; looms weave sheep wool and flax linen.', '#4b3d32', '#82654d', 'Fire clay storage pots in kilns to guard grain.'],
+  ['58. Chalcolithic Copper Age', '5,300 years ago', 'Smelting copper ores in charcoal furnaces: Otzi the Iceman carries a cast copper axe.', '#4a332d', '#824e41', 'Smelt malachite ore into gleaming copper axes.'],
+  ['59. Gobekli Tepe Megaliths', '9,000 years ago', 'Carving monumental 20-ton T-shaped limestone pillars aligned to celestial stars.', '#473c38', '#7b635a', 'Quarry monumental stone pillars aligned to stars.'],
+  ['60. The Bronze Age Foundry', '3,300 years ago', 'Alloying copper with rare tin creates durable bronze plowshares, armor, and trade galleys.', '#4f382a', '#8a5937', 'Cast molten bronze swords and launch trade galleys.'],
+
+  // --- ERA 7: Classical Antiquity & Engineering (Levels 61 - 70) ---
+  ['61. Sumerian Cuneiform Uruk', '3,200 BCE', 'The invention of writing! Pressing reed styluses into wet clay tablets inaugurates history.', '#513d2f', '#8d6345', 'Inscribe tax records and epic poetry in wet clay.'],
+  ['62. Egyptian Great Pyramids', '2,560 BCE', 'Engineering the Great Pyramid with 2.3 million stone blocks aligned to true celestial north.', '#56422d', '#966d40', 'Survey right angles and haul limestone blocks.'],
+  ['63. Indus Valley Harappa', '2,500 BCE', 'Standardized baked-brick cities featuring covered underground sewer drainage systems.', '#4f4133', '#896c4d', 'Inspect municipal drains and orthogonal brick streets.'],
+  ['64. Shang Dynasty Oracle Bones', '1,200 BCE', 'Divination inscriptions, sericulture silk production, and intricate bronze ritual vessels.', '#4d3a33', '#845c4e', 'Decipher oracle bone scripts and spin silk threads.'],
+  ['65. Phoenician Maritime Galleys', '900 BCE', 'Cedarwood biremes navigate open Mediterranean waters with Polaris and the 22-letter alphabet.', '#36404c', '#546b7a', 'Navigate open sea waters using Polaris and oars.'],
+  ['66. Classical Greek Polis', '430 BCE', 'Athenian democracy, Euclidean geometry, rational philosophy, and the Parthenon colonnade.', '#3c4756', '#627083', 'Debate in the Agora and demonstrate geometric proofs.'],
+  ['67. Persian Royal Road & Qanats', '500 BCE', 'Imperial postal couriers across 2,700 km and underground qanats irrigating desert oases.', '#49423b', '#7b6c59', 'Relay royal dispatches along the imperial courier road.'],
+  ['68. Qin Great Wall & Armies', '220 BCE', 'Standardized axle widths, crossbows, and massive defensive ramparts across mountain ridges.', '#443b35', '#745f52', 'Defend frontier ramparts with repeating crossbows.'],
+  ['69. Roman Aqueducts & Arches', '100 CE', 'Self-healing volcanic pozzolana concrete, soaring arched aqueducts, and paved highways.', '#42373c', '#72575e', 'Vault concrete aqueducts to channel alpine waters.'],
+  ['70. The Grand Silk Road', '200 CE', 'Transcontinental camel caravans exchanging Chinese silk, Indian spices, and Roman glassware.', '#4d3b31', '#855e47', 'Lead the merchant caravan across desert oasis posts.'],
+
+  // --- ERA 8: Medieval Science to Steam (Levels 71 - 80) ---
+  ['71. Baghdad House of Wisdom', '830 CE', 'Al-Khwarizmi invents algebra, Ibn al-Haytham tests optics, and astrolabes map the stars.', '#473b4d', '#735b7a', 'Calculate astronomical charts using brass astrolabes.'],
+  ['72. Song Dynasty Inventions', '1040 CE', 'Pioneering magnetic compass navigation, black gunpowder, and movable ceramic type.', '#44373e', '#735460', 'Align movable type blocks and test black powder.'],
+  ['73. Gothic Mechanical Clocks', '1300 CE', 'Cathedral ribbed vaults soar skyward, regulated by the rhythmic ticking of escapement gears.', '#373c44', '#59636e', 'Calibrate verge escapement gears in cathedral belfries.'],
+  ['74. The Black Death (1347)', '1347 CE', 'Bubonic pandemic sweeps across continents! Navigate quarantines and plague doctor wards.', '#2e2533', '#4f3956', 'Evade plague vectors and deliver medicinal herbs.'],
+  ['75. Age of Oceanic Exploration', '1520 CE', 'Caravels brave open global oceans with lateen rigging, completing the first circumnavigation.', '#2a3b48', '#446477', 'Tack lateen sails against open Atlantic gales.'],
+  ['76. Gutenberg Printing Press', '1455 CE', 'Movable lead alloy type democratizes literacy, fueling the rapid spread of scientific treatises.', '#3d3835', '#6b5e58', 'Press inked lead type onto cotton rag sheets.'],
+  ['77. The Scientific Revolution', '1687 CE', 'Newton formulates universal gravitation and calculus; Galileo turns his telescope to Jupiter.', '#2d3345', '#49556e', 'Observe moons of Jupiter and calculate gravitational orbits.'],
+  ['78. Microscopic Discovery', '1720 CE', 'Van Leeuwenhoek reveals unseen microbes; early variolation paves the way for immunology.', '#2d3b40', '#486266', 'Peer through polished lenses to discover bacteria.'],
+  ['79. Agricultural Seed Drill', '1730 CE', 'Jethro Tull’s seed drill and four-field crop rotation trigger massive food surplus booms.', '#39402f', '#5e6b47', 'Sow seed in straight furrows to boost harvests.'],
+  ['80. Newcomen Steam Engine', '1712 CE', 'Burning coal creates steam, condensing into a vacuum that pumps water from deep mines.', '#33373b', '#545b61', 'Operate atmospheric pistons to drain flooded mines.'],
+
+  // --- ERA 9: Industrial & World Wars (Levels 81 - 90) ---
+  ['81. James Watt Steam Power', '1776 CE', 'Separate steam condensers quadruple efficiency, powering mechanized textile factories.', '#383637', '#5d5757', 'Regulate steam pressure valves in spinning mills.'],
+  ['82. Steam Locomotive on Rails', '1830 CE', 'Stephenson’s Rocket hurtles on iron tracks, shrinking continental distances forever.', '#35383d', '#575e64', 'Fire boiler furnaces to drive steam locomotives.'],
+  ['83. Telegraph Cables', '1866 CE', 'Submarine transatlantic cables transmit instant electrical impulses across oceans.', '#2f3b45', '#4e626e', 'Tap Morse code impulses across undersea cables.'],
+  ['84. World War I: Trench War', '1914 - 1918 CE', 'No Man’s Land: dodge mortar bombardments, barbed wire tangles, and chemical gas.', '#3a322c', '#54463a', 'Cross No Man’s Land under artillery fire and clear wire.'],
+  ['85. Electrification Grid', '1893 CE', 'Alternating current generators at Niagara Falls transmit power across cities and homes.', '#2b3447', '#465874', 'Route high-voltage AC lines through city grids.'],
+  ['86. Powered Flight (Kitty Hawk)', '1903 CE', 'The Wright brothers achieve three-axis aerodynamic control, conquering the open sky.', '#333e4c', '#546679', 'Balance wing warping controls against Kitty Hawk winds.'],
+  ['87. 1918 Flu & Penicillin', '1918 - 1928 CE', 'Airborne influenza strikes; Alexander Fleming isolates penicillin antibiotic mold.', '#2c3a3d', '#455e61', 'Isolate penicillin molds to treat bacterial plagues.'],
+  ['88. World War II & Atomic Dawn', '1939 - 1945 CE', 'Artillery barrages, radar defense, and the nuclear chain reaction that ended the war.', '#2b2c36', '#444654', 'Dodge blitz bombardments and reach the command bunker.'],
+  ['89. Apollo 11: Moon Landing', '1969 CE', 'Saturn V propels humans to the Sea of Tranquility: "One small step for man, one giant leap for mankind."', '#1a1d29', '#3f4557', 'Execute low-gravity lunar hops to plant the flag.'],
+  ['90. Silicon Microprocessor', '1971 CE', 'Billions of etched transistors fit onto microchips, democratizing personal computing.', '#1d2c38', '#344c5b', 'Etch microscopic transistor circuits on silicon wafers.'],
+
+  // --- ERA 10: Information, COVID-19 & Singularity (Levels 91 - 100) ---
+  ['91. World Wide Web & Fiber', '1991 CE', 'Hypertext transport protocols and transoceanic glass fiber cables unify human knowledge.', '#1a2c42', '#2f4f6e', 'Route optical laser packets through fiber lines.'],
+  ['92. Smartphone & GPS Orbit', '2007 CE', 'Relativistic atomic clocks in orbit pinpoint handheld pocket supercomputers anywhere.', '#22364c', '#385773', 'Triangulate satellite signals from orbital clocks.'],
+  ['93. COVID-19 Pandemic (2020)', '2020 CE', 'SARS-CoV-2 airborne aerosol plumes! Deploy sanitizer mist, mRNA vaccines, and social distancing.', '#233038', '#384d59', 'Disinfect viral aerosol clouds and deliver mRNA vaccines.'],
+  ['94. Planetary Clean Energy', '2024 CE', 'Perovskite solar tandem cells and gigawatt wind turbines decouple civilization from fossil fuels.', '#1f3e35', '#336551', 'Erect offshore wind turbines and perovskite arrays.'],
+  ['95. James Webb & Mars Rovers', '2026 CE', 'Infrared space mirrors peer back to the first stars, while robotic rovers hunt Martian fossils.', '#25253e', '#413e5d', 'Scan ancient lakebeds on Mars with robotic lasers.'],
+  ['96. Quantum Transmon Qubits', '2032 CE', 'Superconducting transmon qubits in dilution fridges simulate complex molecular physics.', '#222d4a', '#39476f', 'Maintain quantum phase coherence in dilution fridges.'],
+  ['97. Artificial General Intel', '2038 CE', 'Multimodal self-recursive neural reasoning accelerates cross-disciplinary scientific discovery.', '#2d224d', '#4c3779', 'Synthesize cross-domain algorithms in neural clusters.'],
+  ['98. Tokamak Net-Gain Fusion', '2045 CE', 'Confining magnetic plasma at 150 million degrees Celsius harnesses the power of the stars on Earth.', '#3a1f47', '#5f3270', 'Confine deuterium-tritium plasma in tokamak coils.'],
+  ['99. Interplanetary Biospheres', '2060 CE', 'Pressurized orbital O’Neill cylinders and self-sustaining lunar and Martian colonies.', '#172740', '#2d4b6c', 'Pressurize orbital biodomes and terraform Martian soil.'],
+  ['100. Kardashev Type I Singularity', '2100+ CE', 'Dyson solar swarms, conscious cybernetic synthesis, and harmonious interstellar stewardship.', '#10223b', '#264f7a', 'Align Dyson swarm collectors to illuminate humanity.']
+];
+
+// Interactive themes per level [danger1, danger2, checkpoint, bounce]
+const THINGS = [];
+const DEFAULT_THEMES = [
+  ['🦠','♨️','🧬','🫧'], // 1-10 Microscopic
+  ['🦑','🪨','🐚','🪸'], // 11-20 Marine
+  ['🦂','🪵','🦴','🌿'], // 21-30 Land pioneers
+  ['🦖','☄️','🥚','🪨'], // 31-40 Dinosaurs
+  ['🐅','🐍','🏕️','🐘'], // 41-50 Primates/Hominids
+  ['🦣','🔥','📜','🌾'], // 51-60 Stone/Bronze
+  ['⚔️','🏹','🏛️','🛡️'], // 61-70 Classical
+  ['💀','🕯️','📖','🔔'], // 71-80 Renaissance / Black Death
+  ['💣','⚡','💡','🧲'], // 81-90 Industrial & World Wars
+  ['🤖','💉','🧠','🛸']  // 91-100 Future & COVID-19
+];
+for(let i = 0; i < 100; i++) {
+  THINGS.push(DEFAULT_THEMES[Math.floor(i / 10)]);
+}
+
+// ==========================================
+// AUDIO SYSTEM (WEB AUDIO SYNTHESIZER)
+// ==========================================
+let AC = null, soundMuted = false;
+function tone(f, d, ty, v, f2) {
+  if (soundMuted) return;
+  try {
+    if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)();
+    if (AC.state === 'suspended') AC.resume();
+    const t = AC.currentTime, o = AC.createOscillator(), g = AC.createGain();
+    o.type = ty || 'square';
+    o.frequency.setValueAtTime(f, t);
+    if (f2) o.frequency.exponentialRampToValueAtTime(Math.max(10, f2), t + d);
+    g.gain.setValueAtTime(v || 0.06, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + d);
+    o.connect(g); g.connect(AC.destination);
+    o.start(); o.stop(t + d);
+  } catch(e) {}
+}
+
+function tm() { return performance.now() / 1000; }
+function hr(n) { return Math.abs(Math.sin(n * 12.9898) * 43758.5453) % 1; }
+
+// ==========================================
+// PERSISTENT PROGRESS & UPGRADE SHOP SYSTEM
+// ==========================================
+const KEY = 'rebirth_evolution_story_save';
+let lvl = 0, deaths = 0, bodies = {}, coins = 50, ending = false;
+let upgrades = {
+  speed: 0,        // Speed boost
+  doubleJump: false, // Double Jump ability
+  shield: 0,       // Extra hit points
+  weapon: 0,       // Damage / Spear velocity
+  magnet: false,   // Coin attractor
+  immunity: false, // Pandemic virus immunity
+  companion: false,// AI Companion ally summoned
+  coop: false      // 2-Player mode
+};
+
+try {
+  const s = JSON.parse(localStorage.getItem(KEY) || 'null');
+  if (s) {
+    lvl = Math.min(Math.max(0, s.lvl || 0), ERAS.length - 1);
+    deaths = s.deaths || 0;
+    bodies = s.bodies || {};
+    if (typeof s.coins === 'number') coins = s.coins;
+    if (s.upgrades) upgrades = Object.assign(upgrades, s.upgrades);
+  }
+} catch(e) {}
+
+function save() {
+  try {
+    localStorage.setItem(KEY, JSON.stringify({ lvl, deaths, bodies, coins, upgrades }));
+  } catch(e) {}
+}
+
+function updateHUDCoins() {
+  document.getElementById('hud-coin-val').textContent = coins;
+  const sDisp = document.getElementById('shop-coin-display');
+  if (sDisp) sDisp.textContent = coins;
+}
+
+// Pseudo-random level generator
+function rng(a) {
+  return function() {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+let LV, p, p2, card = 0, dead = 0, cam = 0, jb = 0, ph = 0;
+let deathParticles = [];
+let lastDeathCause = 'fall';
+let lastDeathMessage = 'You died. Your body stays. You are reborn.';
+let infectionLevel = 0;
+let inChamber = false;
+let currentChamberGoal = false;
+
+// ==========================================
+// EXPANDED LENGTHY LEVELS & NESTED GAMEPLAY
+// ==========================================
+function build(l) {
+  const r = rng(l * 7919 + 13);
+  const P = [], S = [];
+  const gm = Math.min(70 + (l % 10) * 5, 125);
+  const len = 4600 + (l % 10) * 140; // Lengthy multi-tier levels
+  const G = [];
+
+  // Main starting ground
+  P.push({ x: -200, y: 360, w: 750, h: 200, type: 'ground' });
+  let x = 550;
+
+  while (x < len) {
+    const g = 48 + r() * (gm - 48);
+    const w = 220 + r() * 260;
+    const gx = x + g;
+    P.push({ x: gx, y: 360, w, h: 200, type: 'ground' });
+    G.push({ x: gx, w });
+
+    // Mid-tier platforms
+    if (r() < 0.7) {
+      const fy = 285 - r() * 35;
+      P.push({ x: x + g / 2 - 45, y: fy, w: 90 + r() * 30, h: 14, type: 'mid' });
+      // High-tier scaffold / bridge
+      if (r() < 0.4) {
+        P.push({ x: gx + 30, y: fy - 65, w: 100, h: 12, type: 'high' });
+      }
+    }
+
+    // Spikes
+    if (l >= 1 && r() < 0.38 + (l % 10) * 0.02) {
+      S.push({ x: gx + 50 + r() * (w - 120), w: 36 });
+    }
+    x = gx + w;
+  }
+
+  const r2 = rng(l * 104729 + 7);
+  const T = [];
+  let cp = 1000;
+  for (const s of G) {
+    const q = r2();
+    if (q < 0.32 + (l % 10) * 0.02) {
+      T.push({ k: 'w', x: s.x + 60, y: 360, x0: s.x + 14, x1: s.x + s.w - 14, d: 1, sp: 45 + r2() * 35 });
+    } else if (q < 0.6) {
+      T.push({ k: 'h', x: s.x + 50 + r2() * (s.w - 110), y: 360 });
+    } else if (q < 0.74) {
+      T.push({ k: 'b', x: s.x + s.w / 2, y: 360 });
+    }
+    // Evenly spaced checkpoints
+    if (s.x > cp) {
+      T.push({ k: 'c', x: s.x + s.w - 60, y: 360, on: 0 });
+      cp = s.x + 1150;
+    }
+  }
+
+  // --- Collectible Evolution Amber Coins ---
+  const coinList = [];
+  for (let cx = 350; cx < len - 300; cx += 160 + r2() * 120) {
+    coinList.push({
+      x: cx,
+      y: 320 - r2() * 80,
+      r: 9,
+      collected: false,
+      rot: r2() * Math.PI
+    });
+  }
+
+  // --- Nested Gameplay Sub-Chamber Portal ---
+  // A secret chamber door placed mid-level (e.g. at x ~ 2100)
+  const chamberDoor = {
+    x: 2150 + r2() * 300,
+    y: 316,
+    w: 36,
+    h: 44,
+    visited: false,
+    active: true
+  };
+
+  // Chamber Sub-Level Platforms & layout
+  const chamberP = [
+    { x: -100, y: 360, w: 1000, h: 200, type: 'ground' },
+    { x: 180, y: 300, w: 90, h: 14, type: 'mid' },
+    { x: 340, y: 240, w: 100, h: 14, type: 'high' },
+    { x: 520, y: 290, w: 90, h: 14, type: 'mid' },
+    { x: 670, y: 360, w: 300, h: 200, type: 'ground' }
+  ];
+  const chamberRelic = { x: 740, y: 330, collected: false };
+
+  // --- Real-Life Situation 1: Huntable Game Animals ---
+  const animals = [];
+  const isHuntingEra = (l >= 10 && l <= 60);
+  if (isHuntingEra) {
+    for (let ax = 700; ax < len - 300; ax += 800 + r2() * 400) {
+      animals.push({
+        x: ax, y: 360,
+        hp: 2,
+        kind: l >= 50 ? 'mammoth' : (l >= 30 ? 'raptor' : 'sabertooth'),
+        dir: r2() < 0.5 ? 1 : -1,
+        speed: 35 + r2() * 25,
+        alive: true
+      });
+    }
+  }
+
+  // --- Real-Life Situation 2: World Wars Artillery Mortars ---
+  const isWarEra = (l >= 83 && l <= 88);
+  const bombs = [];
+
+  // --- Real-Life Situation 3: Pandemic Airborne Virus Clouds ---
+  const isPandemicEra = (l === 73 || l === 86 || l === 92);
+  const virusClouds = [];
+  if (isPandemicEra) {
+    for (let vx = 650; vx < len - 300; vx += 700 + r2() * 350) {
+      virusClouds.push({
+        x: vx, y: 310 - r2() * 30,
+        r: 38,
+        active: true,
+        drift: 0
+      });
+    }
+  }
+
+  // --- Real-Life Situation 4: Pushable Rolling Boulders ---
+  const boulders = [];
+  for (let bx = 900; bx < len - 400; bx += 1100 + r2() * 500) {
+    boulders.push({ x: bx, y: 346, r: 14, vx: 0 });
+  }
+
+  // --- AI Companion Ally (Other Player) ---
+  const companion = {
+    x: 40, y: 326, vx: 0, vy: 0,
+    face: 1, on: false,
+    timer: 0, shootCooldown: 0,
+    alive: true
+  };
+
+  return {
+    P, S, T,
+    coinList,
+    chamberDoor, chamberP, chamberRelic,
+    animals, bombs, virusClouds, boulders,
+    companion,
+    projectiles: [],
+    isWarEra, isHuntingEra, isPandemicEra,
+    goal: x - 80,
+    len: x
+  };
+}
+
+let SP = { x: 60, y: 326 };
+function spawn() {
+  const speedBonus = upgrades.speed * 35;
+  p = {
+    x: SP.x, y: SP.y, vx: 0, vy: 0,
+    w: 22, h: 34, on: false,
+    lx: SP.x, ly: SP.y + 34, face: 1,
+    shield: upgrades.shield,
+    canDoubleJump: upgrades.doubleJump,
+    jumpCount: 0,
+    speedBonus
+  };
+  // Player 2 for Co-op
+  p2 = {
+    x: SP.x - 30, y: SP.y, vx: 0, vy: 0,
+    w: 22, h: 34, on: false,
+    lx: SP.x - 30, ly: SP.y + 34, face: 1,
+    alive: true
+  };
+  infectionLevel = 0;
+  inChamber = false;
+  currentChamberGoal = false;
+}
+
+function startLevel() {
+  LV = build(lvl);
+  if (!bodies[lvl]) bodies[lvl] = [];
+  SP = { x: 60, y: 326 };
+  spawn();
+  card = 3.2;
+  dead = 0;
+  cam = 0;
+  deathParticles = [];
+  updateActionIcon();
+  updateHUDCoins();
+  triggerStoryDialogue();
+}
+startLevel();
+
+function updateActionIcon() {
+  const btn = document.getElementById('A');
+  if (LV.isHuntingEra) btn.textContent = '🏹';
+  else if (LV.isWarEra) btn.textContent = '💣';
+  else if (LV.isPandemicEra) btn.textContent = '🧴';
+  else if (lvl >= 90) btn.textContent = '⚡';
+  else btn.textContent = '⚔️';
+}
+
+// Story Dialog Notification
+function triggerStoryDialogue() {
+  const E = ERAS[lvl];
+  const dlg = document.getElementById('story-dialog');
+  const avatar = document.getElementById('speaker-avatar');
+  const name = document.getElementById('speaker-name');
+  const text = document.getElementById('speaker-text');
+
+  const icons = ['🧬','🦠','🌱','🔬','🦠','🌿','🪸','🧽','🪼','🥞',
+                 '🐚','🦑','🐟','🐚','🦂','🦈','🐟','🦎','🐸','🐊',
+                 '🌲','🐛','🦗','🦎','🐊','🦕','🦖','🐀','🦝','🦖',
+                 '🐁','🦅','🦕','🦅','🦖','🦏','🦖','☄️','🐒','🦤',
+                 '🐋','🦏','🐅','🐵','🦍','🦧','🚶','🧍','🔨','🔥',
+                 '🦴','🗣️','🦣','🎨','🌾','🐑','🏺','⛏️','🏛️','⚔️',
+                 '📜','📐','🧱','🧶','⛵','🏛️','🐎','🏹','🏛️','🐫',
+                 '🔭','🧭','⏰','💀','⛵','📖','🍎','🔬','🚜','🚂',
+                 '⚙️','🚂','📡','🎖️','💡','✈️','💊','⚛️','🚀','💻',
+                 '🌐','📱','💉','☀️','🔭','⚛️','🤖','☀️','🪐','🌟'];
+
+  avatar.textContent = icons[lvl] || '📜';
+  name.textContent = `${E[0]} • ${E[1]}`;
+  text.innerHTML = `<strong>Quest:</strong> ${E[5]}<br><span style="opacity:0.85;">${E[2]}</span>`;
+
+  dlg.classList.add('show');
+  clearTimeout(window.storyTimer);
+  window.storyTimer = setTimeout(() => {
+    dlg.classList.remove('show');
+  }, 7000);
+}
+document.getElementById('btn-story-dismiss').addEventListener('click', () => {
+  document.getElementById('story-dialog').classList.remove('show');
+});
+
+// Controls & Inputs
+const K = { l: 0, r: 0 };
+const K2 = { l: 0, r: 0 }; // Player 2 inputs
+
+function jump(isP2 = false) {
+  tone(220, 0.01, 'sine', 0.001);
+  const target = isP2 ? p2 : p;
+  if (!target) return;
+
+  if (target.on) {
+    target.vy = -640;
+    target.on = false;
+    target.jumpCount = 1;
+    tone(300, 0.15, 'square', 0.05, 700);
+  } else if (!isP2 && p.canDoubleJump && p.jumpCount === 1) {
+    // Double Jump upgrade!
+    target.vy = -560;
+    target.jumpCount = 2;
+    tone(440, 0.18, 'sine', 0.08, 880);
+    for (let i = 0; i < 8; i++) {
+      deathParticles.push({
+        x: p.x + p.w / 2, y: p.y + p.h,
+        vx: (Math.random() - 0.5) * 80, vy: 30,
+        life: 0.3, maxLife: 0.3, color: '#00f0ff', size: 2.5
+      });
+    }
+  }
+
+  jb = 0.12;
+  if (card > 0 && card < 2.8) card = 0;
+  if (ending) restart();
+}
+
+function triggerAction(isP2 = false) {
+  if (card > 0 || dead > 0 || ending) return;
+  const user = isP2 ? p2 : p;
+  const weaponPow = isP2 ? 1 : (1 + upgrades.weapon * 0.5);
+
+  if (LV.isHuntingEra) {
+    // Throw hunting spear
+    tone(400, 0.12, 'sawtooth', 0.08, 180);
+    LV.projectiles.push({
+      x: user.x + user.w / 2,
+      y: user.y + 12,
+      vx: user.face * (420 * weaponPow),
+      vy: -140,
+      kind: 'spear',
+      life: 1.8
+    });
+  } else if (LV.isWarEra) {
+    // Trench rifle / grenade
+    tone(180, 0.2, 'square', 0.12, 60);
+    LV.projectiles.push({
+      x: user.x + user.w / 2,
+      y: user.y + 14,
+      vx: user.face * (560 * weaponPow),
+      vy: -40,
+      kind: 'bullet',
+      life: 1.2
+    });
+  } else if (LV.isPandemicEra) {
+    // Disinfectant sanitizer spray
+    tone(600, 0.16, 'triangle', 0.09, 850);
+    infectionLevel = Math.max(0, infectionLevel - 0.45);
+    for (let i = 0; i < 14; i++) {
+      deathParticles.push({
+        x: user.x + user.w / 2 + user.face * 16,
+        y: user.y + 16,
+        vx: user.face * (140 + Math.random() * 160),
+        vy: (Math.random() - 0.5) * 60,
+        life: 0.4, maxLife: 0.4,
+        color: 'rgba(93, 228, 250, 0.85)',
+        size: 3
+      });
+    }
+    for (const vc of LV.virusClouds) {
+      if (vc.active && Math.hypot((user.x + user.face * 60) - vc.x, user.y - vc.y) < 80) {
+        vc.active = false;
+        tone(800, 0.2, 'sine', 0.1, 1200);
+      }
+    }
+  } else {
+    // Dash / Plasma pulse
+    tone(340, 0.15, 'sine', 0.09, 680);
+    user.vx += user.face * 320;
+    for (let i = 0; i < 8; i++) {
+      deathParticles.push({
+        x: user.x + user.w / 2, y: user.y + user.h / 2,
+        vx: -user.face * (80 + Math.random() * 100), vy: (Math.random() - 0.5) * 50,
+        life: 0.35, maxLife: 0.35, color: '#ffc83b', size: 2.5
+      });
+    }
+  }
+}
+
+// Enter Nested Sub-Chamber
+function tryEnterChamber() {
+  if (card > 0 || dead > 0 || ending) return;
+
+  if (inChamber) {
+    // Exit back to main level!
+    inChamber = false;
+    p.x = LV.chamberDoor.x + 40;
+    p.y = 320;
+    tone(550, 0.2, 'triangle', 0.1, 880);
+    return;
+  }
+
+  // Check proximity to chamber door
+  if (Math.hypot((p.x + p.w / 2) - LV.chamberDoor.x, (p.y + p.h) - (LV.chamberDoor.y + LV.chamberDoor.h)) < 50) {
+    inChamber = true;
+    p.x = 20;
+    p.y = 320;
+    tone(440, 0.25, 'sine', 0.12, 660);
+    // Announcement
+    for (let i = 0; i < 18; i++) {
+      deathParticles.push({
+        x: p.x, y: p.y,
+        vx: (Math.random() - 0.5) * 120, vy: -50,
+        life: 0.5, maxLife: 0.5, color: '#ffd15c', size: 3
+      });
+    }
+  }
+}
+
+function restart() {
+  lvl = 0; deaths = 0; bodies = {}; ending = false;
+  save(); startLevel();
+}
+
+function bind(id, f, u) {
+  const e = document.getElementById(id);
+  e.addEventListener('pointerdown', ev => {
+    ev.preventDefault();
+    f();
+    e.classList.add('on');
+  });
+  ['pointerup', 'pointerleave', 'pointercancel'].forEach(n => e.addEventListener(n, () => {
+    if (u) u();
+    e.classList.remove('on');
+  }));
+}
+
+bind('L', () => K.l = 1, () => K.l = 0);
+bind('R', () => K.r = 1, () => K.r = 0);
+bind('J', () => jump(false));
+bind('A', () => triggerAction(false));
+bind('E', tryEnterChamber);
+
+addEventListener('keydown', e => {
+  const k = e.key;
+  // Player 1 controls (WASD / Space / F / E)
+  if (['a', 'A'].includes(k)) K.l = 1;
+  else if (['d', 'D'].includes(k)) K.r = 1;
+  else if (['w', 'W', ' '].includes(k)) { jump(false); e.preventDefault(); }
+  else if (['f', 'F', 'Shift', 'z', 'Z'].includes(k)) { triggerAction(false); e.preventDefault(); }
+  else if (['e', 'E'].includes(k)) { tryEnterChamber(); }
+  // Player 2 controls (Arrow keys / Enter)
+  else if (k === 'ArrowLeft') K2.l = 1;
+  else if (k === 'ArrowRight') K2.r = 1;
+  else if (k === 'ArrowUp') { jump(true); e.preventDefault(); }
+  else if (['Enter', '/'].includes(k)) { triggerAction(true); e.preventDefault(); }
+  // Menus
+  else if (k === 'm' || k === 'M') toggleModal('modal-map');
+  else if (k === 'b' || k === 'B') toggleModal('modal-shop');
+});
+addEventListener('keyup', e => {
+  const k = e.key;
+  if (['a', 'A'].includes(k)) K.l = 0;
+  if (['d', 'D'].includes(k)) K.r = 0;
+  if (k === 'ArrowLeft') K2.l = 0;
+  if (k === 'ArrowRight') K2.r = 0;
+});
+C.addEventListener('pointerdown', () => {
+  if (card > 0 || ending) jump();
+});
+
+// Modal Toggles
+function toggleModal(id) {
+  const m = document.getElementById(id);
+  const isVis = m.classList.contains('visible');
+  document.querySelectorAll('.game-modal').forEach(el => el.classList.remove('visible'));
+  if (!isVis) {
+    m.classList.add('visible');
+    if (id === 'modal-shop') renderShop();
+    else if (id === 'modal-story') renderStoryChronicle();
+    else if (id === 'modal-map') renderMapModal();
+  }
+}
+document.getElementById('btn-open-shop').addEventListener('click', () => toggleModal('modal-shop'));
+document.getElementById('btn-close-shop').addEventListener('click', () => toggleModal('modal-shop'));
+document.getElementById('btn-open-story').addEventListener('click', () => toggleModal('modal-story'));
+document.getElementById('btn-close-story').addEventListener('click', () => toggleModal('modal-story'));
+document.getElementById('btn-open-map').addEventListener('click', () => toggleModal('modal-map'));
+document.getElementById('btn-close-map').addEventListener('click', () => toggleModal('modal-map'));
+document.getElementById('btn-sound-toggle').addEventListener('click', () => {
+  soundMuted = !soundMuted;
+  document.getElementById('btn-sound-toggle').textContent = soundMuted ? '🔇 Muted' : '🔊 Sound';
+});
+
+// Standalone File Download
+document.getElementById('btn-download-game').addEventListener('click', () => {
+  const html = document.documentElement.outerHTML;
+  const blob = new Blob(['<!DOCTYPE html>\n' + html], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'Rebirth-Evolution-100-Epochs.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+
+// ==========================================
+// SHOP SYSTEM IMPLEMENTATION
+// ==========================================
+const SHOP_ITEMS = [
+  { id: 'speed', name: 'Mitochondrial Drive', cost: 40, desc: 'Increases movement velocity and sprint agility (+25%).', max: 3, check: () => upgrades.speed, buy: () => { upgrades.speed++; } },
+  { id: 'doubleJump', name: 'Arthropod Jump Spring', cost: 80, desc: 'Enables double jumping mid-air to reach high ledges.', max: 1, check: () => upgrades.doubleJump ? 1 : 0, buy: () => { upgrades.doubleJump = true; p.canDoubleJump = true; } },
+  { id: 'shield', name: 'Keratin Carapace Shield', cost: 60, desc: 'Survive one extra lethal hazard or attack hit.', max: 2, check: () => upgrades.shield, buy: () => { upgrades.shield++; p.shield++; } },
+  { id: 'weapon', name: 'Obsidian Spearhead', cost: 90, desc: 'Spears and bullets fly faster and deal double hunting damage.', max: 2, check: () => upgrades.weapon, buy: () => { upgrades.weapon++; } },
+  { id: 'magnet', name: 'Bio-Magnetic Attractor', cost: 50, desc: 'Passively pulls nearby Amber Coins and DNA toward you.', max: 1, check: () => upgrades.magnet ? 1 : 0, buy: () => { upgrades.magnet = true; } },
+  { id: 'immunity', name: 'Antibody Synthesis', cost: 45, desc: 'Immunity against COVID-19 and plague airborne viral clouds.', max: 1, check: () => upgrades.immunity ? 1 : 0, buy: () => { upgrades.immunity = true; } },
+  { id: 'companion', name: 'Summon Clan Companion', cost: 120, desc: 'An autonomous AI ally fights, hunts, and collects coins with you!', max: 1, check: () => upgrades.companion ? 1 : 0, buy: () => { upgrades.companion = true; } },
+  { id: 'coop', name: 'Enable 2-Player Co-op Mode', cost: 30, desc: 'Second player joins with Arrow Keys + Enter/Slash!', max: 1, check: () => upgrades.coop ? 1 : 0, buy: () => { upgrades.coop = !upgrades.coop; } }
+];
+
+function renderShop() {
+  updateHUDCoins();
+  const grid = document.getElementById('shop-grid-items');
+  grid.innerHTML = '';
+
+  SHOP_ITEMS.forEach(it => {
+    const card = document.createElement('div');
+    card.className = 'shop-card';
+    const curVal = it.check();
+    const isMax = curVal >= it.max;
+
+    card.innerHTML = `
+      <div>
+        <div class="shop-card-head">
+          <div class="shop-card-name">${it.name}</div>
+          <div class="shop-card-cost">${isMax ? 'MAX' : '🪙 ' + it.cost}</div>
+        </div>
+        <div class="shop-card-desc">${it.desc}</div>
+      </div>
+      <button class="shop-buy-btn ${isMax ? 'bought' : ''}">${isMax ? '✓ Active' : 'Buy Upgrade'}</button>
+    `;
+
+    const btn = card.querySelector('.shop-buy-btn');
+    if (!isMax) {
+      btn.addEventListener('click', () => {
+        if (coins >= it.cost) {
+          coins -= it.cost;
+          it.buy();
+          save();
+          tone(580, 0.2, 'triangle', 0.1, 880);
+          renderShop();
+        } else {
+          tone(200, 0.15, 'sawtooth', 0.08, 100);
+        }
+      });
+    }
+    grid.appendChild(card);
+  });
+}
+
+function renderStoryChronicle() {
+  const E = ERAS[lvl];
+  const body = document.getElementById('story-modal-content');
+  body.innerHTML = `
+    <div style="background:rgba(229,169,88,0.12); border-left:3px solid var(--accent); padding:12px 16px; border-radius:4px; margin-bottom:14px;">
+      <h2 style="margin:0 0 4px 0; color:var(--accent); font-size:20px;">${E[0]}</h2>
+      <div style="color:var(--cyan); font-size:13px; font-style:italic;">${E[1]}</div>
+    </div>
+    <div style="font-size:15px; line-height:1.6; margin-bottom:16px;">
+      <h4 style="color:var(--gold); margin:0 0 6px 0;">Historical & Biological Chronicle:</h4>
+      <p style="margin:0 0 10px 0; opacity:0.9;">${E[2]}</p>
+    </div>
+    <div style="background:rgba(255,255,255,0.06); padding:12px; border-radius:6px; margin-bottom:14px;">
+      <h4 style="color:var(--green); margin:0 0 6px 0;">🎯 Current Epoch Quest Objective:</h4>
+      <div style="font-size:14px;">${E[5]}</div>
+    </div>
+    <div style="background:rgba(63,197,217,0.08); padding:12px; border-radius:6px;">
+      <h4 style="color:var(--cyan); margin:0 0 6px 0;">🚪 Nested Sub-Chamber:</h4>
+      <div style="font-size:13px; line-height:1.5;">Look for the glowing doorway midway through the level. Press <strong>[Action / Key E]</strong> to enter the nested puzzle chamber, collect rare ancient relics, and earn bonus Evolution Amber!</div>
+    </div>
+  `;
+}
+
+function renderMapModal() {
+  const b = document.getElementById('map-modal-body');
+  b.innerHTML = '';
+  for (let eraIdx = 0; eraIdx < 10; eraIdx++) {
+    const eraSec = document.createElement('div');
+    eraSec.className = 'era-section';
+    const eraTitle = document.createElement('div');
+    eraTitle.className = 'era-section-title';
+    const eraNames = [
+      'Era I: Archaean & Proterozoic Dawn (Levels 1 - 10)',
+      'Era II: Cambrian Seas to Land Tetrapods (Levels 11 - 20)',
+      'Era III: Carboniferous & Permian Pioneers (Levels 21 - 30)',
+      'Era IV: Age of Dinosaurs & Early Mammals (Levels 31 - 40)',
+      'Era V: Cenozoic Mammals & Early Hominids (Levels 41 - 50)',
+      'Era VI: Stone Age, Mammoth Hunt & Farming (Levels 51 - 60)',
+      'Era VII: Classical Antiquity & Monumental Law (Levels 61 - 70)',
+      'Era VIII: Medieval Science, Black Death & Steam (Levels 71 - 80)',
+      'Era IX: Industrial Acceleration & World Wars (Levels 81 - 90)',
+      'Era X: Digital Frontier, COVID-19 & Singularity (Levels 91 - 100)'
+    ];
+    eraTitle.textContent = eraNames[eraIdx];
+    eraSec.appendChild(eraTitle);
+
+    const grid = document.createElement('div');
+    grid.className = 'level-grid';
+    for (let l = eraIdx * 10; l < (eraIdx + 1) * 10; l++) {
+      const btn = document.createElement('div');
+      btn.className = 'lvl-btn' + (l === lvl ? ' active' : '') + (bodies[l] && bodies[l].length ? ' beaten' : '');
+      btn.innerHTML = `<span class="lvl-btn-num">${l + 1}</span><span class="lvl-btn-name">${ERAS[l][0].split('. ')[1] || ERAS[l][0]}</span>`;
+      btn.addEventListener('click', () => {
+        lvl = l;
+        save();
+        startLevel();
+        document.getElementById('modal-map').classList.remove('visible');
+      });
+      grid.appendChild(btn);
+    }
+    eraSec.appendChild(grid);
+    b.appendChild(eraSec);
+  }
+}
+
+// ==========================================
+// REALISTIC DYING SITUATIONS & HITBOX PLATFORMS
+// ==========================================
+function bodyRects() {
+  if (inChamber) return [];
+  return bodies[lvl].map(b => ({ x: b.x - 18, y: b.y - 16, w: 36, h: 16 }));
+}
+
+function hit(a, b) {
+  return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+}
+
+function die(cause, fell) {
+  // If player has shield upgrade
+  if (p.shield > 0 && cause !== 'fall') {
+    p.shield--;
+    tone(300, 0.2, 'triangle', 0.1, 600);
+    // Shield flash particles
+    for (let i = 0; i < 15; i++) {
+      deathParticles.push({
+        x: p.x + p.w / 2, y: p.y + p.h / 2,
+        vx: (Math.random() - 0.5) * 150, vy: (Math.random() - 0.5) * 150,
+        life: 0.4, maxLife: 0.4, color: '#3fc5d9', size: 3
+      });
+    }
+    p.vy = -380;
+    return;
+  }
+
+  lastDeathCause = cause || 'fall';
+  const bx = fell ? (p.lx + p.w / 2) : (p.x + p.w / 2);
+  const by = fell ? (p.ly + p.h) : (p.y + p.h);
+
+  if (!inChamber) {
+    const b = { x: bx, y: by, cause: lastDeathCause };
+    bodies[lvl].push(b);
+    if (bodies[lvl].length > 90) bodies[lvl].shift();
+  }
+  deaths++;
+  dead = 0.95;
+  save();
+
+  if (lastDeathCause === 'war') {
+    tone(100, 0.6, 'sawtooth', 0.16, 30);
+    lastDeathMessage = "Fallen in No Man's Land — Slain by artillery mortar bombardment.";
+  } else if (lastDeathCause === 'virus') {
+    tone(260, 0.5, 'triangle', 0.12, 80);
+    lastDeathMessage = "Succumbed to Pandemic Contagion — Lungs failed to airborne virus.";
+  } else if (lastDeathCause === 'predator') {
+    tone(180, 0.55, 'sawtooth', 0.15, 50);
+    lastDeathMessage = "Killed in the Hunt — Mauled down by an aggressive predator.";
+  } else if (lastDeathCause === 'fire') {
+    tone(300, 0.5, 'sawtooth', 0.12, 70);
+    lastDeathMessage = "Consumed by the Inferno — Reduced to smoldering charred ash.";
+  } else if (lastDeathCause === 'spikes') {
+    tone(280, 0.45, 'square', 0.12, 60);
+    lastDeathMessage = "Impaled upon Spikes — Your body shields subsequent lives.";
+  } else {
+    tone(220, 0.45, 'sawtooth', 0.1, 55);
+    lastDeathMessage = "Fallen into the Abyss — Your sacrifice becomes the bedrock of humanity.";
+  }
+
+  deathParticles = [];
+  for (let i = 0; i < 32; i++) {
+    let col = '#f4ebd9';
+    if (lastDeathCause === 'predator') col = (i % 2 === 0 ? '#cc292b' : '#f7d0b5');
+    else if (lastDeathCause === 'war') col = (i % 2 === 0 ? '#ff7733' : '#3d3835');
+    else if (lastDeathCause === 'virus') col = (i % 2 === 0 ? '#63d95b' : '#9b5de5');
+    else if (lastDeathCause === 'fire') col = (i % 2 === 0 ? '#ff4d26' : '#262423');
+
+    deathParticles.push({
+      x: bx, y: by - 12,
+      vx: (Math.random() - 0.5) * 190, vy: -40 - Math.random() * 150,
+      life: 0.85, maxLife: 0.85, color: col, size: 3 + Math.random() * 3
+    });
+  }
+}
+
+// ==========================================
+// PHYSICS & SIMULATION STEP
+// ==========================================
+function step(dt) {
+  if (ending) return;
+  if (card > 0) { card -= dt; return; }
+
+  // Update particles
+  for (let i = deathParticles.length - 1; i >= 0; i--) {
+    const pt = deathParticles[i];
+    pt.x += pt.vx * dt;
+    pt.y += pt.vy * dt;
+    pt.life -= dt;
+    if (pt.life <= 0) deathParticles.splice(i, 1);
+  }
+
+  if (dead > 0) {
+    dead -= dt;
+    if (dead <= 0) spawn();
+    return;
+  }
+
+  jb -= dt;
+  const currentP = inChamber ? LV.chamberP : LV.P;
+  const solids = currentP.concat(bodyRects());
+
+  // Player 1 Motion
+  const baseSpeed = 230 + p.speedBonus;
+  p.vx = (K.r - K.l) * baseSpeed;
+  if (p.vx) p.face = p.vx > 0 ? 1 : -1;
+
+  p.vy += 1800 * dt;
+
+  // Horizontal motion P1
+  p.x += p.vx * dt;
+  for (const s of solids) {
+    if (hit(p, s)) {
+      if (p.vx > 0) p.x = s.x - p.w;
+      else if (p.vx < 0) p.x = s.x + s.w;
+    }
+  }
+  if (p.x < 0) p.x = 0;
+
+  // Vertical motion P1
+  p.y += p.vy * dt;
+  p.on = false;
+  for (const s of solids) {
+    if (hit(p, s)) {
+      if (p.vy > 0) {
+        p.y = s.y - p.h;
+        p.on = true;
+        p.lx = p.x;
+        p.ly = p.y;
+        p.jumpCount = 0;
+      } else if (p.vy < 0) {
+        p.y = s.y + s.h;
+      }
+      p.vy = 0;
+    }
+  }
+
+  ph += Math.abs(p.vx) * dt * 0.05;
+
+  // Player 2 Motion (If Co-op enabled)
+  if (upgrades.coop && p2) {
+    p2.vx = (K2.r - K2.l) * 230;
+    if (p2.vx) p2.face = p2.vx > 0 ? 1 : -1;
+    p2.vy += 1800 * dt;
+    p2.x += p2.vx * dt;
+    for (const s of solids) {
+      if (hit(p2, s)) {
+        if (p2.vx > 0) p2.x = s.x - p2.w;
+        else if (p2.vx < 0) p2.x = s.x + s.w;
+      }
+    }
+    p2.y += p2.vy * dt;
+    p2.on = false;
+    for (const s of solids) {
+      if (hit(p2, s)) {
+        if (p2.vy > 0) {
+          p2.y = s.y - p2.h;
+          p2.on = true;
+          p2.lx = p2.x; p2.ly = p2.y;
+        } else if (p2.vy < 0) {
+          p2.y = s.y + s.h;
+        }
+        p2.vy = 0;
+      }
+    }
+  }
+
+  // AI Companion Ally Logic
+  if (upgrades.companion && LV.companion && LV.companion.alive) {
+    const comp = LV.companion;
+    const targetX = p.x - p.face * 55;
+    const distToP = targetX - comp.x;
+    comp.face = distToP > 0 ? 1 : -1;
+    comp.vx = Math.abs(distToP) > 15 ? comp.face * Math.min(220, Math.abs(distToP) * 4) : 0;
+    comp.vy += 1800 * dt;
+    comp.x += comp.vx * dt;
+    for (const s of solids) {
+      if (hit({ x: comp.x - 10, y: comp.y - 30, w: 20, h: 30 }, s)) {
+        if (comp.vx > 0) comp.x = s.x - 10;
+        else if (comp.vx < 0) comp.x = s.x + s.w + 10;
+        comp.vy = -450; // auto jump
+      }
+    }
+    comp.y += comp.vy * dt;
+    comp.on = false;
+    for (const s of solids) {
+      if (hit({ x: comp.x - 10, y: comp.y - 30, w: 20, h: 30 }, s)) {
+        if (comp.vy > 0) { comp.y = s.y; comp.on = true; }
+        comp.vy = 0;
+      }
+    }
+    // Companion auto-attacks hostile animals/walkers
+    comp.shootCooldown -= dt;
+    if (comp.shootCooldown <= 0 && LV.animals) {
+      for (const a of LV.animals) {
+        if (a.alive && Math.abs(a.x - comp.x) < 320) {
+          comp.shootCooldown = 1.6;
+          comp.face = a.x > comp.x ? 1 : -1;
+          LV.projectiles.push({
+            x: comp.x, y: comp.y - 18,
+            vx: comp.face * 380, vy: -120,
+            kind: 'spear', life: 1.5
+          });
+          tone(420, 0.1, 'sawtooth', 0.05, 200);
+          break;
+        }
+      }
+    }
+  }
+
+  // --- Coin Collection & Magnetic Attractor ---
+  for (const c of LV.coinList) {
+    if (!c.collected) {
+      c.rot += dt * 3;
+      // Magnet pull
+      if (upgrades.magnet) {
+        const dToP = Math.hypot((p.x + p.w / 2) - c.x, (p.y + p.h / 2) - c.y);
+        if (dToP < 140) {
+          c.x += ((p.x + p.w / 2) - c.x) * dt * 4;
+          c.y += ((p.y + p.h / 2) - c.y) * dt * 4;
+        }
+      }
+      // Pickup check
+      if (Math.hypot((p.x + p.w / 2) - c.x, (p.y + p.h / 2) - c.y) < 26) {
+        c.collected = true;
+        coins += 5;
+        save();
+        updateHUDCoins();
+        tone(660, 0.08, 'sine', 0.08);
+        setTimeout(() => tone(880, 0.12, 'sine', 0.08), 50);
+      }
+    }
+  }
+
+  // --- Nested Chamber Relic Pickup ---
+  if (inChamber && !LV.chamberRelic.collected) {
+    if (Math.hypot((p.x + p.w / 2) - LV.chamberRelic.x, (p.y + p.h / 2) - LV.chamberRelic.y) < 35) {
+      LV.chamberRelic.collected = true;
+      coins += 50;
+      save();
+      updateHUDCoins();
+      tone(523, 0.15, 'triangle', 0.1);
+      setTimeout(() => tone(659, 0.15, 'triangle', 0.1), 100);
+      setTimeout(() => tone(784, 0.3, 'triangle', 0.12), 200);
+    }
+  }
+
+  // --- Real-Life Situation 1 Logic: Hunting Animals ---
+  if (!inChamber && LV.animals) {
+    for (const a of LV.animals) {
+      if (!a.alive) continue;
+      a.x += a.dir * a.speed * dt;
+      if (Math.abs(a.x - (p.x - 300)) > 600) a.dir *= -1;
+
+      const aBox = { x: a.x - 20, y: a.y - 28, w: 40, h: 28 };
+      if (hit(p, aBox)) {
+        die('predator', false);
+        return;
+      }
+    }
+  }
+
+  // --- Real-Life Situation 2 Logic: World Wars Falling Mortars ---
+  if (!inChamber && LV.isWarEra) {
+    if (Math.random() < 0.035) {
+      LV.bombs.push({
+        x: p.x + (Math.random() - 0.4) * 500,
+        y: -20,
+        vy: 340 + Math.random() * 80
+      });
+      tone(120, 0.2, 'sawtooth', 0.04, 300);
+    }
+    for (let i = LV.bombs.length - 1; i >= 0; i--) {
+      const bm = LV.bombs[i];
+      bm.y += bm.vy * dt;
+      if (bm.y >= 355) {
+        tone(90, 0.4, 'square', 0.15, 30);
+        for (let k = 0; k < 18; k++) {
+          deathParticles.push({
+            x: bm.x, y: 355,
+            vx: (Math.random() - 0.5) * 220, vy: -40 - Math.random() * 160,
+            life: 0.5, maxLife: 0.5, color: '#ff6622', size: 4
+          });
+        }
+        if (Math.hypot(p.x - bm.x, p.y - 350) < 65) {
+          die('war', false);
+          return;
+        }
+        LV.bombs.splice(i, 1);
+      }
+    }
+  }
+
+  // --- Real-Life Situation 3 Logic: Pandemic Contagion & Virus Clouds ---
+  if (!inChamber && LV.isPandemicEra && LV.virusClouds) {
+    for (const vc of LV.virusClouds) {
+      if (!vc.active) continue;
+      vc.drift += dt * 1.5;
+      const curX = vc.x + Math.sin(vc.drift) * 24;
+      const dist = Math.hypot((p.x + p.w / 2) - curX, (p.y + p.h / 2) - vc.y);
+      if (dist < vc.r) {
+        if (!upgrades.immunity) {
+          infectionLevel += dt * 0.45;
+          if (Math.random() < 0.3) {
+            deathParticles.push({
+              x: p.x + p.w / 2, y: p.y - 6,
+              vx: (Math.random() - 0.5) * 40, vy: -30,
+              life: 0.3, maxLife: 0.3, color: '#63d95b', size: 2.5
+            });
+            tone(200, 0.05, 'triangle', 0.03, 100);
+          }
+          if (infectionLevel >= 1.0) {
+            die('virus', false);
+            return;
+          }
+        }
+      }
+    }
+  }
+
+  // --- Projectiles Update ---
+  for (let i = LV.projectiles.length - 1; i >= 0; i--) {
+    const pr = LV.projectiles[i];
+    pr.x += pr.vx * dt;
+    pr.y += pr.vy * dt;
+    pr.vy += 280 * dt;
+    pr.life -= dt;
+
+    if (LV.animals) {
+      for (const a of LV.animals) {
+        if (a.alive && Math.hypot(pr.x - a.x, pr.y - (a.y - 14)) < 26) {
+          a.hp--;
+          tone(550, 0.15, 'triangle', 0.1, 750);
+          pr.life = 0;
+          if (a.hp <= 0) {
+            a.alive = false;
+            coins += 25; // reward for successful hunt!
+            save();
+            updateHUDCoins();
+            for (let k = 0; k < 14; k++) {
+              deathParticles.push({
+                x: a.x, y: a.y - 14,
+                vx: (Math.random() - 0.5) * 120, vy: -50,
+                life: 0.5, maxLife: 0.5, color: '#ffc83b', size: 3
+              });
+            }
+          }
+          break;
+        }
+      }
+    }
+
+    if (pr.life <= 0) LV.projectiles.splice(i, 1);
+  }
+
+  // --- Interactive Pushable Boulders ---
+  if (!inChamber && LV.boulders) {
+    for (const bd of LV.boulders) {
+      bd.x += bd.vx * dt;
+      bd.vx *= 0.94;
+      const pDist = Math.hypot((p.x + p.w / 2) - bd.x, (p.y + p.h) - bd.y);
+      if (pDist < bd.r + 14) {
+        bd.vx = p.face * 110;
+      }
+    }
+  }
+
+  // Standard entities (walkers, hazards, bounces, checkpoints)
+  if (!inChamber) {
+    for (const t of LV.T) {
+      if (t.dead) continue;
+      if (t.k === 'w') {
+        t.x += t.d * t.sp * dt;
+        if (t.x < t.x0 || t.x > t.x1) t.d = -t.d;
+        if (hit(p, { x: t.x - 14, y: t.y - 24, w: 28, h: 24 })) {
+          if (p.vy > 0 && p.y + p.h < t.y - 10) {
+            t.dead = 1;
+            p.vy = -430;
+            tone(500, 0.1, 'square', 0.06, 900);
+            coins += 10;
+            save();
+            updateHUDCoins();
+          } else {
+            die('predator', false);
+            return;
+          }
+        }
+      } else if (t.k === 'h') {
+        if (hit(p, { x: t.x - 10, y: t.y - 24, w: 20, h: 24 })) {
+          die(LV.isWarEra ? 'war' : 'fire', false);
+          return;
+        }
+      } else if (t.k === 'b') {
+        if (p.vy >= 0 && hit(p, { x: t.x - 16, y: t.y - 18, w: 32, h: 18 })) {
+          p.vy = -1000;
+          p.on = false;
+          tone(250, 0.25, 'sine', 0.1, 900);
+        }
+      } else if (t.k === 'c' && !t.on && p.x > t.x) {
+        t.on = 1;
+        SP = { x: t.x, y: 326 };
+        tone(660, 0.2, 'triangle', 0.08, 990);
+      }
+    }
+
+    // Spikes
+    for (const s of LV.S) {
+      if (hit(p, { x: s.x + 4, y: 346, w: s.w - 8, h: 14 })) {
+        die('spikes', false);
+        return;
+      }
+    }
+  }
+
+  // Fall off bottom
+  if (p.y > H + 80) {
+    die('fall', true);
+    return;
+  }
+
+  // Reach Goal Flag
+  if (!inChamber && p.x + p.w > LV.goal) {
+    tone(523, 0.15, 'triangle', 0.08);
+    setTimeout(() => tone(659, 0.15, 'triangle', 0.08), 120);
+    setTimeout(() => tone(784, 0.3, 'triangle', 0.08), 240);
+    lvl++;
+    coins += 40; // Level completion reward!
+    save();
+    if (lvl >= ERAS.length) {
+      lvl = ERAS.length - 1;
+      ending = true;
+    } else {
+      startLevel();
+    }
+  }
+
+  // Camera smooth tracking
+  const maxCam = inChamber ? 100 : (LV.len - W + 60);
+  cam = Math.max(0, Math.min(p.x - 260, maxCam));
+}
+
+// ==========================================
+// BACKGROUND, PARALLAX & GRAPHICS
+// ==========================================
+function el(x, y, a, b) {
+  X.beginPath(); X.ellipse(x, y, a, b, 0, 0, 7); X.fill();
+}
+function lay(sp, col, base, amp, wl, ph) {
+  X.fillStyle = col;
+  X.beginPath();
+  X.moveTo(0, H);
+  for (let x = 0; x <= W; x += 20) {
+    X.lineTo(x, base - amp * Math.sin((x + cam * sp) / wl + ph) - amp * 0.5 * Math.sin((x + cam * sp) / (wl * 0.37) + ph * 2));
+  }
+  X.lineTo(W, H);
+  X.fill();
+}
+function orb(x, y, r, c) {
+  const g = X.createRadialGradient(x, y, r * 0.2, x, y, r * 2.2);
+  g.addColorStop(0, c);
+  g.addColorStop(0.4, c);
+  g.addColorStop(1, 'rgba(255,255,255,0)');
+  X.fillStyle = g;
+  X.beginPath();
+  X.arc(x, y, r * 2.2, 0, 7);
+  X.fill();
+}
+function rep(sp, gap, fn) {
+  const o = (cam * sp) % gap, b = Math.floor(cam * sp / gap);
+  for (let i = -1; i * gap - o < W + gap; i++) fn(i * gap - o, i + b);
+}
+
+const VG = X.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, W * 0.65);
+VG.addColorStop(0, 'rgba(0,0,0,0)');
+VG.addColorStop(1, 'rgba(0,0,0,.52)');
+
+function terrain(s, E) {
+  if (s.x + s.w < cam - 10 || s.x > cam + W + 10) return;
+  const big = s.h > 100, hh = big ? 200 : s.h;
+  const g = X.createLinearGradient(0, s.y, 0, s.y + hh);
+  g.addColorStop(0, inChamber ? '#2c2236' : E[4]);
+  g.addColorStop(1, 'rgba(0,0,0,.85)');
+  X.fillStyle = inChamber ? '#2c2236' : E[4];
+  X.fillRect(s.x, s.y, s.w, s.h);
+  X.fillStyle = g;
+  X.fillRect(s.x, s.y, s.w, Math.min(s.h, hh));
+
+  const eraGroup = Math.floor(lvl / 10);
+  const CRUST_COLORS = ['#3fc5d9', '#2a8b94', '#489635', '#a87a42', '#8c5a35', '#914f3b', '#c79d38', '#5e728a', '#859bb0', '#00f0ff'];
+  X.fillStyle = inChamber ? '#9b5de5' : CRUST_COLORS[eraGroup];
+  X.fillRect(s.x, s.y, s.w, big ? 6 : 4);
+  X.fillStyle = 'rgba(255,255,255,.28)';
+  X.fillRect(s.x, s.y, s.w, 2);
+}
+
+function drawBackground(l, E) {
+  const t = tm();
+  const eraGroup = Math.floor(l / 10);
+
+  if (inChamber) {
+    // Nested Chamber Background (Subterranean / High-Tech Lab)
+    X.fillStyle = '#100a18';
+    X.fillRect(0, 0, W, H);
+    lay(0.1, 'rgba(40,20,50,.7)', 320, 20, 100, 1);
+    for (let i = 0; i < 14; i++) {
+      X.fillStyle = 'rgba(155,93,229,.35)';
+      X.beginPath();
+      X.arc((i * 65 + t * 12) % W, 80 + (i * 35) % 250, 2 + i % 3, 0, Math.PI * 2);
+      X.fill();
+    }
+    return;
+  }
+
+  if (eraGroup === 0) {
+    for (let i = 0; i < 5; i++) {
+      const x = i * 190 - (cam * 0.1 % 190) + 40;
+      X.fillStyle = 'rgba(180,255,240,.06)';
+      X.beginPath();
+      X.moveTo(x, 0); X.lineTo(x + 60, 0); X.lineTo(x + 170, 400); X.lineTo(x + 40, 400);
+      X.fill();
+    }
+    lay(0.2, 'rgba(5,40,50,.55)', 330, 25, 120, 1);
+  } else if (eraGroup === 1) {
+    orb(620, 100, 36, '#ffe9a0');
+    lay(0.15, 'rgba(30,70,90,.5)', 300, 30, 150, 0);
+  } else if (eraGroup === 2) {
+    lay(0.15, 'rgba(20,40,20,.6)', 310, 25, 140, 1);
+  } else if (eraGroup === 3) {
+    orb(640, 90, 26, '#ffd890');
+    lay(0.2, 'rgba(50,25,20,.8)', 320, 35, 130, 3);
+  } else if (eraGroup === 4) {
+    orb(600, 100, 34, '#ffe599');
+    lay(0.2, 'rgba(90,60,35,.6)', 310, 20, 140, 1);
+  } else if (eraGroup === 5) {
+    lay(0.2, 'rgba(35,25,20,.85)', 330, 22, 120, 2);
+    orb(140, 350, 70, 'rgba(255,120,40,.35)');
+  } else if (eraGroup === 6) {
+    orb(660, 100, 32, '#ffdf99');
+    lay(0.2, 'rgba(80,50,40,.5)', 320, 20, 150, 1);
+  } else if (eraGroup === 7) {
+    lay(0.2, 'rgba(40,50,65,.6)', 320, 20, 140, 1);
+  } else if (eraGroup === 8) {
+    lay(0.15, 'rgba(35,35,42,.6)', 320, 20, 150, 2);
+  } else {
+    lay(0.15, 'rgba(10,25,45,.7)', 320, 18, 140, 1);
+  }
+}
+
+// ==========================================
+// AVATAR RENDERING SYSTEM
+// ==========================================
+function drawAvatar(x, y, col, walkTime, facing, isGrounded, isP2 = false) {
+  const eraGroup = Math.floor(lvl / 10);
+  const t = tm();
+
+  X.save();
+  X.translate(x, y);
+  X.scale(facing, 1);
+
+  if (eraGroup === 0) {
+    // CELLULAR ORGANISM
+    const w = Math.sin(t * 8) * 1.5;
+    const squish = isGrounded ? 0 : Math.sin(t * 12) * 2;
+    X.fillStyle = isP2 ? 'rgba(255, 209, 92, 0.45)' : 'rgba(63, 197, 217, 0.45)';
+    X.strokeStyle = isP2 ? '#ffd15c' : '#5de4fa';
+    X.lineWidth = 2.5;
+    X.beginPath();
+    X.ellipse(0, -16 + squish, 13 + w, 14 - squish, 0, 0, Math.PI * 2);
+    X.fill(); X.stroke();
+    X.fillStyle = 'rgba(255, 200, 80, 0.8)';
+    X.beginPath(); X.arc(-2, -18, 4.5, 0, Math.PI * 2); X.fill();
+    X.strokeStyle = isP2 ? '#ffd15c' : '#5de4fa'; X.lineWidth = 2;
+    X.beginPath(); X.moveTo(-11, -16);
+    for (let k = 1; k <= 4; k++) X.lineTo(-11 - k * 7, -16 + Math.sin(t * 10 + k) * 5);
+    X.stroke();
+  } else if (eraGroup === 1) {
+    // CAMBRIAN / INVERTEBRATE
+    const tailSwing = Math.sin(t * 9) * 6;
+    X.strokeStyle = isP2 ? '#9b5de5' : '#367882'; X.lineWidth = 3.5;
+    X.beginPath(); X.moveTo(-8, -12); X.lineTo(-20, -12 + tailSwing); X.stroke();
+    X.fillStyle = isP2 ? '#6a3ba0' : '#2f6770'; X.strokeStyle = '#62c2ce'; X.lineWidth = 2;
+    X.beginPath(); X.ellipse(2, -14, 15, 9, 0, 0, Math.PI * 2); X.fill(); X.stroke();
+    X.fillStyle = '#ffd15c'; X.beginPath(); X.arc(11, -17, 2.8, 0, Math.PI * 2); X.fill();
+    X.strokeStyle = '#62c2ce'; X.lineWidth = 2.5;
+    for (let i = -1; i <= 1; i++) {
+      const legPhase = Math.sin(walkTime * 1.5 + i * 2) * 5;
+      X.beginPath(); X.moveTo(i * 6, -7); X.lineTo(i * 6 - 2, 0 + legPhase); X.stroke();
+    }
+  } else if (eraGroup === 2) {
+    // SYNAPSID DIMETRODON
+    X.fillStyle = isP2 ? 'rgba(155, 93, 229, 0.75)' : 'rgba(219, 90, 48, 0.75)';
+    X.beginPath(); X.moveTo(-10, -14); X.quadraticCurveTo(0, -32, 10, -14); X.fill();
+    X.strokeStyle = '#f1a85d'; X.lineWidth = 1.5;
+    for (let s = -8; s <= 8; s += 4) { X.beginPath(); X.moveTo(s, -14); X.lineTo(s * 0.7, -27); X.stroke(); }
+    X.fillStyle = isP2 ? '#4a3b6e' : '#4c6e3b'; X.beginPath(); X.ellipse(0, -10, 15, 8, 0, 0, Math.PI * 2); X.fill();
+    X.fillStyle = '#5c8547'; X.beginPath(); X.ellipse(12, -12, 7, 5, 0, 0, Math.PI * 2); X.fill();
+    X.strokeStyle = '#324a26'; X.lineWidth = 3;
+    const stride = isGrounded ? Math.sin(walkTime) * 6 : 2;
+    X.beginPath(); X.moveTo(6, -6); X.lineTo(8 + stride, 0); X.moveTo(-6, -6); X.lineTo(-4 - stride, 0); X.stroke();
+  } else if (eraGroup === 3) {
+    // VELOCIRAPTOR
+    const legPhase = isGrounded ? Math.sin(walkTime * 1.3) * 8 : 4;
+    X.strokeStyle = isP2 ? '#9b5de5' : '#8e4b33'; X.lineWidth = 3.5;
+    X.beginPath(); X.moveTo(-6, -15); X.quadraticCurveTo(-18, -17, -26, -23); X.stroke();
+    X.fillStyle = isP2 ? '#8444b0' : '#a6563a'; X.beginPath(); X.ellipse(0, -16, 12, 8, -0.2, 0, Math.PI * 2); X.fill();
+    X.beginPath(); X.ellipse(11, -22, 8, 5, 0.1, 0, Math.PI * 2); X.fill();
+    X.strokeStyle = '#5c2a18'; X.lineWidth = 3;
+    X.beginPath(); X.moveTo(4, -10); X.lineTo(6 + legPhase, 0); X.moveTo(-4, -10); X.lineTo(-2 - legPhase, 0); X.stroke();
+  } else if (eraGroup === 4) {
+    // HOMINID
+    const legSwing = isGrounded ? Math.sin(walkTime) * 6 : 2;
+    X.fillStyle = isP2 ? '#4a3224' : '#61432a'; X.fillRect(-5, -22, 11, 15);
+    X.fillStyle = '#7a5535'; X.beginPath(); X.arc(1, -27, 6.5, 0, Math.PI * 2); X.fill();
+    X.strokeStyle = '#61432a'; X.lineWidth = 3;
+    X.beginPath(); X.moveTo(0, -20); X.lineTo(9, -12); X.stroke();
+    X.fillStyle = '#9ea5ad'; X.beginPath(); X.moveTo(9, -14); X.lineTo(13, -11); X.lineTo(9, -8); X.fill();
+    X.beginPath(); X.moveTo(-2, -7); X.lineTo(-3 - legSwing, 0); X.moveTo(4, -7); X.lineTo(4 + legSwing, 0); X.stroke();
+  } else if (eraGroup === 5) {
+    // STONE AGE HUNTER
+    const legSwing = isGrounded ? Math.sin(walkTime) * 6 : 2;
+    X.fillStyle = isP2 ? '#4a5b6e' : '#704f32'; X.fillRect(-5, -21, 11, 14);
+    X.fillStyle = '#d9aa7e'; X.beginPath(); X.arc(1, -26, 5.5, 0, Math.PI * 2); X.fill();
+    X.strokeStyle = '#47311c'; X.lineWidth = 2;
+    X.beginPath(); X.moveTo(8, -2); X.lineTo(11, -34); X.stroke();
+    X.fillStyle = '#e86a23'; X.beginPath(); X.arc(11, -34, 3 + Math.sin(t * 12) * 1.5, 0, Math.PI * 2); X.fill();
+    X.strokeStyle = '#5a3d24'; X.lineWidth = 2.8;
+    X.beginPath(); X.moveTo(-2, -7); X.lineTo(-3 - legSwing, 0); X.moveTo(4, -7); X.lineTo(4 + legSwing, 0); X.stroke();
+  } else if (eraGroup === 6) {
+    // CLASSICAL WARRIOR
+    const legSwing = isGrounded ? Math.sin(walkTime) * 6 : 2;
+    X.fillStyle = isP2 ? '#2b4d8f' : '#8f2e22'; X.fillRect(-5, -21, 11, 14);
+    X.fillStyle = '#c99b38'; X.fillRect(-3, -19, 8, 8);
+    X.fillStyle = '#d9aa7e'; X.beginPath(); X.arc(1, -26, 5.5, 0, Math.PI * 2); X.fill();
+    X.fillStyle = '#c99b38'; X.beginPath(); X.arc(1, -28, 5.5, Math.PI, 0); X.fill();
+    X.fillStyle = '#e02828'; X.fillRect(-1, -35, 3.5, 8);
+    X.fillStyle = isP2 ? '#2b4d8f' : '#8f2e22'; X.strokeStyle = '#c99b38'; X.lineWidth = 1.5;
+    X.beginPath(); X.ellipse(8, -14, 4.5, 9, 0, 0, Math.PI * 2); X.fill(); X.stroke();
+    X.strokeStyle = '#734d28'; X.lineWidth = 2.8;
+    X.beginPath(); X.moveTo(-2, -7); X.lineTo(-3 - legSwing, 0); X.moveTo(4, -7); X.lineTo(4 + legSwing, 0); X.stroke();
+  } else if (eraGroup === 7) {
+    // RENAISSANCE SCHOLAR / PLAGUE DOCTOR
+    const legSwing = isGrounded ? Math.sin(walkTime) * 6 : 2;
+    X.fillStyle = (lvl === 73) ? '#1f1b24' : (isP2 ? '#4a3b6e' : '#2d435e');
+    X.fillRect(-5, -21, 11, 14);
+    X.fillStyle = '#d9aa7e'; X.beginPath(); X.arc(1, -26, 5.5, 0, Math.PI * 2); X.fill();
+    if (lvl === 73) {
+      X.fillStyle = '#f4ebd9'; X.beginPath(); X.moveTo(2, -26); X.lineTo(12, -22); X.lineTo(2, -20); X.fill();
+    } else {
+      X.fillStyle = '#1c2938'; X.beginPath(); X.ellipse(1, -30, 7, 3, -0.1, 0, Math.PI * 2); X.fill();
+    }
+    X.strokeStyle = '#1c2938'; X.lineWidth = 2.8;
+    X.beginPath(); X.moveTo(-2, -7); X.lineTo(-3 - legSwing, 0); X.moveTo(4, -7); X.lineTo(4 + legSwing, 0); X.stroke();
+  } else if (eraGroup === 8) {
+    // WORLD WAR SOLDIER / INDUSTRIAL AVIATOR
+    const legSwing = isGrounded ? Math.sin(walkTime) * 6 : 2;
+    if (LV.isWarEra) {
+      X.fillStyle = isP2 ? '#3b453e' : '#4a4439'; X.fillRect(-6, -22, 12, 15);
+      X.fillStyle = '#d9aa7e'; X.beginPath(); X.arc(1, -26, 5.5, 0, Math.PI * 2); X.fill();
+      X.fillStyle = '#3a3832'; X.beginPath(); X.arc(1, -28, 7.5, Math.PI, 0); X.fill();
+      X.strokeStyle = '#2b261f'; X.lineWidth = 2.5;
+      X.beginPath(); X.moveTo(2, -18); X.lineTo(14, -14); X.stroke();
+    } else {
+      X.fillStyle = isP2 ? '#c5d5e5' : '#e4ebf2'; X.fillRect(-6, -22, 12, 15);
+      X.fillStyle = '#e4ebf2'; X.beginPath(); X.arc(1, -27, 7, 0, Math.PI * 2); X.fill();
+      X.fillStyle = '#f5a623'; X.beginPath(); X.arc(3, -27, 4.5, -Math.PI / 2, Math.PI / 2); X.fill();
+    }
+    X.strokeStyle = '#e4ebf2'; X.lineWidth = 3.5;
+    X.beginPath(); X.moveTo(-2, -7); X.lineTo(-3 - legSwing, 0); X.moveTo(4, -7); X.lineTo(4 + legSwing, 0); X.stroke();
+  } else {
+    // FUTURE SINGULARITY / PPE DOCTOR
+    if (lvl === 92) {
+      X.fillStyle = '#d9f0f7'; X.fillRect(-5, -21, 11, 14);
+      X.fillStyle = '#d9aa7e'; X.beginPath(); X.arc(1, -26, 5.5, 0, Math.PI * 2); X.fill();
+      X.fillStyle = '#00f0ff'; X.fillRect(2, -25, 4, 3);
+    } else {
+      const hoverY = isGrounded ? 0 : Math.sin(t * 12) * 2;
+      X.fillStyle = isP2 ? 'rgba(255, 209, 92, 0.45)' : 'rgba(0, 240, 255, 0.45)';
+      X.beginPath(); X.moveTo(-4, -18); X.lineTo(-18, -30 + hoverY); X.lineTo(-10, -12); X.fill();
+      X.fillStyle = '#0e1d2d'; X.fillRect(-5, -22, 11, 15);
+      X.strokeStyle = isP2 ? '#ffd15c' : '#00f0ff'; X.lineWidth = 1.5; X.strokeRect(-5, -22, 11, 15);
+      X.fillStyle = isP2 ? '#ffd15c' : '#00f0ff'; X.beginPath(); X.arc(0.5, -15, 3, 0, Math.PI * 2); X.fill();
+      X.fillStyle = '#0e1d2d'; X.beginPath(); X.arc(1, -26, 6, 0, Math.PI * 2); X.fill();
+      X.fillStyle = isP2 ? '#ffd15c' : '#00f0ff'; X.fillRect(1, -28, 5.5, 3.5);
+    }
+    X.strokeStyle = isP2 ? '#ffd15c' : '#00f0ff'; X.lineWidth = 2.5;
+    X.beginPath(); X.moveTo(-2, -7); X.lineTo(-2, 0); X.moveTo(3, -7); X.lineTo(3, 0); X.stroke();
+  }
+
+  // Draw Shield Indicator Bubble if active
+  if (!isP2 && p.shield > 0) {
+    X.strokeStyle = 'rgba(63, 197, 217, 0.7)';
+    X.lineWidth = 2;
+    X.beginPath();
+    X.arc(1, -16, 22 + Math.sin(t * 6) * 2, 0, Math.PI * 2);
+    X.stroke();
+  }
+
+  X.restore();
+}
+
+// ==========================================
+// SITUATION-BASED CORPSE RENDERING
+// ==========================================
+function drawCorpse(b) {
+  const cause = b.cause || 'fall';
+  if (cause === 'war') {
+    X.fillStyle = '#2b2926'; X.fillRect(b.x - 18, b.y - 16, 36, 4);
+    X.fillStyle = '#3a342b'; X.fillRect(b.x - 18, b.y - 12, 32, 8);
+    X.fillStyle = '#5c5443'; X.beginPath(); X.arc(b.x + 8, b.y - 10, 6, Math.PI, 0); X.fill();
+  } else if (cause === 'virus') {
+    X.fillStyle = '#283838'; X.fillRect(b.x - 18, b.y - 16, 36, 4);
+    X.fillStyle = '#1e2b2a'; X.fillRect(b.x - 18, b.y - 12, 32, 8);
+    X.fillStyle = '#55c777'; X.fillRect(b.x - 2, b.y - 12, 4, 7); X.fillRect(b.x - 5, b.y - 10, 10, 3);
+  } else if (cause === 'predator') {
+    X.fillStyle = '#992222'; X.fillRect(b.x - 18, b.y - 16, 36, 4);
+    X.fillStyle = 'rgba(235, 225, 205, 0.85)'; X.fillRect(b.x - 18, b.y - 12, 28, 8);
+    X.beginPath(); X.arc(b.x + 13, b.y - 9, 5, 0, 7); X.fill();
+  } else if (cause === 'fire') {
+    X.fillStyle = '#ff6622'; X.fillRect(b.x - 18, b.y - 16, 36, 4);
+    X.fillStyle = '#1a1918'; X.fillRect(b.x - 18, b.y - 12, 30, 8);
+  } else {
+    X.fillStyle = 'rgba(255, 248, 230, 0.95)'; X.fillRect(b.x - 18, b.y - 16, 36, 4);
+    X.fillStyle = 'rgba(215, 200, 180, 0.85)'; X.fillRect(b.x - 18, b.y - 12, 30, 8);
+    X.beginPath(); X.arc(b.x + 14, b.y - 9, 6, 0, 7); X.fill();
+  }
+}
+
+function wrap(t, x, y, mw, lh) {
+  const w = t.split(' ');
+  let l = '';
+  for (const s of w) {
+    const n = l ? l + ' ' + s : s;
+    if (X.measureText(n).width > mw) {
+      X.fillText(l, x, y);
+      y += lh;
+      l = s;
+    } else l = n;
+  }
+  X.fillText(l, x, y);
+}
+
+// ==========================================
+// MAIN RENDER LOOP
+// ==========================================
+function draw() {
+  const E = ERAS[lvl];
+
+  X.fillStyle = inChamber ? '#120b1c' : E[3];
+  X.fillRect(0, 0, W, H);
+  const sg = X.createLinearGradient(0, 0, 0, H);
+  sg.addColorStop(0, 'rgba(0,0,0,.4)');
+  sg.addColorStop(0.7, 'rgba(255,220,170,.1)');
+  sg.addColorStop(1, 'rgba(0,0,0,0)');
+  X.fillStyle = sg;
+  X.fillRect(0, 0, W, H);
+
+  drawBackground(lvl, E);
+
+  X.save();
+  X.translate(-cam, 0);
+
+  // Platforms
+  const currentP = inChamber ? LV.chamberP : LV.P;
+  for (const s of currentP) {
+    terrain(s, E);
+  }
+
+  // Spikes (only in main level)
+  if (!inChamber) {
+    X.fillStyle = '#e8e0d0';
+    for (const s of LV.S) {
+      for (let i = 0; i < 3; i++) {
+        const bx = s.x + i * s.w / 3;
+        X.beginPath();
+        X.moveTo(bx, 360);
+        X.lineTo(bx + s.w / 6, 346);
+        X.lineTo(bx + s.w / 3, 360);
+        X.fill();
+      }
+    }
+  }
+
+  // Deceased Bodies Platforms
+  if (!inChamber) {
+    for (const b of bodies[lvl]) {
+      drawCorpse(b);
+    }
+  }
+
+  // --- Render Nested Chamber Doorway ---
+  if (!inChamber && LV.chamberDoor) {
+    const cd = LV.chamberDoor;
+    // Stone/Tech Chamber Frame
+    X.fillStyle = '#1c1524';
+    X.fillRect(cd.x, cd.y, cd.w, cd.h);
+    X.strokeStyle = '#9b5de5';
+    X.lineWidth = 2.5;
+    X.strokeRect(cd.x, cd.y, cd.w, cd.h);
+    // Glowing chamber portal glow
+    const pg = X.createLinearGradient(cd.x, cd.y, cd.x, cd.y + cd.h);
+    pg.addColorStop(0, 'rgba(155, 93, 229, 0.8)');
+    pg.addColorStop(1, 'rgba(63, 197, 217, 0.3)');
+    X.fillStyle = pg;
+    X.fillRect(cd.x + 3, cd.y + 3, cd.w - 6, cd.h - 3);
+
+    // Indicator Text
+    if (Math.hypot((p.x + p.w / 2) - cd.x, (p.y + p.h) - (cd.y + cd.h)) < 65) {
+      X.fillStyle = '#ffd15c';
+      X.font = 'bold 12px Georgia,serif';
+      X.textAlign = 'center';
+      X.fillText('🚪 ENTER [E]', cd.x + cd.w / 2, cd.y - 8);
+    }
+  }
+
+  // Chamber Exit Portal (When inside chamber)
+  if (inChamber) {
+    X.fillStyle = '#3fc5d9';
+    X.fillRect(20, 316, 32, 44);
+    X.fillStyle = '#ffd15c';
+    X.font = 'bold 12px Georgia,serif';
+    X.textAlign = 'center';
+    X.fillText('🚪 EXIT [E]', 36, 308);
+
+    // Relic Artifact in Chamber
+    if (!LV.chamberRelic.collected) {
+      const cr = LV.chamberRelic;
+      X.fillStyle = '#ffd15c';
+      X.beginPath();
+      X.arc(cr.x, cr.y + Math.sin(tm() * 4) * 4, 12, 0, Math.PI * 2);
+      X.fill();
+      X.font = '18px serif';
+      X.textAlign = 'center';
+      X.fillText('⭐', cr.x, cr.y + 6 + Math.sin(tm() * 4) * 4);
+      X.font = 'bold 12px Georgia,serif';
+      X.fillText('ANCIENT RELIC (+50🪙)', cr.x, cr.y - 18);
+    }
+  }
+
+  // --- Render Rotating 3D Amber Coins ---
+  for (const c of LV.coinList) {
+    if (c.collected) continue;
+    const cw = Math.cos(c.rot) * c.r;
+    X.save();
+    X.translate(c.x, c.y);
+    X.fillStyle = '#ffd15c';
+    X.beginPath();
+    X.ellipse(0, 0, Math.max(1.5, Math.abs(cw)), c.r, 0, 0, Math.PI * 2);
+    X.fill();
+    X.strokeStyle = '#e5a958';
+    X.lineWidth = 1.5;
+    X.stroke();
+    X.restore();
+  }
+
+  // --- Render Animals (Hunting) ---
+  if (!inChamber && LV.animals) {
+    for (const a of LV.animals) {
+      if (!a.alive) {
+        X.fillStyle = '#8a5a3a';
+        X.fillRect(a.x - 16, a.y - 12, 32, 12);
+        continue;
+      }
+      X.save();
+      X.translate(a.x, a.y);
+      X.scale(a.dir, 1);
+      X.font = '28px serif';
+      X.textAlign = 'center';
+      const aIcon = a.kind === 'mammoth' ? '🦣' : (a.kind === 'raptor' ? '🦖' : '🐅');
+      X.fillText(aIcon, 0, -4);
+      X.restore();
+    }
+  }
+
+  // --- Render AI Companion Ally ---
+  if (upgrades.companion && LV.companion && LV.companion.alive) {
+    const comp = LV.companion;
+    drawAvatar(comp.x, comp.y, '#3fc5d9', comp.on ? ph : 1.2, comp.face, comp.on, true);
+    X.fillStyle = '#3fc5d9';
+    X.font = '10px Georgia,serif';
+    X.textAlign = 'center';
+    X.fillText('ALLY', comp.x, comp.y - 38);
+  }
+
+  // --- Render Player 2 (Co-op) ---
+  if (upgrades.coop && p2 && p2.alive) {
+    drawAvatar(p2.x + p2.w / 2, p2.y + p2.h, '#ffd15c', p2.on ? ph : 1.2, p2.face, p2.on, true);
+    X.fillStyle = '#ffd15c';
+    X.font = '10px Georgia,serif';
+    X.textAlign = 'center';
+    X.fillText('P2', p2.x + p2.w / 2, p2.y - 6);
+  }
+
+  // --- Render Artillery Mortars (War) ---
+  if (!inChamber && LV.isWarEra && LV.bombs) {
+    X.fillStyle = '#3a3832';
+    for (const bm of LV.bombs) {
+      X.beginPath(); X.arc(bm.x, bm.y, 5, 0, Math.PI * 2); X.fill();
+      X.fillStyle = '#ff7733';
+      X.fillRect(bm.x - 1, bm.y - 8, 2, 6);
+    }
+  }
+
+  // --- Render Pandemic Virus Clouds ---
+  if (!inChamber && LV.isPandemicEra && LV.virusClouds) {
+    for (const vc of LV.virusClouds) {
+      if (!vc.active) continue;
+      const curX = vc.x + Math.sin(vc.drift) * 24;
+      const g = X.createRadialGradient(curX, vc.y, 6, curX, vc.y, vc.r);
+      g.addColorStop(0, 'rgba(85, 199, 119, 0.7)');
+      g.addColorStop(0.5, 'rgba(155, 93, 229, 0.4)');
+      g.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      X.fillStyle = g;
+      X.beginPath(); X.arc(curX, vc.y, vc.r, 0, Math.PI * 2); X.fill();
+      X.font = '20px serif';
+      X.textAlign = 'center';
+      X.fillText('🦠', curX, vc.y + 6);
+    }
+  }
+
+  // --- Render Pushable Boulders ---
+  if (!inChamber && LV.boulders) {
+    X.fillStyle = '#7a7672';
+    X.strokeStyle = '#524e4a';
+    X.lineWidth = 2;
+    for (const bd of LV.boulders) {
+      X.beginPath(); X.arc(bd.x, bd.y, bd.r, 0, Math.PI * 2); X.fill(); X.stroke();
+    }
+  }
+
+  // --- Render Projectiles ---
+  for (const pr of LV.projectiles) {
+    if (pr.kind === 'spear') {
+      X.strokeStyle = '#f4ebd9';
+      X.lineWidth = 2.5;
+      X.beginPath();
+      X.moveTo(pr.x, pr.y);
+      X.lineTo(pr.x - (pr.vx > 0 ? 14 : -14), pr.y + 6);
+      X.stroke();
+    } else {
+      X.fillStyle = '#ffd15c';
+      X.beginPath(); X.arc(pr.x, pr.y, 3, 0, Math.PI * 2); X.fill();
+    }
+  }
+
+  // Particles
+  for (const pt of deathParticles) {
+    const alpha = pt.life / pt.maxLife;
+    X.fillStyle = pt.color;
+    X.globalAlpha = alpha;
+    X.beginPath(); X.arc(pt.x, pt.y, pt.size || 3, 0, Math.PI * 2); X.fill();
+  }
+  X.globalAlpha = 1.0;
+
+  // Red Goal Flag (Main Level)
+  if (!inChamber) {
+    X.fillStyle = '#f4ebd9';
+    X.fillRect(LV.goal, 250, 4, 110);
+    X.fillStyle = '#e8553a';
+    X.beginPath();
+    X.moveTo(LV.goal + 4, 250);
+    X.lineTo(LV.goal + 44, 265);
+    X.lineTo(LV.goal + 4, 280);
+    X.fill();
+  }
+
+  // Interactive Level Entities
+  if (!inChamber) {
+    const TH = THINGS[lvl];
+    X.font = '30px serif';
+    X.textAlign = 'center';
+    for (const t of LV.T) {
+      if (t.dead) continue;
+      const hp = t.k === 'b' || t.k === 'c';
+      X.fillStyle = hp ? (t.on ? 'rgba(120,255,140,.6)' : 'rgba(120,255,140,.3)') : 'rgba(255,70,50,.25)';
+      X.beginPath();
+      X.arc(t.x, t.y - 14, 19, 0, 7);
+      X.fill();
+      X.fillText(TH[{ w: 0, h: 1, c: 2, b: 3 }[t.k]], t.x, t.y - 4);
+    }
+  }
+  X.textAlign = 'left';
+
+  // Player 1 Avatar
+  if (dead <= 0 && !ending) {
+    drawAvatar(p.x + p.w / 2, p.y + p.h, '#fff6e0', p.on ? ph : 1.2, p.face, p.on, false);
+  }
+
+  X.restore();
+
+  // Screen Vignette
+  X.fillStyle = VG;
+  X.fillRect(0, 0, W, H);
+
+  // HUD: Level, Era, Quest
+  X.fillStyle = '#f4ebd9';
+  X.font = 'bold 17px Georgia,serif';
+  X.textAlign = 'left';
+  X.fillText(inChamber ? 'SUB-CHAMBER: ' + E[0] : E[0], 14, 24);
+
+  X.font = '12px Georgia,serif';
+  X.fillStyle = 'rgba(244, 235, 217, 0.8)';
+  X.fillText('Level ' + (lvl + 1) + ' of 100  •  Life ' + (deaths + 1), 14, 42);
+
+  // Quest Tracker
+  X.fillStyle = '#ffd15c';
+  X.font = 'italic 12px Georgia,serif';
+  X.fillText('🎯 ' + E[5], 14, 60);
+
+  // Pandemic Infection Meter
+  if (LV.isPandemicEra && infectionLevel > 0) {
+    X.fillStyle = 'rgba(0, 0, 0, 0.6)';
+    X.fillRect(14, 68, 120, 10);
+    X.fillStyle = infectionLevel > 0.7 ? '#e04b4b' : '#48bb78';
+    X.fillRect(14, 68, 120 * infectionLevel, 10);
+    X.strokeStyle = '#f4ebd9';
+    X.strokeRect(14, 68, 120, 10);
+    X.font = '10px Georgia,serif';
+    X.fillStyle = '#f4ebd9';
+    X.fillText('VIRAL LOAD', 140, 77);
+  }
+
+  X.textAlign = 'right';
+  X.font = 'italic 13px Georgia,serif';
+  X.fillStyle = '#f4ebd9';
+  X.fillText(E[1], W - 14, 24);
+
+  // Realistic Death Notification Overlay
+  if (dead > 0) {
+    X.fillStyle = 'rgba(18, 10, 8, 0.88)';
+    X.fillRect(0, 0, W, H);
+    X.textAlign = 'center';
+    X.fillStyle = '#ff6b6b';
+    X.font = 'bold 22px Georgia,serif';
+    X.fillText('MORTAL CASUALTY', W / 2, H / 2 - 35);
+
+    X.fillStyle = '#f4ebd9';
+    X.font = 'italic 17px Georgia,serif';
+    X.fillText(lastDeathMessage, W / 2, H / 2);
+
+    X.font = '14px Georgia,serif';
+    X.fillStyle = '#3fc5d9';
+    X.fillText('Your body remains as a solid stepping stone. Humankind marches forward.', W / 2, H / 2 + 35);
+  }
+
+  // Level Card Announcement or Victory Screen
+  if (card > 0 || ending) {
+    X.fillStyle = 'rgba(10,8,6,.88)';
+    X.fillRect(0, 0, W, H);
+    X.fillStyle = '#f4ebd9';
+    X.textAlign = 'center';
+
+    if (ending) {
+      X.font = 'bold 30px Georgia,serif';
+      X.fillText('🌟 KARDASHEV TYPE I REACHED 🌟', W / 2, 130);
+      X.font = 'italic 18px Georgia,serif';
+      X.fillText('You have completed all 100 Epochs of Evolution!', W / 2, 165);
+      X.font = '16px Georgia,serif';
+      wrap('From primordial soup to pandemics, world wars, nested chambers, and cosmic ascendancy... Total lives sacrificed: ' + (deaths + 1) + ' • Evolution Amber collected: ' + coins + '. Tap or press Jump to start again.', W / 2, 210, 580, 25);
+    } else {
+      X.font = 'bold 30px Georgia,serif';
+      X.fillText(E[0], W / 2, 130);
+      X.font = 'italic 16px Georgia,serif';
+      X.fillText(E[1], W / 2, 160);
+      X.font = '16px Georgia,serif';
+      wrap(E[2], W / 2, 205, 560, 24);
+
+      X.font = 'bold 15px Georgia,serif';
+      X.fillStyle = '#ffd15c';
+      X.fillText('Quest: ' + E[5], W / 2, H - 110);
+
+      const T2 = THINGS[lvl];
+      X.font = '20px Georgia,serif';
+      X.fillStyle = '#f4ebd9';
+      X.fillText('Danger: ' + T2[0] + ' ' + T2[1] + '     Helps: ' + T2[2] + ' ' + T2[3], W / 2, H - 85);
+
+      X.font = '12px Georgia,serif';
+      X.fillStyle = '#3fc5d9';
+      X.fillText('Press 🚪 / Key E: Enter Nested Chamber • Press 🛒 / Key B: Shop Upgrades', W / 2, H - 60);
+      X.fillStyle = '#f4ebd9';
+      X.fillText('Fallen bodies remain as solid bridges. Tap or jump to begin.', W / 2, H - 38);
+    }
+  }
+}
+
+// Main Animation Loop
+let last = 0;
+function loop(t) {
+  const dt = Math.min(0.033, (t - last) / 1000 || 0);
+  last = t;
+  step(dt);
+  draw();
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
