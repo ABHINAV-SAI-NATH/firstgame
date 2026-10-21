@@ -1,0 +1,2630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="screen-orientation" content="landscape">
+<meta name="theme-color" content="#090706">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Rebirth: The Long Road of Humankind - Mobile Edition</title>
+<style>
+:root {
+  --bg: #080605;
+  --fg: #f5eedb;
+  --accent: #e5a958;
+  --cyan: #3fc5d9;
+  --gold: #ffd15c;
+  --red: #e04b4b;
+  --green: #48bb78;
+  --purple: #9b5de5;
+  --panel-bg: rgba(14, 10, 8, 0.88);
+  --border-light: rgba(244, 235, 217, 0.2);
+}
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Georgia, serif;
+  touch-action: none;
+}
+
+#game-root {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  overflow: hidden;
+}
+
+canvas#c {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  background: #000;
+}
+
+/* Minimalist Arcade HUD Bar */
+#hud-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: env(safe-area-inset-top, 6px) env(safe-area-inset-right, 14px) 6px env(safe-area-inset-left, 14px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: none;
+  z-index: 30;
+}
+.hud-left, .hud-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: auto;
+}
+.hud-badge {
+  background: var(--panel-bg);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border-light);
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+}
+.hud-badge.coins {
+  color: var(--gold);
+  border-color: rgba(255, 209, 92, 0.45);
+}
+.hud-badge.difficulty {
+  color: var(--cyan);
+  border-color: rgba(63, 197, 217, 0.4);
+  cursor: pointer;
+}
+.hud-badge.difficulty:active {
+  transform: scale(0.95);
+  background: rgba(63, 197, 217, 0.2);
+}
+.hud-icon-svg {
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  display: inline-block;
+  vertical-align: middle;
+}
+.hud-btn {
+  background: var(--panel-bg);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border-light);
+  color: var(--fg);
+  padding: 6px 11px;
+  border-radius: 18px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: transform 0.1s, background 0.15s, border-color 0.15s;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+.hud-btn:active {
+  transform: scale(0.92);
+  background: rgba(244, 235, 217, 0.25);
+  border-color: var(--accent);
+}
+.hud-btn.gold {
+  border-color: rgba(255, 209, 92, 0.5);
+  color: var(--gold);
+}
+
+/* Touch Control Layer */
+#mobile-pad {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 25;
+}
+.dpad-container {
+  position: absolute;
+  bottom: calc(env(safe-area-inset-bottom, 10px) + 12px);
+  left: calc(env(safe-area-inset-left, 12px) + 12px);
+  display: flex;
+  gap: 14px;
+  pointer-events: auto;
+}
+.action-container {
+  position: absolute;
+  bottom: calc(env(safe-area-inset-bottom, 10px) + 10px);
+  right: calc(env(safe-area-inset-right, 12px) + 12px);
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  pointer-events: auto;
+}
+
+.btn-touch {
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  background: rgba(18, 13, 10, 0.72);
+  backdrop-filter: blur(6px);
+  border: 2px solid rgba(244, 235, 217, 0.35);
+  color: var(--fg);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  touch-action: none;
+  user-select: none;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.7), inset 0 2px 4px rgba(255,255,255,0.12);
+  transition: transform 0.06s, background 0.08s, border-color 0.08s;
+}
+.btn-touch svg {
+  width: 26px;
+  height: 26px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.btn-touch:active, .btn-touch.touch-active {
+  transform: scale(0.90);
+  background: rgba(229, 169, 88, 0.45);
+  border-color: var(--accent);
+}
+.btn-touch.jump-btn {
+  width: 76px;
+  height: 76px;
+  background: rgba(229, 169, 88, 0.22);
+  border-color: rgba(229, 169, 88, 0.65);
+}
+.btn-touch.jump-btn svg { width: 32px; height: 32px; }
+.btn-touch.act-btn {
+  background: rgba(63, 197, 217, 0.22);
+  border-color: rgba(63, 197, 217, 0.6);
+}
+.btn-touch.interact-btn {
+  background: rgba(255, 209, 92, 0.22);
+  border-color: rgba(255, 209, 92, 0.65);
+}
+
+/* Portrait Warning */
+#rotate-warning {
+  position: fixed;
+  inset: 0;
+  background: #090706;
+  z-index: 9999;
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 30px;
+}
+@media screen and (orientation: portrait) and (max-width: 900px) {
+  #rotate-warning { display: flex; }
+}
+.rotate-vector {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 20px;
+  animation: phoneSpin 2.4s infinite ease-in-out;
+}
+@keyframes phoneSpin {
+  0% { transform: rotate(0deg); }
+  50% { transform: rotate(90deg); }
+  100% { transform: rotate(0deg); }
+}
+.rotate-title {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.rotate-desc {
+  font-size: 13px;
+  color: var(--fg);
+  opacity: 0.85;
+  max-width: 310px;
+  line-height: 1.5;
+}
+
+/* Floating Context Prompt */
+#interact-prompt {
+  position: absolute;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 209, 92, 0.95);
+  color: #0d0a08;
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.4px;
+  padding: 5px 14px;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.7);
+  z-index: 40;
+  display: none;
+  align-items: center;
+  gap: 8px;
+  animation: pulsePrompt 1s infinite alternate;
+  pointer-events: none;
+}
+@keyframes pulsePrompt {
+  0% { transform: translateX(-50%) scale(0.96); }
+  100% { transform: translateX(-50%) scale(1.04); }
+}
+
+/* Narrative Dialog Bottom Box */
+#story-dialog {
+  position: absolute;
+  bottom: calc(env(safe-area-inset-bottom, 10px) + 84px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 620px;
+  background: rgba(14, 10, 8, 0.95);
+  border: 1px solid rgba(229, 169, 88, 0.5);
+  border-radius: 8px;
+  padding: 10px 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.85);
+  z-index: 50;
+  display: none;
+  align-items: center;
+  gap: 12px;
+}
+#story-dialog.show { display: flex; }
+#speaker-icon-box {
+  width: 44px;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+  border: 1px solid rgba(229, 169, 88, 0.4);
+}
+#speaker-content { flex: 1; }
+#speaker-name { font-size: 12px; font-weight: 800; color: var(--accent); margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+#speaker-text { font-size: 12px; line-height: 1.4; color: var(--fg); }
+#btn-story-dismiss {
+  background: rgba(244, 235, 217, 0.15);
+  border: 1px solid rgba(244, 235, 217, 0.3);
+  color: var(--fg);
+  padding: 5px 12px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  align-self: center;
+}
+
+/* Modals */
+.game-modal {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 6, 5, 0.96);
+  backdrop-filter: blur(10px);
+  z-index: 100;
+  display: none;
+  flex-direction: column;
+  padding: env(safe-area-inset-top, 16px) env(safe-area-inset-right, 24px) env(safe-area-inset-bottom, 16px) env(safe-area-inset-left, 24px);
+  overflow: hidden;
+}
+.game-modal.visible { display: flex; }
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(244, 235, 217, 0.2);
+  padding-bottom: 8px;
+  margin-bottom: 10px;
+}
+.modal-title { font-size: 16px; font-weight: 800; color: var(--accent); display: flex; align-items: center; gap: 8px; letter-spacing: 0.5px; }
+.modal-body { flex: 1; overflow-y: auto; padding-right: 6px; }
+
+/* Shop Grid */
+.shop-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 10px;
+}
+.shop-card {
+  background: rgba(244, 235, 217, 0.06);
+  border: 1px solid rgba(244, 235, 217, 0.2);
+  border-radius: 6px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.shop-card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.shop-card-name { font-size: 13px; font-weight: 800; color: #fff; }
+.shop-card-cost { color: var(--gold); font-size: 12px; font-weight: 800; }
+.shop-card-desc { font-size: 11px; opacity: 0.85; line-height: 1.35; margin-bottom: 8px; }
+.shop-buy-btn {
+  background: rgba(229, 169, 88, 0.25);
+  border: 1px solid var(--accent);
+  color: var(--fg);
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  align-self: flex-start;
+}
+.shop-buy-btn.bought {
+  background: rgba(72, 187, 120, 0.2);
+  border-color: var(--green);
+  color: var(--green);
+  cursor: default;
+}
+
+/* Timeline Level Grid */
+.era-section { margin-bottom: 12px; }
+.era-section-title {
+  font-size: 12px; font-weight: 800; color: var(--cyan);
+  margin-bottom: 5px; border-bottom: 1px dashed rgba(244, 235, 217, 0.2); padding-bottom: 2px;
+}
+.level-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 5px;
+}
+.lvl-btn {
+  background: rgba(244, 235, 217, 0.08); border: 1px solid rgba(244, 235, 217, 0.2);
+  border-radius: 4px; padding: 4px 2px; text-align: center; cursor: pointer; color: var(--fg);
+  font-size: 11px;
+}
+.lvl-btn.active { background: rgba(229, 169, 88, 0.35); border-color: var(--accent); font-weight: 800; }
+.lvl-btn.beaten { border-color: #55c777; color: #a3e8b7; }
+.lvl-btn-num { font-size: 12px; font-weight: 800; display: block; }
+.lvl-btn-name { font-size: 9px; opacity: 0.8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+</style>
+</head>
+<body>
+
+<!-- Portrait Rotation Screen -->
+<div id="rotate-warning">
+  <svg class="rotate-vector" viewBox="0 0 24 24" fill="none" stroke="#e5a958" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+    <path d="M12 18h.01"/>
+    <path d="M1 9l3-3 3 3"/>
+    <path d="M4 6v8a4 4 0 004 4h1"/>
+  </svg>
+  <div class="rotate-title">LANDSCAPE MODE REQUIRED</div>
+  <div class="rotate-desc">Rebirth is optimized for horizontal mobile gameplay. Please rotate your device to landscape for full-screen controls.</div>
+</div>
+
+<div id="game-root">
+  <!-- Minimalist HUD -->
+  <div id="hud-bar">
+    <div class="hud-left">
+      <div class="hud-badge coins">
+        <svg class="hud-icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9 9h6M9 15h6"/></svg>
+        <span id="hud-coin-val">0</span>
+      </div>
+      <div class="hud-badge" id="hud-era-badge">EPOCH 1/100</div>
+      <div class="hud-badge difficulty" id="hud-diff-btn" title="Click to Change Difficulty">
+        <span id="hud-diff-label">NORMAL</span>
+      </div>
+      <div class="hud-badge" id="hud-shield-badge" style="display:none; color:var(--cyan);">
+        SHIELD: <span id="hud-shield-val">0</span>
+      </div>
+    </div>
+    <div class="hud-right">
+      <button class="hud-btn gold" id="btn-open-shop">
+        <svg class="hud-icon-svg" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4H6zM3 6h18M16 10a4 4 0 01-8 0"/></svg>
+        SHOP
+      </button>
+      <button class="hud-btn" id="btn-open-story">
+        <svg class="hud-icon-svg" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20M4 4.5A2.5 2.5 0 016.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15z"/></svg>
+        DOSSIER
+      </button>
+      <button class="hud-btn" id="btn-open-map">
+        <svg class="hud-icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+        EPOCHS
+      </button>
+      <button class="hud-btn" id="btn-fs-toggle" title="Toggle Fullscreen">
+        <svg class="hud-icon-svg" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>
+      </button>
+      <button class="hud-btn" id="btn-sound-toggle" title="Mute/Unmute Audio">
+        <svg class="hud-icon-svg" id="sound-icon-svg" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5zM19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Primary Canvas -->
+  <canvas id="c"></canvas>
+
+  <!-- Interactive Action Prompt -->
+  <div id="interact-prompt">PRESS [INTERACT]</div>
+
+  <!-- Story Dossier Dialog Toast -->
+  <div id="story-dialog">
+    <div id="speaker-icon-box">
+      <svg viewBox="0 0 24 24" style="width:24px;height:24px;stroke:#e5a958;fill:none;stroke-width:2;"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/></svg>
+    </div>
+    <div id="speaker-content">
+      <div id="speaker-name">CHRONICLE DOSSIER</div>
+      <div id="speaker-text">...</div>
+    </div>
+    <button id="btn-story-dismiss">DISMISS</button>
+  </div>
+
+  <!-- Responsive On-Screen Arcade Gamepad -->
+  <div id="mobile-pad">
+    <div class="dpad-container">
+      <button class="btn-touch" id="btn-left" aria-label="Left">
+        <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <button class="btn-touch" id="btn-right" aria-label="Right">
+        <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+    </div>
+    <div class="action-container">
+      <button class="btn-touch interact-btn" id="btn-interact" aria-label="Interact">
+        <svg viewBox="0 0 24 24"><path d="M12 2v20M2 12h20M4.93 4.93l14.14 14.14M19.07 4.93L4.93 19.07"/></svg>
+      </button>
+      <button class="btn-touch act-btn" id="btn-action" aria-label="Attack / Strike">
+        <svg id="svg-action-icon" viewBox="0 0 24 24"><path d="M14.5 17.5L3 6V3h3l11.5 11.5M13 19l2 2 5-5-2-2"/></svg>
+      </button>
+      <button class="btn-touch jump-btn" id="btn-jump" aria-label="Jump">
+        <svg viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Shop Modal -->
+  <div class="game-modal" id="modal-shop">
+    <div class="modal-header">
+      <div class="modal-title">MUTATION UPGRADES & ENHANCEMENTS</div>
+      <button class="hud-btn" id="btn-close-shop">CLOSE</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,209,92,0.1); padding:8px 12px; border-radius:6px; margin-bottom:10px;">
+        <div>Evolution Amber: <strong style="color:var(--gold); font-size:14px;"><span id="shop-coin-display">0</span> AMBER</strong></div>
+        <div style="font-size:11px; opacity:0.85;">Permanent upgrades persist across all 100 epochs.</div>
+      </div>
+      <div class="shop-grid" id="shop-grid-items"></div>
+    </div>
+  </div>
+
+  <!-- Dossier Modal -->
+  <div class="game-modal" id="modal-story">
+    <div class="modal-header">
+      <div class="modal-title">EPOCH DOSSIER & HISTORICAL ARCHIVE</div>
+      <button class="hud-btn" id="btn-close-story">CLOSE</button>
+    </div>
+    <div class="modal-body" id="story-modal-content"></div>
+  </div>
+
+  <!-- Epochs Map Modal -->
+  <div class="game-modal" id="modal-map">
+    <div class="modal-header">
+      <div class="modal-title">TIMELINE OF THE 100 EPOCHS</div>
+      <button class="hud-btn" id="btn-close-map">CLOSE</button>
+    </div>
+    <div class="modal-body" id="map-modal-body"></div>
+  </div>
+</div>
+
+<script>
+const C = document.getElementById('c'), X = C.getContext('2d'), W = 800, H = 450;
+C.width = W; C.height = H;
+
+// ==========================================
+// 100-EPOCH NARRATIVE DATABASE (CLEAN TYPOGRAPHY)
+// ==========================================
+const ERAS = [
+  ['1. Protocell Genesis', '4.1 Ga', 'Lipid vesicles enclose catalytic RNA inside hydrothermal vents.', '#071821', '#103844', 'Awaken RNA catalysts and reach the primordial Vent Core.'],
+  ['2. Archaea Extremophiles', '3.8 Ga', 'Anaerobes thrive in boiling mineral waters, metabolizing sulfur.', '#091c26', '#13404d', 'Survive toxic sulfur vents and scavenge enzymes.'],
+  ['3. Cyanobacteria Awakening', '3.5 Ga', 'Photosynthesis awakens! Stromatolites release oxygen into the world.', '#0d292f', '#185055', 'Harness solar rays and build oxygen stromatolites.'],
+  ['4. Eukaryote Endosymbiosis', '2.1 Ga', 'Engulfing an aerobic bacterium gives birth to cellular mitochondria.', '#0f333b', '#1f6164', 'Engulf the bacterial symbiont to power respiration.'],
+  ['5. Ciliate Micro-Hunter', '1.6 Ga', 'Coordinated beating cilia propel a single-celled microscopic predator.', '#123943', '#257074', 'Hunt nutrient microbes with ciliary dash.'],
+  ['6. Volvox Colony', '1.2 Ga', 'Multicellular cooperation begins in a hollow spherical green colony.', '#143d46', '#2d7c7b', 'Coordinate colony rotation across ocean currents.'],
+  ['7. Placozoa Tissue', '800 Ma', 'The simplest animal tissue: a crawling digestive sheet over marine mats.', '#123842', '#2f7c75', 'Crawl benthic carpets and digest organic mats.'],
+  ['8. Porifera Spicules', '650 Ma', 'Filter feeders pump water through silica spicules in Snowball Earth.', '#10343e', '#2c736a', 'Filter ocean currents through silica spicule chambers.'],
+  ['9. Cnidarian Hydromedusa', '600 Ma', 'First neuromuscular system! Pulsating jelly bell with stinging cells.', '#0f2f3c', '#286862', 'Fire stingers to fend off deep-sea predators.'],
+  ['10. Apex Dickinsonia', '558 Ma', 'Ediacaran pioneer: ribbed bilateral organism facing deep currents.', '#112b3a', '#245b58', 'Defeat the primordial currents and pioneer symmetry.'],
+
+  ['11. Trilobite Armor', '521 Ma', 'Cambrian Explosion! Calcite crystal compound eyes and jointed armor.', '#0a2336', '#1c4962', 'Navigate the coral reef and roll into carapace.'],
+  ['12. Anomalocaris Apex Hunt', '508 Ma', 'The world’s first apex predator, wielding raptorial grasping claws.', '#0d283c', '#20536c', 'Hunt giant trilobites and enter the Coral Lair.'],
+  ['13. Pikaia Direct Ancestor', '500 Ma', 'Earliest direct chordate ancestor: sinuous ribbon with a dorsal nerve cord.', '#102c40', '#255b74', 'Pioneer the spinal cord and dart through predators.'],
+  ['14. Orthocone Nautiloid', '460 Ma', 'Conical-shelled cephalopod controlling gas buoyancy with jet propulsion.', '#133248', '#2b657e', 'Vent siphuncle gas buoyancy to traverse chasms.'],
+  ['15. Eurypterid Sea Scorpion', '430 Ma', 'Two-meter armored chelicerate hunting brackish estuaries with pincers.', '#17364b', '#306980', 'Crush rocky barriers with massive chitinous chelae.'],
+  ['16. Dunkleosteus Leviathan', '380 Ma', 'Giant placoderm armored fish wielding self-sharpening bone shears.', '#1a3346', '#336275', 'Sever armored placoderm foes in deep Devonian trenches.'],
+  ['17. Lobe-Finned Coelacanth', '375 Ma', 'Bone-jointed paired fins that contain the blueprint for limbs.', '#1d3443', '#39636f', 'Scull paired bony fins across shallow deltas.'],
+  ['18. Tiktaalik Fishapod', '375 Ma', 'Articulated wrist joints and push-up forearms peer above the water.', '#203740', '#416668', 'Perform wrist pushups to cross gravel banks.'],
+  ['19. Acanthostega Swamps', '365 Ma', 'Eight-digited tetrapod roams freshwater marshes with gills and lungs.', '#22383c', '#46685f', 'Navigate weed-choked swamps with 8-digited limbs.'],
+  ['20. Ichthyostega Pioneer', '360 Ma', 'Muscular shoulders drag pioneer limbs out of the water onto dry mud.', '#233835', '#4d6957', 'Conquer terra firma! Haul pioneer limbs on dry land.'],
+
+  ['21. Lycophyte Rainforests', '350 Ma', 'Dense 40-meter clubmoss rainforests carpet the continents into coal.', '#182b1d', '#3d5c33', 'Clamber over gigantic lycophyte root tangles.'],
+  ['22. Arthropleura Titan', '320 Ma', 'Fueled by high oxygen (35% O2), a 2.5-meter giant millipede rumbles.', '#1c2e1c', '#446636', 'Trample decaying primeval logs under high oxygen.'],
+  ['23. Meganeura Sky Hunter', '305 Ma', 'Master of primeval skies with a 75-cm wingspan hawking prey.', '#20331e', '#4c6f3a', 'Soar over swamp canopies and catch flying insects.'],
+  ['24. Hylonomus Amniote', '312 Ma', 'The amniotic waterproof egg severs the umbilical cord to water.', '#24341f', '#52723d', 'Protect the amniotic egg and scamper across leaves.'],
+  ['25. Dimetrodon Solar Sail', '295 Ma', 'Proto-mammal synapsid with a vascularized dorsal sail for warmth.', '#2b3020', '#5c6e3b', 'Bask sail in morning sunlight to hunt prey.'],
+  ['26. Edaphosaurus Herbivore', '290 Ma', 'Herbivorous synapsid developing a specialized gut for fermenting ferns.', '#2d2e1e', '#616738', 'Browse tough Permian ferns and ferment plant fiber.'],
+  ['27. Gorgonopsid Apex Hunt', '260 Ma', 'Saber-toothed carnivore bringing down armored pareiasaurs.', '#33291c', '#635332', 'Track prey trails and strike with saber fangs.'],
+  ['28. Lystrosaurus Survivor', '252 Ma', 'Weathering the catastrophic Permian-Triassic Great Dying extinction.', '#38281b', '#6b4d2f', 'Burrow underground to weather Siberian Traps.'],
+  ['29. Cynodont Warm Blood', '248 Ma', 'Warm-blooded ancestor with sensory whiskers, fur insulation, and palate.', '#3d2b1f', '#735033', 'Navigate nocturnal burrows using sensory whiskers.'],
+  ['30. Eoraptor Dawn Runner', '231 Ma', 'Agile bipedal sprint and hollow bones launch the dinosaur reign.', '#3d2e23', '#745437', 'Outrun rival archosaurs across Triassic river valleys.'],
+
+  ['31. Morganucodon Shadows', '205 Ma', 'Tiny nocturnal mammal scurries under roots with acute inner ear hearing.', '#362b2d', '#694c4d', 'Scuttle beneath Jurassic dinosaur feet in shadow.'],
+  ['32. Archaeopteryx Wings', '150 Ma', 'Feathered marvel: dinosaur teeth and bony tail paired with avian wings.', '#382f3c', '#6d5469', 'Gliding leap between limestone cliffs of Solnhofen.'],
+  ['33. Stegosaurus Thagomizer', '155 Ma', 'Heavy plated herbivore with vascularized armor and spiked tail.', '#3f3536', '#725c56', 'Defend against stalking Allosaurus with tail spikes.'],
+  ['34. Pterosaur Thermals', '120 Ma', 'Soaring on aerodynamic skin membranes across Cretaceous cliffs.', '#353c48', '#5b6a7a', 'Catch ocean thermals and soar across sea cliffs.'],
+  ['35. Velociraptor Pack', '75 Ma', 'Feathered pack predator armed with keen stereoscopic eyes and curved claw.', '#443831', '#7c5f49', 'Coordinate with pack companions to ambush prey.'],
+  ['36. Triceratops Shield', '68 Ma', 'Six-ton fortress with a solid bone neck frill and meter-long horns.', '#473229', '#7f533a', 'Form defensive horns against attacking tyrannosaurs.'],
+  ['37. Tyrannosaurus Rex', '66 Ma', 'Apex theropod possessing bone-crushing 12,000-pound jaw pressure.', '#4c2d25', '#844733', 'Rule Hell Creek and crush armor plates with bite force.'],
+  ['38. Chicxulub Cataclysm', '66 Ma', 'A 10-km bolide strikes. Firestorms erupt as mammals burrow deep.', '#3a1f1b', '#623126', 'Dodge falling asteroid fragments and reach deep shelter.'],
+  ['39. Purgatorius Forest', '65 Ma', 'Tiny arboreal survivor in recovering post-impact forests: primate dawn.', '#342629', '#634346', 'Climb flowering angiosperm trees to gather fruit.'],
+  ['40. Gastornis Terror Bird', '50 Ma', 'Giant flightless bird ruling dense Eocene subtropical jungles.', '#352d24', '#665337', 'Stalk early mammalian herbivores through dense jungle.'],
+
+  ['41. Ambulocetus Walking Whale', '48 Ma', 'The whale that could walk! Amphibious mammal paddling coastal bays.', '#24333b', '#415a63', 'Paddle coastal bays and transition toward the sea.'],
+  ['42. Paraceratherium Titan', '30 Ma', 'Largest land mammal: an eight-meter hornless rhino browsing treetops.', '#31332c', '#5a5c48', 'Browse towering tree canopies across Eurasian plains.'],
+  ['43. Smilodon Ambush', '2.5 Ma', 'Powerful ambush cat with 28-cm canine daggers hunting megafauna.', '#3d3023', '#6e5233', 'Ambush giant bison and avoid counter-charges.'],
+  ['44. Aegyptopithecus Canopy', '33 Ma', 'Developing forward-facing stereoscopic color vision to navigate trees.', '#373222', '#695c34', 'Judge branch depths with stereoscopic vision.'],
+  ['45. Proconsul Brachiation', '18 Ma', 'Miocene tailless ape with flexible shoulders swinging with branch dexterity.', '#343825', '#606439', 'Swing branch to branch across East African forests.'],
+  ['46. Sahelanthropus Upright', '7 Ma', 'Anterior foramen magnum marks earliest shift toward upright posture.', '#3e3427', '#6d5a3c', 'Stand upright to peer over tall savannah grasses.'],
+  ['47. Ardipithecus Woodland', '4.4 Ma', 'Facultative biped in Afar woodlands balancing climbing and walking.', '#443729', '#755d3e', 'Balance dual climbing feet and ground walking stride.'],
+  ['48. Australopithecus Lucy', '3.2 Ma', 'Habitual biped of the savanna leaving footprints in volcanic ash.', '#4c3929', '#7f5d3d', 'Cross open savanna trackways with free hands.'],
+  ['49. Homo Habilis Knapper', '2.3 Ma', 'First toolmaker chipping Oldowan stone flakes to butcher marrow bones.', '#503827', '#855938', 'Knap sharp flint flakes and scavenge bone marrow.'],
+  ['50. Homo Erectus Fire', '1.8 Ma', 'Controlled hearth fire shrinks gut and supercharges brain growth.', '#522b1c', '#853e20', 'Carry the burning firebrand to light the night cave.'],
+
+  ['51. Neanderthal Hearth', '120 ka', 'Cold-adapted humans in caves burying dead and wearing red ochre.', '#3a343b', '#61545e', 'Gather herbal medicines and decorate with red ochre.'],
+  ['52. Homo Sapiens Migration', '70 ka', 'Syntactical language and symbolic thought ignite global migration.', '#453835', '#73574d', 'Communicate abstract concepts and lead clan migration.'],
+  ['53. Mammoth Steppe Hunt', '30 ka', 'Spear-throwers bring down towering ice-age woolly mammoths.', '#3e3943', '#685c6d', 'Hunt the woolly mammoth with spear-throwers!'],
+  ['54. Lascaux Cave Art', '17 ka', 'Limestone sanctuaries lit by animal fat lamps externalize consciousness.', '#433430', '#74534a', 'Blow pigment upon limestone walls to tell our story.'],
+  ['55. Natufian Settlement', '12.5 ka', 'First stone hamlets; harvesting wild rye with flint curved sickles.', '#473d32', '#7b664d', 'Harvest wild grains with curved flint sickles.'],
+  ['56. Neolithic Farming Dawn', '10 ka', 'Fertile Crescent farmers domesticate emmer wheat and sheep.', '#45442f', '#777348', 'Cultivate emmer wheat and protect herd pastures.'],
+  ['57. Pottery & Weaving', '7.5 ka', 'Fired clay pots preserve oil and grain; looms weave flax linen.', '#4b3d32', '#82654d', 'Fire clay storage pots in kilns to guard grain.'],
+  ['58. Chalcolithic Copper Age', '5.3 ka', 'Smelting copper ores in charcoal furnaces: Otzi the Iceman’s copper axe.', '#4a332d', '#824e41', 'Smelt malachite ore into gleaming copper axes.'],
+  ['59. Gobekli Tepe Megaliths', '9 ka', 'Carving monumental 20-ton T-shaped limestone pillars to celestial stars.', '#473c38', '#7b635a', 'Quarry monumental stone pillars aligned to stars.'],
+  ['60. Bronze Age Foundry', '3.3 ka', 'Alloying copper with rare tin creates durable bronze plowshares.', '#4f382a', '#8a5937', 'Cast molten bronze swords and launch trade galleys.'],
+
+  ['61. Sumerian Cuneiform Uruk', '3,200 BCE', 'The invention of writing! Pressing reed styluses into wet clay tablets.', '#513d2f', '#8d6345', 'Inscribe tax records and epic poetry in wet clay.'],
+  ['62. Egyptian Great Pyramids', '2,560 BCE', 'Engineering the Great Pyramid aligned to true celestial north.', '#56422d', '#966d40', 'Survey right angles and haul limestone blocks.'],
+  ['63. Indus Valley Harappa', '2,500 BCE', 'Standardized baked-brick cities featuring underground sewers.', '#4f4133', '#896c4d', 'Inspect municipal drains and orthogonal brick streets.'],
+  ['64. Shang Dynasty Oracle Bones', '1,200 BCE', 'Divination inscriptions, sericulture silk, and intricate bronze vessels.', '#4d3a33', '#845c4e', 'Decipher oracle bone scripts and spin silk threads.'],
+  ['65. Phoenician Galleys', '900 BCE', 'Cedarwood biremes navigate open Mediterranean with the 22-letter alphabet.', '#36404c', '#546b7a', 'Navigate open sea waters using Polaris and oars.'],
+  ['66. Classical Greek Polis', '430 BCE', 'Athenian democracy, Euclidean geometry, and the Parthenon colonnade.', '#3c4756', '#627083', 'Debate in the Agora and demonstrate geometric proofs.'],
+  ['67. Persian Royal Road', '500 BCE', 'Imperial postal couriers across 2,700 km and underground qanats.', '#49423b', '#7b6c59', 'Relay royal dispatches along the courier road.'],
+  ['68. Qin Great Wall', '220 BCE', 'Standardized axle widths, crossbows, and massive defensive ramparts.', '#443b35', '#745f52', 'Defend frontier ramparts with repeating crossbows.'],
+  ['69. Roman Aqueducts & Arches', '100 CE', 'Volcanic pozzolana concrete, soaring arched aqueducts, and highways.', '#42373c', '#72575e', 'Vault concrete aqueducts to channel alpine waters.'],
+  ['70. Grand Silk Road', '200 CE', 'Camel caravans exchanging silk, Indian spices, and Roman glassware.', '#4d3b31', '#855e47', 'Lead merchant caravan across desert oasis posts.'],
+
+  ['71. Baghdad House of Wisdom', '830 CE', 'Al-Khwarizmi invents algebra, Ibn al-Haytham tests optics, and astrolabes.', '#473b4d', '#735b7a', 'Calculate astronomical charts using astrolabes.'],
+  ['72. Song Dynasty Inventions', '1040 CE', 'Magnetic compass navigation, black powder, and movable ceramic type.', '#44373e', '#735460', 'Align movable type blocks and test black powder.'],
+  ['73. Gothic Mechanical Clocks', '1300 CE', 'Cathedral ribbed vaults regulated by ticking escapement gears.', '#373c44', '#59636e', 'Calibrate verge escapement gears in belfries.'],
+  ['74. The Black Death', '1347 CE', 'Bubonic pandemic sweeps across continents! Navigate quarantine wards.', '#2e2533', '#4f3956', 'Evade plague vectors and deliver medicinal herbs.'],
+  ['75. Oceanic Exploration', '1520 CE', 'Caravels brave open global oceans completing first circumnavigation.', '#2a3b48', '#446477', 'Tack lateen sails against open Atlantic gales.'],
+  ['76. Gutenberg Printing Press', '1455 CE', 'Movable lead alloy type democratizes literacy and scientific treatises.', '#3d3835', '#6b5e58', 'Press inked lead type onto cotton rag sheets.'],
+  ['77. Scientific Revolution', '1687 CE', 'Newton formulates universal gravitation and calculus; Galileo observes.', '#2d3345', '#49556e', 'Observe moons of Jupiter and calculate orbits.'],
+  ['78. Microscopic Discovery', '1720 CE', 'Van Leeuwenhoek reveals unseen microbes; early variolation paves medicine.', '#2d3b40', '#486266', 'Peer through lenses to discover bacteria.'],
+  ['79. Agricultural Seed Drill', '1730 CE', 'Jethro Tull’s seed drill and four-field crop rotation trigger food surplus.', '#39402f', '#5e6b47', 'Sow seed in straight furrows to boost harvests.'],
+  ['80. Newcomen Steam Engine', '1712 CE', 'Burning coal creates steam condensing into a vacuum that pumps mines.', '#33373b', '#545b61', 'Operate atmospheric pistons to drain flooded mines.'],
+
+  ['81. James Watt Steam Power', '1776 CE', 'Separate steam condensers quadruple efficiency, powering textile mills.', '#383637', '#5d5757', 'Regulate steam pressure valves in spinning mills.'],
+  ['82. Steam Locomotive Rails', '1830 CE', 'Stephenson’s Rocket hurtles on iron tracks shrinking continental distances.', '#35383d', '#575e64', 'Fire boiler furnaces to drive steam locomotives.'],
+  ['83. Transatlantic Telegraph', '1866 CE', 'Submarine cables transmit instant electrical impulses across oceans.', '#2f3b45', '#4e626e', 'Tap Morse code impulses across undersea cables.'],
+  ['84. World War I Trench War', '1914 - 1918 CE', 'No Man’s Land: dodge mortar bombardments, barbed wire, and gas.', '#3a322c', '#54463a', 'Cross No Man’s Land under artillery fire and clear wire.'],
+  ['85. Electrification Grid', '1893 CE', 'Alternating current generators at Niagara transmit power across cities.', '#2b3447', '#465874', 'Route high-voltage AC lines through city grids.'],
+  ['86. Powered Flight (Kitty Hawk)', '1903 CE', 'The Wright brothers achieve three-axis aerodynamic control.', '#333e4c', '#546679', 'Balance wing warping controls against Kitty Hawk winds.'],
+  ['87. 1918 Flu & Penicillin', '1918 - 1928 CE', 'Airborne influenza strikes; Fleming isolates penicillin antibiotic mold.', '#2c3a3d', '#455e61', 'Isolate penicillin molds to treat bacterial plagues.'],
+  ['88. World War II Vanguard', '1939 - 1945 CE', 'Artillery barrages, radar defense, and the nuclear chain reaction.', '#2b2c36', '#444654', 'Dodge blitz bombardments and reach the command bunker.'],
+  ['89. Apollo 11 Moon Landing', '1969 CE', 'Saturn V propels humans to the Sea of Tranquility: One small step.', '#1a1d29', '#3f4557', 'Execute low-gravity lunar hops to plant the flag.'],
+  ['90. Silicon Microprocessor', '1971 CE', 'Billions of etched transistors fit onto microchips, democratizing PCs.', '#1d2c38', '#344c5b', 'Etch microscopic transistor circuits on silicon wafers.'],
+
+  ['91. World Wide Web & Fiber', '1991 CE', 'Hypertext transport protocols and transoceanic fiber unify knowledge.', '#1a2c42', '#2f4f6e', 'Route optical laser packets through fiber lines.'],
+  ['92. Smartphone & GPS Orbit', '2007 CE', 'Relativistic atomic clocks in orbit pinpoint handheld pocket computers.', '#22364c', '#385773', 'Triangulate satellite signals from orbital clocks.'],
+  ['93. COVID-19 Pandemic (2020)', '2020 CE', 'SARS-CoV-2 airborne aerosols! Deploy sanitizer, mRNA vaccines, distancing.', '#233038', '#384d59', 'Disinfect viral aerosol clouds and deliver mRNA vaccines.'],
+  ['94. Planetary Clean Energy', '2024 CE', 'Perovskite solar tandem cells and gigawatt wind turbines decouple fossils.', '#1f3e35', '#336551', 'Erect offshore wind turbines and perovskite arrays.'],
+  ['95. James Webb & Mars Rovers', '2026 CE', 'Infrared space mirrors peer to first stars, rovers hunt Martian fossils.', '#25253e', '#413e5d', 'Scan ancient lakebeds on Mars with robotic lasers.'],
+  ['96. Quantum Transmon Qubits', '2032 CE', 'Superconducting transmon qubits in dilution fridges simulate physics.', '#222d4a', '#39476f', 'Maintain quantum phase coherence in dilution fridges.'],
+  ['97. Artificial General Intel', '2038 CE', 'Multimodal self-recursive neural reasoning accelerates discovery.', '#2d224d', '#4c3779', 'Synthesize cross-domain algorithms in neural clusters.'],
+  ['98. Tokamak Net-Gain Fusion', '2045 CE', 'Magnetic plasma at 150M°C harnesses power of the stars on Earth.', '#3a1f47', '#5f3270', 'Confine deuterium-tritium plasma in tokamak coils.'],
+  ['99. Interplanetary Biospheres', '2060 CE', 'Pressurized orbital O’Neill cylinders and self-sustaining colonies.', '#172740', '#2d4b6c', 'Pressurize orbital biodomes and terraform Martian soil.'],
+  ['100. Kardashev Type I Singularity', '2100+ CE', 'Dyson solar swarms, conscious synthesis, and interstellar stewardship.', '#10223b', '#264f7a', 'Align Dyson swarm collectors to illuminate humanity.']
+];
+
+// Web Audio Synthesizer
+let AC = null, soundMuted = false;
+function tone(f, d, ty, v, f2) {
+  if (soundMuted) return;
+  try {
+    if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)();
+    if (AC.state === 'suspended') AC.resume();
+    const t = AC.currentTime, o = AC.createOscillator(), g = AC.createGain();
+    o.type = ty || 'square';
+    o.frequency.setValueAtTime(f, t);
+    if (f2) o.frequency.exponentialRampToValueAtTime(Math.max(10, f2), t + d);
+    g.gain.setValueAtTime(v || 0.06, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + d);
+    o.connect(g); g.connect(AC.destination);
+    o.start(); o.stop(t + d);
+  } catch(e) {}
+}
+
+function haptic(ms = 15) {
+  if (navigator.vibrate) try { navigator.vibrate(ms); } catch(e) {}
+}
+
+function tm() { return performance.now() / 1000; }
+
+// ==========================================
+// DIFFICULTY SYSTEM
+// ==========================================
+// 0: EXPLORER (3 HP, casual hazard speed, easy checkpoints)
+// 1: NORMAL (1 HP + shield, classic rebirth corpse bridges)
+// 2: EXTINCTION (Permadeath hazard speed +15%, 2x coin multiplier)
+const DIFFICULTIES = [
+  { name: 'EXPLORER', maxHp: 3, spdMult: 0.85, coinMult: 1.0, color: '#3fc5d9' },
+  { name: 'NORMAL',   maxHp: 1, spdMult: 1.0,  coinMult: 1.0, color: '#ffd15c' },
+  { name: 'EXTINCTION', maxHp: 1, spdMult: 1.2, coinMult: 2.0, color: '#e04b4b' }
+];
+let currentDiffIndex = 1;
+
+// Storage
+const KEY = 'rebirth_evolution_story_save';
+let lvl = 0, deaths = 0, bodies = {}, coins = 50, ending = false;
+let combo = 0, maxCombo = 0;
+let upgrades = {
+  speed: 0,
+  doubleJump: false,
+  shield: 0,
+  weapon: 0,
+  magnet: false,
+  immunity: false,
+  companion: false
+};
+
+try {
+  const s = JSON.parse(localStorage.getItem(KEY) || 'null');
+  if (s) {
+    lvl = Math.min(Math.max(0, s.lvl || 0), ERAS.length - 1);
+    deaths = s.deaths || 0;
+    bodies = s.bodies || {};
+    if (typeof s.coins === 'number') coins = s.coins;
+    if (typeof s.diff === 'number') currentDiffIndex = s.diff % 3;
+    if (s.upgrades) upgrades = Object.assign(upgrades, s.upgrades);
+  }
+} catch(e) {}
+
+function save() {
+  try {
+    localStorage.setItem(KEY, JSON.stringify({ lvl, deaths, bodies, coins, diff: currentDiffIndex, upgrades }));
+  } catch(e) {}
+}
+
+function updateHUD() {
+  document.getElementById('hud-coin-val').textContent = coins;
+  document.getElementById('hud-era-badge').textContent = `EPOCH ${lvl + 1}/100`;
+
+  const diffObj = DIFFICULTIES[currentDiffIndex];
+  const diffLabel = document.getElementById('hud-diff-label');
+  diffLabel.textContent = diffObj.name;
+  diffLabel.style.color = diffObj.color;
+
+  const sBadge = document.getElementById('hud-shield-badge');
+  const sVal = document.getElementById('hud-shield-val');
+  if (p && p.shield > 0) {
+    sBadge.style.display = 'flex';
+    sVal.textContent = p.shield;
+  } else {
+    sBadge.style.display = 'none';
+  }
+  const sDisp = document.getElementById('shop-coin-display');
+  if (sDisp) sDisp.textContent = coins;
+}
+
+function cycleDifficulty() {
+  currentDiffIndex = (currentDiffIndex + 1) % DIFFICULTIES.length;
+  const d = DIFFICULTIES[currentDiffIndex];
+  tone(480, 0.15, 'triangle', 0.08, 640);
+  haptic(20);
+  save();
+  updateHUD();
+  addFloatingText(`DIFFICULTY: ${d.name}`, p ? p.x : 100, p ? p.y - 25 : 200, d.color);
+}
+document.getElementById('hud-diff-btn').addEventListener('click', cycleDifficulty);
+
+function rng(a) {
+  return function() {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+let LV, p, card = 0, dead = 0, cam = 0, jb = 0, ph = 0;
+let deathParticles = [];
+let floatingTexts = [];
+let lastDeathCause = 'fall';
+let lastDeathMessage = 'Your body remains as a physical foundation.';
+let infectionLevel = 0;
+let inChamber = false;
+
+// ==========================================
+// LEVEL BUILDER WITH ADVANCED OBJECTS
+// ==========================================
+function build(l) {
+  const r = rng(l * 7919 + 13);
+  const diff = DIFFICULTIES[currentDiffIndex];
+  const P = [], S = [];
+  const gm = Math.min(70 + (l % 10) * 5, 125);
+  const len = 4400 + (l % 10) * 140;
+  const G = [];
+
+  // Starting ground
+  P.push({ x: -200, y: 360, w: 720, h: 200, type: 'ground' });
+  let x = 520;
+
+  // Crumbling platforms
+  const crumbling = [];
+
+  while (x < len) {
+    const g = 50 + r() * (gm - 46);
+    const w = 220 + r() * 260;
+    const gx = x + g;
+    P.push({ x: gx, y: 360, w, h: 200, type: 'ground' });
+    G.push({ x: gx, w });
+
+    // Mid platforms
+    if (r() < 0.72) {
+      const fy = 280 - r() * 40;
+      P.push({ x: x + g / 2 - 45, y: fy, w: 90 + r() * 30, h: 14, type: 'mid' });
+      if (r() < 0.4) {
+        P.push({ x: gx + 30, y: fy - 65, w: 100, h: 12, type: 'high' });
+      }
+    }
+
+    // Crumbling platform chance
+    if (r() < 0.35) {
+      crumbling.push({
+        x: gx + w / 2 - 35, y: 220, w: 70, h: 12,
+        stepped: false, timer: 0.8, fallen: false, vy: 0
+      });
+    }
+
+    // Spikes
+    if (l >= 1 && r() < 0.35 + (l % 10) * 0.02) {
+      S.push({ x: gx + 50 + r() * (w - 120), w: 36 });
+    }
+    x = gx + w;
+  }
+
+  const r2 = rng(l * 104729 + 7);
+  const T = [];
+  let cp = 1000;
+  for (const s of G) {
+    const q = r2();
+    if (q < 0.32 + (l % 10) * 0.02) {
+      T.push({ k: 'w', x: s.x + 60, y: 360, x0: s.x + 14, x1: s.x + s.w - 14, d: 1, sp: (45 + r2() * 35) * diff.spdMult, frame: 0 });
+    } else if (q < 0.58) {
+      T.push({ k: 'h', x: s.x + 50 + r2() * (s.w - 110), y: 360 });
+    } else if (q < 0.72) {
+      T.push({ k: 'b', x: s.x + s.w / 2, y: 360 });
+    }
+    if (s.x > cp) {
+      T.push({ k: 'c', x: s.x + s.w - 60, y: 360, on: 0 });
+      cp = s.x + 1150;
+    }
+  }
+
+  // Breakable Geodes / Crystals
+  const chests = [];
+  for (let cx = 450; cx < len - 300; cx += 500 + r2() * 350) {
+    chests.push({
+      x: cx, y: 334, w: 26, h: 26,
+      broken: false, relic: r2() < 0.35, hp: 1
+    });
+  }
+
+  // Levers and Gates
+  const levers = [];
+  const gates = [];
+  for (let lx = 900; lx < len - 600; lx += 1200 + r2() * 600) {
+    const gateId = levers.length;
+    levers.push({
+      id: gateId, x: lx, y: 338, w: 22, h: 22, active: false
+    });
+    gates.push({
+      id: gateId, x: lx + 260 + r2() * 150, y: 270, w: 18, h: 90, open: false
+    });
+  }
+
+  // Hovering Moving Platforms
+  const movingPlatforms = [];
+  for (let mx = 700; mx < len - 500; mx += 850 + r2() * 400) {
+    const isVert = r2() < 0.5;
+    movingPlatforms.push({
+      x: mx, y: 260 + r2() * 40, w: 80, h: 14,
+      isVert,
+      min: isVert ? 180 : mx - 80,
+      max: isVert ? 310 : mx + 80,
+      speed: (40 + r2() * 25) * diff.spdMult,
+      dir: 1, vx: 0, vy: 0
+    });
+  }
+
+  // Historical Guides & NPCs
+  const npcs = [];
+  const npcTitles = ['ANCIENT SHAMAN', 'PHILOSOPHER', 'CHRONICLE ELDER', 'PIONEER INVENTOR'];
+  for (let nx = 1100; nx < len - 600; nx += 1400 + r2() * 500) {
+    npcs.push({
+      x: nx, y: 326,
+      name: npcTitles[Math.floor(r2() * npcTitles.length)],
+      talked: false,
+      quote: 'Humanity carries the torch of millions of years. Stand firm!'
+    });
+  }
+
+  // Steam Geysers
+  const geysers = [];
+  for (let gx = 800; gx < len - 400; gx += 950 + r2() * 400) {
+    geysers.push({ x: gx, y: 358, w: 32, h: 10, pulseTimer: r2() * 3 });
+  }
+
+  // Amber Coins
+  const coinList = [];
+  for (let cx = 350; cx < len - 300; cx += 150 + r2() * 110) {
+    coinList.push({
+      x: cx, y: 320 - r2() * 75, r: 8.5,
+      collected: false, rot: r2() * Math.PI
+    });
+  }
+
+  // Nested Chamber
+  const chamberDoor = {
+    x: 2100 + r2() * 300, y: 316, w: 36, h: 44,
+    visited: false, active: true
+  };
+  const chamberP = [
+    { x: -100, y: 360, w: 1000, h: 200, type: 'ground' },
+    { x: 180, y: 300, w: 90, h: 14, type: 'mid' },
+    { x: 340, y: 235, w: 100, h: 14, type: 'high' },
+    { x: 520, y: 285, w: 90, h: 14, type: 'mid' },
+    { x: 670, y: 360, w: 300, h: 200, type: 'ground' }
+  ];
+  const chamberRelic = { x: 740, y: 330, collected: false };
+
+  // Hunting Prehistoric Fauna
+  const animals = [];
+  const isHuntingEra = (l >= 10 && l <= 60);
+  if (isHuntingEra) {
+    for (let ax = 750; ax < len - 300; ax += 800 + r2() * 400) {
+      animals.push({
+        x: ax, y: 360, hp: 2,
+        kind: l >= 50 ? 'mammoth' : (l >= 30 ? 'raptor' : 'sabertooth'),
+        dir: r2() < 0.5 ? 1 : -1,
+        speed: (35 + r2() * 25) * diff.spdMult, alive: true
+      });
+    }
+  }
+
+  // War Artillery
+  const isWarEra = (l >= 83 && l <= 88);
+  const bombs = [];
+
+  // Pandemic Aerosols
+  const isPandemicEra = (l === 73 || l === 86 || l === 92);
+  const virusClouds = [];
+  if (isPandemicEra) {
+    for (let vx = 650; vx < len - 300; vx += 650 + r2() * 350) {
+      virusClouds.push({
+        x: vx, y: 310 - r2() * 30, r: 36,
+        active: true, drift: 0
+      });
+    }
+  }
+
+  // Boulders
+  const boulders = [];
+  for (let bx = 900; bx < len - 400; bx += 1100 + r2() * 500) {
+    boulders.push({ x: bx, y: 346, r: 14, vx: 0 });
+  }
+
+  // Companion
+  const companion = {
+    x: 40, y: 326, vx: 0, vy: 0,
+    face: 1, on: false, timer: 0, shootCooldown: 0, alive: true
+  };
+
+  // Milestone Boss Encounter (Every 10th epoch)
+  let boss = null;
+  if ((l + 1) % 10 === 0) {
+    boss = {
+      x: len - 240, y: 360, w: 56, h: 48,
+      hp: 5, maxHp: 5, dir: -1, speed: 50 * diff.spdMult,
+      alive: true, name: `ALPHA GUARDIAN EPOCH ${l + 1}`
+    };
+  }
+
+  return {
+    P, S, T, crumbling,
+    chests, levers, gates, movingPlatforms, npcs, geysers,
+    coinList, chamberDoor, chamberP, chamberRelic,
+    animals, bombs, virusClouds, boulders,
+    companion, projectiles: [], boss,
+    isWarEra, isHuntingEra, isPandemicEra,
+    lowGravity: (l === 88 || l >= 98),
+    goal: x - 80, len: x
+  };
+}
+
+let SP = { x: 60, y: 326 };
+function spawn() {
+  const diff = DIFFICULTIES[currentDiffIndex];
+  const speedBonus = upgrades.speed * 35;
+  p = {
+    x: SP.x, y: SP.y, vx: 0, vy: 0,
+    w: 22, h: 34, on: false,
+    lx: SP.x, ly: SP.y + 34, face: 1,
+    hp: diff.maxHp,
+    shield: upgrades.shield,
+    canDoubleJump: upgrades.doubleJump,
+    jumpCount: 0, speedBonus,
+    ridingPlatform: null
+  };
+  infectionLevel = 0;
+  inChamber = false;
+  updateHUD();
+}
+
+function startLevel() {
+  LV = build(lvl);
+  if (!bodies[lvl]) bodies[lvl] = [];
+  SP = { x: 60, y: 326 };
+  spawn();
+  card = 3.0;
+  dead = 0;
+  cam = 0;
+  deathParticles = [];
+  floatingTexts = [];
+  updateActionIcon();
+  updateHUD();
+  triggerStoryDialogue();
+}
+startLevel();
+
+function updateActionIcon() {
+  const svg = document.getElementById('svg-action-icon');
+  if (LV.isHuntingEra) {
+    svg.innerHTML = '<path d="M14.5 17.5L3 6V3h3l11.5 11.5M13 19l2 2 5-5-2-2"/>';
+  } else if (LV.isWarEra) {
+    svg.innerHTML = '<circle cx="12" cy="12" r="7"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>';
+  } else if (LV.isPandemicEra) {
+    svg.innerHTML = '<path d="M8 3h8v4H8zM6 7h12v14H6zM10 12h4M12 10v4"/>';
+  } else {
+    svg.innerHTML = '<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>';
+  }
+}
+
+function addFloatingText(text, x, y, col = '#ffd15c') {
+  floatingTexts.push({ text, x, y, vy: -38, life: 1.0, maxLife: 1.0, col });
+}
+
+function triggerStoryDialogue() {
+  const E = ERAS[lvl];
+  const dlg = document.getElementById('story-dialog');
+  const name = document.getElementById('speaker-name');
+  const text = document.getElementById('speaker-text');
+
+  name.textContent = `${E[0]} • ${E[1]}`;
+  text.innerHTML = `<strong>OBJECTIVE:</strong> ${E[5]}<br><span style="opacity:0.85;">${E[2]}</span>`;
+
+  dlg.classList.add('show');
+  clearTimeout(window.storyTimer);
+  window.storyTimer = setTimeout(() => {
+    dlg.classList.remove('show');
+  }, 6500);
+}
+document.getElementById('btn-story-dismiss').addEventListener('click', () => {
+  document.getElementById('story-dialog').classList.remove('show');
+});
+
+// ==========================================
+// CONTROLS & INTERACTIONS
+// ==========================================
+const K = { l: 0, r: 0 };
+
+function jump() {
+  haptic(16);
+  tone(220, 0.01, 'sine', 0.001);
+  if (!p) return;
+
+  const jumpPower = LV.lowGravity ? -490 : -640;
+
+  if (p.on) {
+    p.vy = jumpPower;
+    p.on = false;
+    p.jumpCount = 1;
+    tone(300, 0.15, 'square', 0.05, 700);
+  } else if (p.canDoubleJump && p.jumpCount === 1) {
+    p.vy = jumpPower * 0.9;
+    p.jumpCount = 2;
+    tone(440, 0.18, 'sine', 0.08, 880);
+    for (let i = 0; i < 8; i++) {
+      deathParticles.push({
+        x: p.x + p.w / 2, y: p.y + p.h,
+        vx: (Math.random() - 0.5) * 80, vy: 30,
+        life: 0.3, maxLife: 0.3, color: '#00f0ff', size: 2.5
+      });
+    }
+  }
+
+  jb = 0.12;
+  if (card > 0 && card < 2.8) card = 0;
+  if (ending) restart();
+}
+
+function triggerAction() {
+  if (card > 0 || dead > 0 || ending) return;
+  haptic(20);
+  const diff = DIFFICULTIES[currentDiffIndex];
+  const weaponPow = 1 + upgrades.weapon * 0.5;
+
+  // Strike breakable geodes
+  if (!inChamber) {
+    for (const c of LV.chests) {
+      if (!c.broken && Math.hypot((p.x + p.w / 2) - (c.x + c.w / 2), p.y - c.y) < 55) {
+        c.broken = true;
+        tone(450, 0.2, 'square', 0.1, 750);
+        const reward = Math.round((c.relic ? 30 : 15) * diff.coinMult);
+        coins += reward;
+        addFloatingText(`+${reward} AMBER`, c.x, c.y - 12);
+        save();
+        updateHUD();
+        for (let i = 0; i < 16; i++) {
+          deathParticles.push({
+            x: c.x + c.w / 2, y: c.y + c.h / 2,
+            vx: (Math.random() - 0.5) * 160, vy: -50 - Math.random() * 80,
+            life: 0.45, maxLife: 0.45, color: c.relic ? '#ffd15c' : '#c49a6c', size: 3
+          });
+        }
+      }
+    }
+  }
+
+  // Strike Boss
+  if (!inChamber && LV.boss && LV.boss.alive) {
+    if (Math.hypot((p.x + p.w / 2) - (LV.boss.x + LV.boss.w / 2), p.y - LV.boss.y) < 65) {
+      LV.boss.hp--;
+      tone(550, 0.15, 'triangle', 0.12, 750);
+      addFloatingText('STRIKE!', LV.boss.x, LV.boss.y - 20, '#ff4757');
+      if (LV.boss.hp <= 0) {
+        LV.boss.alive = false;
+        coins += Math.round(100 * diff.coinMult);
+        save();
+        updateHUD();
+        addFloatingText('GUARDIAN VANQUISHED! +100 AMBER', LV.boss.x, LV.boss.y - 30, '#ffd15c');
+      }
+    }
+  }
+
+  if (LV.isHuntingEra) {
+    // Spear projectile
+    tone(400, 0.12, 'sawtooth', 0.08, 180);
+    LV.projectiles.push({
+      x: p.x + p.w / 2, y: p.y + 12,
+      vx: p.face * (420 * weaponPow), vy: -140,
+      kind: 'spear', life: 1.8
+    });
+  } else if (LV.isWarEra) {
+    // Trench projectile
+    tone(180, 0.2, 'square', 0.12, 60);
+    LV.projectiles.push({
+      x: p.x + p.w / 2, y: p.y + 14,
+      vx: p.face * (560 * weaponPow), vy: -40,
+      kind: 'bullet', life: 1.2
+    });
+  } else if (LV.isPandemicEra) {
+    // Aerosol spray
+    tone(600, 0.16, 'triangle', 0.09, 850);
+    infectionLevel = Math.max(0, infectionLevel - 0.45);
+    for (let i = 0; i < 14; i++) {
+      deathParticles.push({
+        x: p.x + p.w / 2 + p.face * 16, y: p.y + 16,
+        vx: p.face * (140 + Math.random() * 160), vy: (Math.random() - 0.5) * 60,
+        life: 0.4, maxLife: 0.4, color: 'rgba(93, 228, 250, 0.85)', size: 3
+      });
+    }
+    for (const vc of LV.virusClouds) {
+      if (vc.active && Math.hypot((p.x + p.face * 60) - vc.x, p.y - vc.y) < 80) {
+        vc.active = false;
+        tone(800, 0.2, 'sine', 0.1, 1200);
+        addFloatingText('DISINFECTED', vc.x, vc.y - 10, '#3fc5d9');
+      }
+    }
+  } else {
+    // Kinetic Dash
+    tone(340, 0.15, 'sine', 0.09, 680);
+    p.vx += p.face * 340;
+    for (let i = 0; i < 8; i++) {
+      deathParticles.push({
+        x: p.x + p.w / 2, y: p.y + p.h / 2,
+        vx: -p.face * (80 + Math.random() * 100), vy: (Math.random() - 0.5) * 50,
+        life: 0.35, maxLife: 0.35, color: '#ffc83b', size: 2.5
+      });
+    }
+  }
+}
+
+function triggerInteract() {
+  if (card > 0 || dead > 0 || ending) return;
+  haptic(22);
+  const diff = DIFFICULTIES[currentDiffIndex];
+
+  // 1. Exit Nested Chamber
+  if (inChamber) {
+    inChamber = false;
+    p.x = LV.chamberDoor.x + 40;
+    p.y = 320;
+    tone(550, 0.2, 'triangle', 0.1, 880);
+    addFloatingText('EXIT CHAMBER', p.x, p.y - 20, '#9b5de5');
+    return;
+  }
+
+  // 2. Enter Sub-Chamber
+  if (Math.hypot((p.x + p.w / 2) - LV.chamberDoor.x, (p.y + p.h) - (LV.chamberDoor.y + LV.chamberDoor.h)) < 55) {
+    inChamber = true;
+    p.x = 20; p.y = 320;
+    tone(440, 0.25, 'sine', 0.12, 660);
+    addFloatingText('CHAMBER ENTERED', 60, 290, '#ffd15c');
+    return;
+  }
+
+  // 3. Levers
+  for (const lev of LV.levers) {
+    if (Math.hypot((p.x + p.w / 2) - (lev.x + lev.w / 2), p.y - lev.y) < 55) {
+      lev.active = !lev.active;
+      tone(400, 0.15, 'square', 0.1, lev.active ? 800 : 300);
+      const gate = LV.gates.find(g => g.id === lev.id);
+      if (gate) {
+        gate.open = lev.active;
+        addFloatingText(lev.active ? 'PORTCULLIS OPEN' : 'PORTCULLIS CLOSED', gate.x, gate.y - 10, '#3fc5d9');
+      }
+      return;
+    }
+  }
+
+  // 4. NPCs
+  for (const npc of LV.npcs) {
+    if (Math.hypot((p.x + p.w / 2) - npc.x, p.y - npc.y) < 65) {
+      npc.talked = true;
+      tone(520, 0.2, 'sine', 0.08, 780);
+      const reward = Math.round(20 * diff.coinMult);
+      coins += reward;
+      save();
+      updateHUD();
+      addFloatingText(`+${reward} AMBER`, npc.x, npc.y - 20, '#ffd15c');
+      const dlg = document.getElementById('story-dialog');
+      document.getElementById('speaker-name').textContent = npc.name;
+      document.getElementById('speaker-text').textContent = `"${npc.quote}" +${reward} Amber gained!`;
+      dlg.classList.add('show');
+      return;
+    }
+  }
+
+  // 5. Breakable Geodes
+  for (const c of LV.chests) {
+    if (!c.broken && Math.hypot((p.x + p.w / 2) - (c.x + c.w / 2), p.y - c.y) < 60) {
+      c.broken = true;
+      tone(550, 0.2, 'triangle', 0.1, 880);
+      const reward = Math.round((c.relic ? 35 : 18) * diff.coinMult);
+      coins += reward;
+      addFloatingText(`+${reward} AMBER`, c.x, c.y - 10);
+      save();
+      updateHUD();
+      return;
+    }
+  }
+}
+
+function updateContextPrompt() {
+  const prompt = document.getElementById('interact-prompt');
+  if (card > 0 || dead > 0 || ending) {
+    prompt.style.display = 'none';
+    return;
+  }
+
+  if (inChamber) {
+    prompt.textContent = 'INTERACT TO EXIT CHAMBER';
+    prompt.style.display = 'flex';
+    return;
+  }
+
+  if (Math.hypot((p.x + p.w / 2) - LV.chamberDoor.x, (p.y + p.h) - (LV.chamberDoor.y + LV.chamberDoor.h)) < 55) {
+    prompt.textContent = 'INTERACT TO ENTER SECRET VAULT';
+    prompt.style.display = 'flex';
+    return;
+  }
+
+  for (const lev of LV.levers) {
+    if (Math.hypot((p.x + p.w / 2) - (lev.x + lev.w / 2), p.y - lev.y) < 55) {
+      prompt.textContent = `INTERACT TO ${lev.active ? 'RESET' : 'PULL'} LEVER`;
+      prompt.style.display = 'flex';
+      return;
+    }
+  }
+
+  for (const npc of LV.npcs) {
+    if (!npc.talked && Math.hypot((p.x + p.w / 2) - npc.x, p.y - npc.y) < 65) {
+      prompt.textContent = `INTERACT TO SPEAK WITH ${npc.name}`;
+      prompt.style.display = 'flex';
+      return;
+    }
+  }
+
+  for (const c of LV.chests) {
+    if (!c.broken && Math.hypot((p.x + p.w / 2) - (c.x + c.w / 2), p.y - c.y) < 60) {
+      prompt.textContent = 'INTERACT OR STRIKE TO CRACK GEODE';
+      prompt.style.display = 'flex';
+      return;
+    }
+  }
+
+  prompt.style.display = 'none';
+}
+
+function restart() {
+  lvl = 0; deaths = 0; bodies = {}; ending = false;
+  save(); startLevel();
+}
+
+function bindTouch(id, onStart, onEnd) {
+  const el = document.getElementById(id);
+  el.addEventListener('pointerdown', ev => {
+    ev.preventDefault();
+    el.classList.add('touch-active');
+    if (onStart) onStart();
+  });
+  const finish = ev => {
+    ev.preventDefault();
+    el.classList.remove('touch-active');
+    if (onEnd) onEnd();
+  };
+  el.addEventListener('pointerup', finish);
+  el.addEventListener('pointerleave', finish);
+  el.addEventListener('pointercancel', finish);
+}
+
+bindTouch('btn-left', () => { K.l = 1; haptic(12); }, () => K.l = 0);
+bindTouch('btn-right', () => { K.r = 1; haptic(12); }, () => K.r = 0);
+bindTouch('btn-jump', jump, null);
+bindTouch('btn-action', triggerAction, null);
+bindTouch('btn-interact', triggerInteract, null);
+
+addEventListener('keydown', e => {
+  const k = e.key;
+  if (['a', 'A', 'ArrowLeft'].includes(k)) K.l = 1;
+  else if (['d', 'D', 'ArrowRight'].includes(k)) K.r = 1;
+  else if (['w', 'W', ' ', 'ArrowUp'].includes(k)) { jump(); e.preventDefault(); }
+  else if (['f', 'F', 'Shift', 'z', 'Z'].includes(k)) { triggerAction(); e.preventDefault(); }
+  else if (['e', 'E'].includes(k)) { triggerInteract(); }
+  else if (k === 'm' || k === 'M') toggleModal('modal-map');
+  else if (k === 'b' || k === 'B') toggleModal('modal-shop');
+});
+addEventListener('keyup', e => {
+  const k = e.key;
+  if (['a', 'A', 'ArrowLeft'].includes(k)) K.l = 0;
+  if (['d', 'D', 'ArrowRight'].includes(k)) K.r = 0;
+});
+C.addEventListener('pointerdown', () => {
+  if (card > 0 || ending) jump();
+});
+
+function toggleFullscreen() {
+  const docEl = document.documentElement;
+  if (!document.fullscreenElement) {
+    if (docEl.requestFullscreen) docEl.requestFullscreen().catch(() => {});
+    else if (docEl.webkitRequestFullscreen) docEl.webkitRequestFullscreen();
+    if (screen.orientation && screen.orientation.lock) {
+      screen.orientation.lock('landscape').catch(() => {});
+    }
+  } else {
+    if (document.exitFullscreen) document.exitFullscreen();
+  }
+}
+document.getElementById('btn-fs-toggle').addEventListener('click', toggleFullscreen);
+
+function toggleModal(id) {
+  const m = document.getElementById(id);
+  const isVis = m.classList.contains('visible');
+  document.querySelectorAll('.game-modal').forEach(el => el.classList.remove('visible'));
+  if (!isVis) {
+    m.classList.add('visible');
+    if (id === 'modal-shop') renderShop();
+    else if (id === 'modal-story') renderStoryChronicle();
+    else if (id === 'modal-map') renderMapModal();
+  }
+}
+document.getElementById('btn-open-shop').addEventListener('click', () => toggleModal('modal-shop'));
+document.getElementById('btn-close-shop').addEventListener('click', () => toggleModal('modal-shop'));
+document.getElementById('btn-open-story').addEventListener('click', () => toggleModal('modal-story'));
+document.getElementById('btn-close-story').addEventListener('click', () => toggleModal('modal-story'));
+document.getElementById('btn-open-map').addEventListener('click', () => toggleModal('modal-map'));
+document.getElementById('btn-close-map').addEventListener('click', () => toggleModal('modal-map'));
+document.getElementById('btn-sound-toggle').addEventListener('click', () => {
+  soundMuted = !soundMuted;
+  const svg = document.getElementById('sound-icon-svg');
+  if (soundMuted) {
+    svg.innerHTML = '<path d="M11 5L6 9H2v6h4l5 4V5zM23 9l-6 6M17 9l6 6"/>';
+  } else {
+    svg.innerHTML = '<path d="M11 5L6 9H2v6h4l5 4V5zM19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/>';
+  }
+});
+
+// ==========================================
+// SHOP SYSTEM
+// ==========================================
+const SHOP_ITEMS = [
+  { id: 'speed', name: 'Mitochondrial Sprint', cost: 40, desc: 'Increases sprint agility and acceleration (+25%).', max: 3, check: () => upgrades.speed, buy: () => { upgrades.speed++; } },
+  { id: 'doubleJump', name: 'Arthropod Spring', cost: 80, desc: 'Enables double jumping mid-air to scale cliffs.', max: 1, check: () => upgrades.doubleJump ? 1 : 0, buy: () => { upgrades.doubleJump = true; p.canDoubleJump = true; } },
+  { id: 'shield', name: 'Keratin Carapace', cost: 60, desc: 'Survive one lethal hazard or projectile impact.', max: 3, check: () => upgrades.shield, buy: () => { upgrades.shield++; p.shield++; updateHUD(); } },
+  { id: 'weapon', name: 'Obsidian Projectiles', cost: 90, desc: 'Spears and projectiles travel faster and hit harder.', max: 2, check: () => upgrades.weapon, buy: () => { upgrades.weapon++; } },
+  { id: 'magnet', name: 'Bio-Magnetic Core', cost: 50, desc: 'Pulls nearby Evolution Amber directly to you.', max: 1, check: () => upgrades.magnet ? 1 : 0, buy: () => { upgrades.magnet = true; } },
+  { id: 'immunity', name: 'Antibody Synthesis', cost: 45, desc: 'Full immunity against pandemic aerosol plumes.', max: 1, check: () => upgrades.immunity ? 1 : 0, buy: () => { upgrades.immunity = true; } },
+  { id: 'companion', name: 'Clan Companion', cost: 120, desc: 'An autonomous ally joins your party and assists in hunts!', max: 1, check: () => upgrades.companion ? 1 : 0, buy: () => { upgrades.companion = true; } }
+];
+
+function renderShop() {
+  updateHUD();
+  const grid = document.getElementById('shop-grid-items');
+  grid.innerHTML = '';
+
+  SHOP_ITEMS.forEach(it => {
+    const card = document.createElement('div');
+    card.className = 'shop-card';
+    const curVal = it.check();
+    const isMax = curVal >= it.max;
+
+    card.innerHTML = `
+      <div>
+        <div class="shop-card-head">
+          <div class="shop-card-name">${it.name}</div>
+          <div class="shop-card-cost">${isMax ? 'MAX' : it.cost + ' AMBER'}</div>
+        </div>
+        <div class="shop-card-desc">${it.desc}</div>
+      </div>
+      <button class="shop-buy-btn ${isMax ? 'bought' : ''}">${isMax ? 'EQUIPPED' : 'UPGRADE'}</button>
+    `;
+
+    const btn = card.querySelector('.shop-buy-btn');
+    if (!isMax) {
+      btn.addEventListener('click', () => {
+        if (coins >= it.cost) {
+          coins -= it.cost;
+          it.buy();
+          save();
+          tone(580, 0.2, 'triangle', 0.1, 880);
+          renderShop();
+        } else {
+          tone(200, 0.15, 'sawtooth', 0.08, 100);
+        }
+      });
+    }
+    grid.appendChild(card);
+  });
+}
+
+function renderStoryChronicle() {
+  const E = ERAS[lvl];
+  const body = document.getElementById('story-modal-content');
+  body.innerHTML = `
+    <div style="background:rgba(229,169,88,0.12); border-left:3px solid var(--accent); padding:10px 14px; border-radius:4px; margin-bottom:12px;">
+      <h2 style="margin:0 0 4px 0; color:var(--accent); font-size:16px;">${E[0]}</h2>
+      <div style="color:var(--cyan); font-size:12px; font-style:italic;">${E[1]}</div>
+    </div>
+    <div style="font-size:13px; line-height:1.5; margin-bottom:12px;">
+      <h4 style="color:var(--gold); margin:0 0 6px 0;">HISTORICAL RECORD</h4>
+      <p style="margin:0 0 8px 0; opacity:0.9;">${E[2]}</p>
+    </div>
+    <div style="background:rgba(255,255,255,0.06); padding:10px; border-radius:6px; margin-bottom:12px;">
+      <h4 style="color:var(--green); margin:0 0 4px 0;">EPOCH OBJECTIVE</h4>
+      <div style="font-size:13px;">${E[5]}</div>
+    </div>
+  `;
+}
+
+function renderMapModal() {
+  const b = document.getElementById('map-modal-body');
+  b.innerHTML = '';
+  for (let eraIdx = 0; eraIdx < 10; eraIdx++) {
+    const eraSec = document.createElement('div');
+    eraSec.className = 'era-section';
+    const eraTitle = document.createElement('div');
+    eraTitle.className = 'era-section-title';
+    const eraNames = [
+      'ERA I: Primordial Dawn (1 - 10)',
+      'ERA II: Cambrian Seas to Land (11 - 20)',
+      'ERA III: Carboniferous & Permian (21 - 30)',
+      'ERA IV: Age of Dinosaurs (31 - 40)',
+      'ERA V: Mammals & Primates (41 - 50)',
+      'ERA VI: Stone Age & Farming (51 - 60)',
+      'ERA VII: Classical Antiquity (61 - 70)',
+      'ERA VIII: Renaissance to Steam (71 - 80)',
+      'ERA IX: Industrial & World Wars (81 - 90)',
+      'ERA X: Digital & Singularity (91 - 100)'
+    ];
+    eraTitle.textContent = eraNames[eraIdx];
+    eraSec.appendChild(eraTitle);
+
+    const grid = document.createElement('div');
+    grid.className = 'level-grid';
+    for (let l = eraIdx * 10; l < (eraIdx + 1) * 10; l++) {
+      const btn = document.createElement('div');
+      btn.className = 'lvl-btn' + (l === lvl ? ' active' : '') + (bodies[l] && bodies[l].length ? ' beaten' : '');
+      btn.innerHTML = `<span class="lvl-btn-num">${l + 1}</span><span class="lvl-btn-name">${ERAS[l][0].split('. ')[1] || ERAS[l][0]}</span>`;
+      btn.addEventListener('click', () => {
+        lvl = l;
+        save();
+        startLevel();
+        document.getElementById('modal-map').classList.remove('visible');
+      });
+      grid.appendChild(btn);
+    }
+    eraSec.appendChild(grid);
+    b.appendChild(eraSec);
+  }
+}
+
+// ==========================================
+// COLLISION & PHYSICAL CASUALTY
+// ==========================================
+function bodyRects() {
+  if (inChamber) return [];
+  return bodies[lvl].map(b => ({ x: b.x - 18, y: b.y - 16, w: 36, h: 16 }));
+}
+
+function hit(a, b) {
+  return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+}
+
+function die(cause, fell) {
+  if (p.shield > 0 && cause !== 'fall') {
+    p.shield--;
+    updateHUD();
+    tone(300, 0.2, 'triangle', 0.1, 600);
+    addFloatingText('CARAPACE SAVED', p.x, p.y - 15, '#3fc5d9');
+    for (let i = 0; i < 15; i++) {
+      deathParticles.push({
+        x: p.x + p.w / 2, y: p.y + p.h / 2,
+        vx: (Math.random() - 0.5) * 150, vy: (Math.random() - 0.5) * 150,
+        life: 0.4, maxLife: 0.4, color: '#3fc5d9', size: 3
+      });
+    }
+    p.vy = -380;
+    return;
+  }
+
+  if (p.hp > 1 && cause !== 'fall') {
+    p.hp--;
+    tone(240, 0.2, 'square', 0.08, 400);
+    addFloatingText(`HP ${p.hp}`, p.x, p.y - 15, '#ff4757');
+    p.vy = -340;
+    return;
+  }
+
+  combo = 0;
+  lastDeathCause = cause || 'fall';
+  const bx = fell ? (p.lx + p.w / 2) : (p.x + p.w / 2);
+  const by = fell ? (p.ly + p.h) : (p.y + p.h);
+
+  if (!inChamber) {
+    const b = { x: bx, y: by, cause: lastDeathCause };
+    bodies[lvl].push(b);
+    if (bodies[lvl].length > 90) bodies[lvl].shift();
+  }
+  deaths++;
+  dead = 0.95;
+  save();
+
+  if (lastDeathCause === 'war') {
+    tone(100, 0.6, 'sawtooth', 0.16, 30);
+    lastDeathMessage = "Fallen in No Man's Land — Struck by artillery bombardment.";
+  } else if (lastDeathCause === 'virus') {
+    tone(260, 0.5, 'triangle', 0.12, 80);
+    lastDeathMessage = "Succumbed to Pandemic Aerosol — Respiratory collapse.";
+  } else if (lastDeathCause === 'predator') {
+    tone(180, 0.55, 'sawtooth', 0.15, 50);
+    lastDeathMessage = "Overwhelmed by primeval predators.";
+  } else if (lastDeathCause === 'spikes') {
+    tone(280, 0.45, 'square', 0.12, 60);
+    lastDeathMessage = "Impaled upon crystalline spikes. Your body forms a bridge.";
+  } else {
+    tone(220, 0.45, 'sawtooth', 0.1, 55);
+    lastDeathMessage = "Fallen into the abyss. Humankind endures upon your sacrifice.";
+  }
+
+  deathParticles = [];
+  for (let i = 0; i < 30; i++) {
+    deathParticles.push({
+      x: bx, y: by - 12,
+      vx: (Math.random() - 0.5) * 190, vy: -40 - Math.random() * 150,
+      life: 0.85, maxLife: 0.85, color: '#f4ebd9', size: 3.5
+    });
+  }
+}
+
+// ==========================================
+// SIMULATION UPDATE
+// ==========================================
+function step(dt) {
+  if (ending) return;
+  if (card > 0) { card -= dt; return; }
+
+  for (let i = floatingTexts.length - 1; i >= 0; i--) {
+    const ft = floatingTexts[i];
+    ft.y += ft.vy * dt;
+    ft.life -= dt;
+    if (ft.life <= 0) floatingTexts.splice(i, 1);
+  }
+
+  for (let i = deathParticles.length - 1; i >= 0; i--) {
+    const pt = deathParticles[i];
+    pt.x += pt.vx * dt;
+    pt.y += pt.vy * dt;
+    pt.life -= dt;
+    if (pt.life <= 0) deathParticles.splice(i, 1);
+  }
+
+  if (dead > 0) {
+    dead -= dt;
+    if (dead <= 0) spawn();
+    return;
+  }
+
+  jb -= dt;
+
+  // Moving platforms
+  if (!inChamber) {
+    for (const mp of LV.movingPlatforms) {
+      if (mp.isVert) {
+        mp.y += mp.dir * mp.speed * dt;
+        mp.vy = mp.dir * mp.speed;
+        mp.vx = 0;
+        if (mp.y < mp.min || mp.y > mp.max) mp.dir *= -1;
+      } else {
+        mp.x += mp.dir * mp.speed * dt;
+        mp.vx = mp.dir * mp.speed;
+        mp.vy = 0;
+        if (mp.x < mp.min || mp.x > mp.max) mp.dir *= -1;
+      }
+    }
+
+    // Crumbling platforms
+    for (const cp of LV.crumbling) {
+      if (cp.stepped && !cp.fallen) {
+        cp.timer -= dt;
+        if (cp.timer <= 0) {
+          cp.fallen = true;
+          cp.vy = 80;
+        }
+      }
+      if (cp.fallen) {
+        cp.vy += 800 * dt;
+        cp.y += cp.vy * dt;
+      }
+    }
+  }
+
+  const activeGates = [];
+  if (!inChamber) {
+    for (const g of LV.gates) {
+      if (!g.open) activeGates.push(g);
+    }
+  }
+
+  const currentP = inChamber ? LV.chamberP : LV.P;
+  const currentMoving = inChamber ? [] : LV.movingPlatforms;
+  const solidCrumbling = inChamber ? [] : LV.crumbling.filter(c => !c.fallen);
+  const solids = currentP.concat(bodyRects()).concat(activeGates).concat(currentMoving).concat(solidCrumbling);
+
+  // Player motion
+  const baseSpeed = 230 + p.speedBonus;
+  p.vx = (K.r - K.l) * baseSpeed;
+  if (p.vx) p.face = p.vx > 0 ? 1 : -1;
+
+  if (p.ridingPlatform) {
+    p.x += p.ridingPlatform.vx * dt;
+  }
+
+  const grav = LV.lowGravity ? 1000 : 1800;
+  p.vy += grav * dt;
+
+  p.x += p.vx * dt;
+  for (const s of solids) {
+    if (hit(p, s)) {
+      if (p.vx > 0) p.x = s.x - p.w;
+      else if (p.vx < 0) p.x = s.x + s.w;
+    }
+  }
+  if (p.x < 0) p.x = 0;
+
+  p.y += p.vy * dt;
+  p.on = false;
+  p.ridingPlatform = null;
+
+  for (const s of solids) {
+    if (hit(p, s)) {
+      if (p.vy > 0) {
+        p.y = s.y - p.h;
+        p.on = true;
+        p.lx = p.x;
+        p.ly = p.y;
+        p.jumpCount = 0;
+        if (s.speed) p.ridingPlatform = s;
+        if (s.stepped !== undefined) s.stepped = true;
+      } else if (p.vy < 0) {
+        p.y = s.y + s.h;
+      }
+      p.vy = 0;
+    }
+  }
+
+  ph += Math.abs(p.vx) * dt * 0.05;
+
+  // Steam Geysers
+  if (!inChamber) {
+    for (const gz of LV.geysers) {
+      gz.pulseTimer += dt;
+      if (Math.hypot((p.x + p.w / 2) - (gz.x + gz.w / 2), (p.y + p.h) - gz.y) < 28) {
+        p.vy = -860;
+        p.on = false;
+        tone(350, 0.25, 'sine', 0.1, 950);
+        addFloatingText('STEAM VENT', gz.x, gz.y - 20, '#3fc5d9');
+        for (let k = 0; k < 12; k++) {
+          deathParticles.push({
+            x: gz.x + gz.w / 2, y: gz.y,
+            vx: (Math.random() - 0.5) * 60, vy: -120 - Math.random() * 100,
+            life: 0.4, maxLife: 0.4, color: 'rgba(255,255,255,0.7)', size: 3
+          });
+        }
+      }
+    }
+  }
+
+  // Companion
+  if (upgrades.companion && LV.companion && LV.companion.alive) {
+    const comp = LV.companion;
+    const targetX = p.x - p.face * 55;
+    const distToP = targetX - comp.x;
+    comp.face = distToP > 0 ? 1 : -1;
+    comp.vx = Math.abs(distToP) > 15 ? comp.face * Math.min(220, Math.abs(distToP) * 4) : 0;
+    comp.vy += 1800 * dt;
+    comp.x += comp.vx * dt;
+    for (const s of solids) {
+      if (hit({ x: comp.x - 10, y: comp.y - 30, w: 20, h: 30 }, s)) {
+        if (comp.vx > 0) comp.x = s.x - 10;
+        else if (comp.vx < 0) comp.x = s.x + s.w + 10;
+        comp.vy = -450;
+      }
+    }
+    comp.y += comp.vy * dt;
+    comp.on = false;
+    for (const s of solids) {
+      if (hit({ x: comp.x - 10, y: comp.y - 30, w: 20, h: 30 }, s)) {
+        if (comp.vy > 0) { comp.y = s.y; comp.on = true; }
+        comp.vy = 0;
+      }
+    }
+  }
+
+  // Coin pickups & Magnet
+  const diff = DIFFICULTIES[currentDiffIndex];
+  for (const c of LV.coinList) {
+    if (!c.collected) {
+      c.rot += dt * 3;
+      if (upgrades.magnet) {
+        const dToP = Math.hypot((p.x + p.w / 2) - c.x, (p.y + p.h / 2) - c.y);
+        if (dToP < 150) {
+          c.x += ((p.x + p.w / 2) - c.x) * dt * 4;
+          c.y += ((p.y + p.h / 2) - c.y) * dt * 4;
+        }
+      }
+      if (Math.hypot((p.x + p.w / 2) - c.x, (p.y + p.h / 2) - c.y) < 26) {
+        c.collected = true;
+        combo++;
+        const gain = Math.round(5 * diff.coinMult);
+        coins += gain;
+        save();
+        updateHUD();
+        tone(660, 0.08, 'sine', 0.08);
+      }
+    }
+  }
+
+  // Chamber Relic
+  if (inChamber && !LV.chamberRelic.collected) {
+    if (Math.hypot((p.x + p.w / 2) - LV.chamberRelic.x, (p.y + p.h / 2) - LV.chamberRelic.y) < 35) {
+      LV.chamberRelic.collected = true;
+      const gain = Math.round(50 * diff.coinMult);
+      coins += gain;
+      save();
+      updateHUD();
+      tone(523, 0.15, 'triangle', 0.1);
+      setTimeout(() => tone(784, 0.3, 'triangle', 0.12), 150);
+      addFloatingText(`+${gain} ANCIENT RELIC`, LV.chamberRelic.x, LV.chamberRelic.y - 20, '#ffd15c');
+    }
+  }
+
+  // Hunting Animals
+  if (!inChamber && LV.animals) {
+    for (const a of LV.animals) {
+      if (!a.alive) continue;
+      a.x += a.dir * a.speed * dt;
+      if (Math.abs(a.x - (p.x - 300)) > 600) a.dir *= -1;
+      const aBox = { x: a.x - 20, y: a.y - 28, w: 40, h: 28 };
+      if (hit(p, aBox)) {
+        die('predator', false);
+        return;
+      }
+    }
+  }
+
+  // Boss
+  if (!inChamber && LV.boss && LV.boss.alive) {
+    const b = LV.boss;
+    b.x += b.dir * b.speed * dt;
+    if (b.x < LV.len - 450 || b.x > LV.len - 150) b.dir *= -1;
+    if (hit(p, { x: b.x - b.w / 2, y: b.y - b.h, w: b.w, h: b.h })) {
+      die('predator', false);
+      return;
+    }
+  }
+
+  // War Mortars
+  if (!inChamber && LV.isWarEra) {
+    if (Math.random() < 0.035) {
+      LV.bombs.push({
+        x: p.x + (Math.random() - 0.4) * 500,
+        y: -20, vy: 340 + Math.random() * 80
+      });
+      tone(120, 0.2, 'sawtooth', 0.04, 300);
+    }
+    for (let i = LV.bombs.length - 1; i >= 0; i--) {
+      const bm = LV.bombs[i];
+      bm.y += bm.vy * dt;
+      if (bm.y >= 355) {
+        tone(90, 0.4, 'square', 0.15, 30);
+        for (let k = 0; k < 16; k++) {
+          deathParticles.push({
+            x: bm.x, y: 355,
+            vx: (Math.random() - 0.5) * 220, vy: -40 - Math.random() * 160,
+            life: 0.5, maxLife: 0.5, color: '#ff6622', size: 4
+          });
+        }
+        if (Math.hypot(p.x - bm.x, p.y - 350) < 65) {
+          die('war', false);
+          return;
+        }
+        LV.bombs.splice(i, 1);
+      }
+    }
+  }
+
+  // Virus Clouds
+  if (!inChamber && LV.isPandemicEra && LV.virusClouds) {
+    for (const vc of LV.virusClouds) {
+      if (!vc.active) continue;
+      vc.drift += dt * 1.5;
+      const curX = vc.x + Math.sin(vc.drift) * 24;
+      const dist = Math.hypot((p.x + p.w / 2) - curX, (p.y + p.h / 2) - vc.y);
+      if (dist < vc.r && !upgrades.immunity) {
+        infectionLevel += dt * 0.45;
+        if (Math.random() < 0.3) {
+          deathParticles.push({
+            x: p.x + p.w / 2, y: p.y - 6,
+            vx: (Math.random() - 0.5) * 40, vy: -30,
+            life: 0.3, maxLife: 0.3, color: '#63d95b', size: 2.5
+          });
+        }
+        if (infectionLevel >= 1.0) {
+          die('virus', false);
+          return;
+        }
+      }
+    }
+  }
+
+  // Projectiles
+  for (let i = LV.projectiles.length - 1; i >= 0; i--) {
+    const pr = LV.projectiles[i];
+    pr.x += pr.vx * dt;
+    pr.y += pr.vy * dt;
+    pr.vy += 260 * dt;
+    pr.life -= dt;
+
+    if (LV.animals) {
+      for (const a of LV.animals) {
+        if (a.alive && Math.hypot(pr.x - a.x, pr.y - (a.y - 14)) < 26) {
+          a.hp--;
+          tone(550, 0.15, 'triangle', 0.1, 750);
+          pr.life = 0;
+          if (a.hp <= 0) {
+            a.alive = false;
+            const reward = Math.round(25 * diff.coinMult);
+            coins += reward;
+            save();
+            updateHUD();
+            addFloatingText(`+${reward} AMBER`, a.x, a.y - 15, '#ffd15c');
+          }
+          break;
+        }
+      }
+    }
+
+    if (pr.life <= 0) LV.projectiles.splice(i, 1);
+  }
+
+  // Pushable Boulders
+  if (!inChamber && LV.boulders) {
+    for (const bd of LV.boulders) {
+      bd.x += bd.vx * dt;
+      bd.vx *= 0.94;
+      const pDist = Math.hypot((p.x + p.w / 2) - bd.x, (p.y + p.h) - bd.y);
+      if (pDist < bd.r + 14) {
+        bd.vx = p.face * 110;
+      }
+    }
+  }
+
+  // Walkers & Springs
+  if (!inChamber) {
+    for (const t of LV.T) {
+      if (t.dead) continue;
+      if (t.k === 'w') {
+        t.x += t.d * t.sp * dt;
+        t.frame = (t.frame + dt * 8) % 4;
+        if (t.x < t.x0 || t.x > t.x1) t.d = -t.d;
+        if (hit(p, { x: t.x - 14, y: t.y - 24, w: 28, h: 24 })) {
+          if (p.vy > 0 && p.y + p.h < t.y - 10) {
+            t.dead = 1;
+            p.vy = -430;
+            tone(500, 0.1, 'square', 0.06, 900);
+            const reward = Math.round(10 * diff.coinMult);
+            coins += reward;
+            save();
+            updateHUD();
+            addFloatingText(`+${reward} AMBER`, t.x, t.y - 15);
+          } else {
+            die('predator', false);
+            return;
+          }
+        }
+      } else if (t.k === 'h') {
+        if (hit(p, { x: t.x - 10, y: t.y - 24, w: 20, h: 24 })) {
+          die('fire', false);
+          return;
+        }
+      } else if (t.k === 'b') {
+        if (p.vy >= 0 && hit(p, { x: t.x - 16, y: t.y - 18, w: 32, h: 18 })) {
+          p.vy = -1000;
+          p.on = false;
+          tone(250, 0.25, 'sine', 0.1, 900);
+        }
+      } else if (t.k === 'c' && !t.on && p.x > t.x) {
+        t.on = 1;
+        SP = { x: t.x, y: 326 };
+        tone(660, 0.2, 'triangle', 0.08, 990);
+        addFloatingText('CHECKPOINT', t.x, t.y - 20, '#55c777');
+      }
+    }
+
+    for (const s of LV.S) {
+      if (hit(p, { x: s.x + 4, y: 346, w: s.w - 8, h: 14 })) {
+        die('spikes', false);
+        return;
+      }
+    }
+  }
+
+  // Fall off bottom
+  if (p.y > H + 80) {
+    die('fall', true);
+    return;
+  }
+
+  // Goal
+  if (!inChamber && p.x + p.w > LV.goal) {
+    tone(523, 0.15, 'triangle', 0.08);
+    setTimeout(() => tone(659, 0.15, 'triangle', 0.08), 120);
+    setTimeout(() => tone(784, 0.3, 'triangle', 0.08), 240);
+    lvl++;
+    const reward = Math.round(40 * diff.coinMult);
+    coins += reward;
+    save();
+    if (lvl >= ERAS.length) {
+      lvl = ERAS.length - 1;
+      ending = true;
+    } else {
+      startLevel();
+    }
+  }
+
+  const maxCam = inChamber ? 100 : (LV.len - W + 60);
+  cam = Math.max(0, Math.min(p.x - 260, maxCam));
+
+  updateContextPrompt();
+}
+
+// ==========================================
+// PROCEDURAL VECTOR CANVAS ARTWORK (ZERO EMOJIS)
+// ==========================================
+function drawTerrain(s, E) {
+  if (s.x + s.w < cam - 10 || s.x > cam + W + 10) return;
+  const big = s.h > 100, hh = big ? 200 : s.h;
+  const g = X.createLinearGradient(0, s.y, 0, s.y + hh);
+  g.addColorStop(0, inChamber ? '#2c2236' : E[4]);
+  g.addColorStop(1, 'rgba(0,0,0,.85)');
+  X.fillStyle = inChamber ? '#2c2236' : E[4];
+  X.fillRect(s.x, s.y, s.w, s.h);
+  X.fillStyle = g;
+  X.fillRect(s.x, s.y, s.w, Math.min(s.h, hh));
+
+  const eraGroup = Math.floor(lvl / 10);
+  const CRUST_COLORS = ['#3fc5d9', '#2a8b94', '#489635', '#a87a42', '#8c5a35', '#914f3b', '#c79d38', '#5e728a', '#859bb0', '#00f0ff'];
+  X.fillStyle = inChamber ? '#9b5de5' : CRUST_COLORS[eraGroup];
+  X.fillRect(s.x, s.y, s.w, big ? 5 : 3);
+  X.fillStyle = 'rgba(255,255,255,.25)';
+  X.fillRect(s.x, s.y, s.w, 1.5);
+}
+
+// Procedural Sprite for Crawler/Walker Enemy
+function drawCrawler(t) {
+  X.save();
+  X.translate(t.x, t.y);
+  X.scale(t.d, 1);
+
+  // Carapace body
+  X.fillStyle = '#b33939';
+  X.beginPath();
+  X.ellipse(0, -14, 13, 8, 0, 0, Math.PI * 2);
+  X.fill();
+  X.strokeStyle = '#2c2c54';
+  X.lineWidth = 1.5;
+  X.stroke();
+
+  // Articulated legs
+  const legCycle = Math.sin(t.frame * Math.PI) * 4;
+  X.strokeStyle = '#333';
+  X.lineWidth = 2;
+  X.beginPath();
+  X.moveTo(-6, -10); X.lineTo(-10, 0 + legCycle);
+  X.moveTo(0, -10); X.lineTo(0, 0 - legCycle);
+  X.moveTo(6, -10); X.lineTo(10, 0 + legCycle);
+  X.stroke();
+
+  // Glowing Eye
+  X.fillStyle = '#ffd15c';
+  X.beginPath();
+  X.arc(8, -15, 2.5, 0, Math.PI * 2);
+  X.fill();
+
+  X.restore();
+}
+
+// Procedural Sprite for Hazard Spire
+function drawHazardSpire(t) {
+  X.save();
+  X.translate(t.x, t.y);
+  X.fillStyle = '#e84118';
+  X.beginPath();
+  X.moveTo(-8, 0);
+  X.lineTo(0, -26);
+  X.lineTo(8, 0);
+  X.closePath();
+  X.fill();
+  X.strokeStyle = '#fbc531';
+  X.lineWidth = 1.5;
+  X.stroke();
+
+  // Thermal smoke particle
+  X.fillStyle = 'rgba(251, 197, 49, 0.4)';
+  X.beginPath();
+  X.arc(0, -28 + Math.sin(tm() * 8) * 3, 3, 0, Math.PI * 2);
+  X.fill();
+  X.restore();
+}
+
+// Procedural Kinetic Springboard
+function drawSpringboard(t) {
+  X.save();
+  X.translate(t.x, t.y);
+  X.fillStyle = '#44bd32';
+  X.fillRect(-14, -6, 28, 6);
+  X.strokeStyle = '#273c75';
+  X.lineWidth = 2;
+  X.beginPath();
+  X.moveTo(-10, -6);
+  X.lineTo(-6, -12);
+  X.lineTo(6, -12);
+  X.lineTo(10, -6);
+  X.stroke();
+  X.restore();
+}
+
+// Procedural Checkpoint Monolith
+function drawCheckpoint(t) {
+  X.save();
+  X.translate(t.x, t.y);
+  X.fillStyle = t.on ? '#4cd137' : '#718093';
+  X.fillRect(-5, -34, 10, 34);
+  X.strokeStyle = t.on ? '#a3e8b7' : '#2f3640';
+  X.lineWidth = 1.5;
+  X.strokeRect(-5, -34, 10, 34);
+
+  // Glowing runic diamond
+  X.fillStyle = t.on ? '#00f0ff' : '#444';
+  X.beginPath();
+  X.moveTo(0, -24);
+  X.lineTo(4, -19);
+  X.lineTo(0, -14);
+  X.lineTo(-4, -19);
+  X.closePath();
+  X.fill();
+  X.restore();
+}
+
+// Procedural Prehistoric Fauna Sprite
+function drawPrehistoricFauna(a) {
+  X.save();
+  X.translate(a.x, a.y);
+  X.scale(a.dir, 1);
+
+  if (a.kind === 'mammoth') {
+    // Mammoth body
+    X.fillStyle = '#4a3319';
+    X.beginPath();
+    X.ellipse(0, -18, 20, 14, 0, 0, Math.PI * 2);
+    X.fill();
+    // Head and trunk
+    X.beginPath();
+    X.ellipse(14, -22, 10, 9, 0, 0, Math.PI * 2);
+    X.fill();
+    // Curved tusks
+    X.strokeStyle = '#f5eedb';
+    X.lineWidth = 2.5;
+    X.beginPath();
+    X.moveTo(18, -18);
+    X.quadraticCurveTo(28, -14, 25, -28);
+    X.stroke();
+  } else if (a.kind === 'raptor') {
+    // Raptor body
+    X.fillStyle = '#7a3e2e';
+    X.beginPath();
+    X.ellipse(0, -16, 16, 8, -0.2, 0, Math.PI * 2);
+    X.fill();
+    X.beginPath();
+    X.ellipse(12, -22, 8, 5, 0.1, 0, Math.PI * 2);
+    X.fill();
+    // Curved claw
+    X.strokeStyle = '#fff';
+    X.lineWidth = 2;
+    X.beginPath();
+    X.moveTo(6, 0); X.lineTo(10, -4); X.stroke();
+  } else {
+    // Sabertooth
+    X.fillStyle = '#b3773b';
+    X.beginPath();
+    X.ellipse(0, -15, 18, 9, 0, 0, Math.PI * 2);
+    X.fill();
+    X.beginPath();
+    X.ellipse(14, -18, 9, 7, 0, 0, Math.PI * 2);
+    X.fill();
+    // Saber daggers
+    X.fillStyle = '#fff';
+    X.fillRect(16, -14, 2.5, 7);
+  }
+
+  // Legs
+  X.fillStyle = '#222';
+  X.fillRect(-10, -6, 5, 6);
+  X.fillRect(6, -6, 5, 6);
+
+  X.restore();
+}
+
+// Procedural Ancient Shaman / NPC Sprite
+function drawNPC(npc) {
+  X.save();
+  X.translate(npc.x, npc.y);
+
+  // Cloaked body
+  X.fillStyle = '#2c3e50';
+  X.beginPath();
+  X.moveTo(0, -28);
+  X.lineTo(9, 0);
+  X.lineTo(-9, 0);
+  X.closePath();
+  X.fill();
+
+  // Head and cowl
+  X.fillStyle = '#d9aa7e';
+  X.beginPath();
+  X.arc(0, -26, 4.5, 0, Math.PI * 2);
+  X.fill();
+
+  // Staff with beacon
+  X.strokeStyle = '#8c7b64';
+  X.lineWidth = 2;
+  X.beginPath();
+  X.moveTo(11, -34);
+  X.lineTo(11, 0);
+  X.stroke();
+
+  // Glowing orb at top
+  X.fillStyle = '#ffd15c';
+  X.beginPath();
+  X.arc(11, -34, 3.5, 0, Math.PI * 2);
+  X.fill();
+
+  X.restore();
+}
+
+// Procedural Boss Guardian
+function drawBoss(b) {
+  X.save();
+  X.translate(b.x, b.y);
+  X.scale(b.dir, 1);
+
+  // Colossal chassis
+  X.fillStyle = '#471818';
+  X.fillRect(-b.w / 2, -b.h, b.w, b.h);
+  X.strokeStyle = '#e04b4b';
+  X.lineWidth = 2.5;
+  X.strokeRect(-b.w / 2, -b.h, b.w, b.h);
+
+  // Core energy
+  X.fillStyle = '#ffd15c';
+  X.beginPath();
+  X.arc(0, -b.h / 2, 9, 0, Math.PI * 2);
+  X.fill();
+
+  // Boss health bar
+  X.fillStyle = 'rgba(0,0,0,0.7)';
+  X.fillRect(-30, -b.h - 18, 60, 6);
+  X.fillStyle = '#e04b4b';
+  X.fillRect(-30, -b.h - 18, 60 * (b.hp / b.maxHp), 6);
+  X.strokeStyle = '#fff';
+  X.lineWidth = 1;
+  X.strokeRect(-30, -b.h - 18, 60, 6);
+
+  X.restore();
+}
+
+// Procedural Amber Geode / Chest
+function drawGeode(c) {
+  X.save();
+  X.translate(c.x, c.y);
+
+  // Crystalline polygon
+  X.fillStyle = c.relic ? '#ffd15c' : '#c49a6c';
+  X.beginPath();
+  X.moveTo(13, 0);
+  X.lineTo(26, 8);
+  X.lineTo(20, 24);
+  X.lineTo(6, 24);
+  X.lineTo(0, 8);
+  X.closePath();
+  X.fill();
+  X.strokeStyle = '#ffffff';
+  X.lineWidth = 1.5;
+  X.stroke();
+
+  // Facet highlight
+  X.fillStyle = 'rgba(255,255,255,0.45)';
+  X.beginPath();
+  X.moveTo(13, 4);
+  X.lineTo(19, 10);
+  X.lineTo(13, 16);
+  X.lineTo(7, 10);
+  X.closePath();
+  X.fill();
+
+  X.restore();
+}
+
+// Procedural Portal Archway
+function drawPortalArch(cd) {
+  X.save();
+  X.translate(cd.x, cd.y);
+
+  // Monolithic Pillars
+  X.fillStyle = '#1c1524';
+  X.fillRect(0, 0, 7, cd.h);
+  X.fillRect(cd.w - 7, 0, 7, cd.h);
+  X.fillRect(0, 0, cd.w, 7);
+
+  // Swirling Vortex Core
+  const t = tm();
+  const grad = X.createRadialGradient(cd.w / 2, cd.h / 2, 2, cd.w / 2, cd.h / 2, 18);
+  grad.addColorStop(0, 'rgba(155, 93, 229, 0.9)');
+  grad.addColorStop(0.7, 'rgba(63, 197, 217, 0.4)');
+  grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  X.fillStyle = grad;
+  X.beginPath();
+  X.arc(cd.w / 2, cd.h / 2, 18, 0, Math.PI * 2);
+  X.fill();
+
+  X.restore();
+}
+
+function drawAvatar(x, y, facing, walkTime, isGrounded) {
+  const eraGroup = Math.floor(lvl / 10);
+  const t = tm();
+
+  X.save();
+  X.translate(x, y);
+  X.scale(facing, 1);
+
+  if (eraGroup === 0) {
+    const w = Math.sin(t * 8) * 1.5;
+    X.fillStyle = 'rgba(63, 197, 217, 0.45)';
+    X.strokeStyle = '#5de4fa';
+    X.lineWidth = 2.5;
+    X.beginPath();
+    X.ellipse(0, -16, 13 + w, 14, 0, 0, Math.PI * 2);
+    X.fill(); X.stroke();
+    X.fillStyle = 'rgba(255, 200, 80, 0.8)';
+    X.beginPath(); X.arc(-2, -18, 4.5, 0, Math.PI * 2); X.fill();
+  } else if (eraGroup <= 3) {
+    X.fillStyle = '#a6563a';
+    X.beginPath(); X.ellipse(0, -16, 13, 8, -0.2, 0, Math.PI * 2); X.fill();
+    X.beginPath(); X.ellipse(11, -22, 8, 5, 0.1, 0, Math.PI * 2); X.fill();
+    X.strokeStyle = '#5c2a18'; X.lineWidth = 3;
+    const stride = isGrounded ? Math.sin(walkTime * 1.5) * 6 : 2;
+    X.beginPath(); X.moveTo(4, -10); X.lineTo(6 + stride, 0); X.moveTo(-4, -10); X.lineTo(-2 - stride, 0); X.stroke();
+  } else if (eraGroup <= 6) {
+    const legSwing = isGrounded ? Math.sin(walkTime) * 6 : 2;
+    X.fillStyle = '#704f32'; X.fillRect(-5, -21, 11, 14);
+    X.fillStyle = '#d9aa7e'; X.beginPath(); X.arc(1, -26, 5.5, 0, Math.PI * 2); X.fill();
+    X.strokeStyle = '#5a3d24'; X.lineWidth = 2.8;
+    X.beginPath(); X.moveTo(-2, -7); X.lineTo(-3 - legSwing, 0); X.moveTo(4, -7); X.lineTo(4 + legSwing, 0); X.stroke();
+  } else {
+    X.fillStyle = '#0e1d2d'; X.fillRect(-5, -22, 11, 15);
+    X.strokeStyle = '#00f0ff'; X.lineWidth = 1.5; X.strokeRect(-5, -22, 11, 15);
+    X.fillStyle = '#00f0ff'; X.beginPath(); X.arc(0.5, -15, 3, 0, Math.PI * 2); X.fill();
+    X.fillStyle = '#0e1d2d'; X.beginPath(); X.arc(1, -26, 6, 0, Math.PI * 2); X.fill();
+    X.fillStyle = '#00f0ff'; X.fillRect(1, -28, 5.5, 3.5);
+    X.strokeStyle = '#00f0ff'; X.lineWidth = 2.5;
+    X.beginPath(); X.moveTo(-2, -7); X.lineTo(-2, 0); X.moveTo(3, -7); X.lineTo(3, 0); X.stroke();
+  }
+
+  if (p && p.shield > 0) {
+    X.strokeStyle = 'rgba(63, 197, 217, 0.7)';
+    X.lineWidth = 2;
+    X.beginPath();
+    X.arc(1, -16, 22 + Math.sin(t * 6) * 2, 0, Math.PI * 2);
+    X.stroke();
+  }
+
+  X.restore();
+}
+
+function drawCorpse(b) {
+  X.fillStyle = 'rgba(255, 248, 230, 0.95)';
+  X.fillRect(b.x - 18, b.y - 16, 36, 4);
+  X.fillStyle = 'rgba(215, 200, 180, 0.85)';
+  X.fillRect(b.x - 18, b.y - 12, 30, 8);
+  X.beginPath(); X.arc(b.x + 14, b.y - 9, 6, 0, 7); X.fill();
+}
+
+// ==========================================
+// MAIN RENDER LOOP
+// ==========================================
+function draw() {
+  const E = ERAS[lvl];
+
+  X.fillStyle = inChamber ? '#120b1c' : E[3];
+  X.fillRect(0, 0, W, H);
+
+  X.save();
+  X.translate(-cam, 0);
+
+  // Platforms
+  const currentP = inChamber ? LV.chamberP : LV.P;
+  for (const s of currentP) drawTerrain(s, E);
+
+  // Crumbling platforms
+  if (!inChamber) {
+    for (const cp of LV.crumbling) {
+      if (!cp.fallen) {
+        X.fillStyle = cp.stepped ? '#d63031' : '#b2bec3';
+        X.fillRect(cp.x, cp.y, cp.w, cp.h);
+        X.fillStyle = '#2d3436';
+        X.fillRect(cp.x, cp.y + cp.h - 3, cp.w, 3);
+      }
+    }
+  }
+
+  // Moving Platforms
+  if (!inChamber) {
+    for (const mp of LV.movingPlatforms) {
+      X.fillStyle = '#3fc5d9';
+      X.fillRect(mp.x, mp.y, mp.w, mp.h);
+      X.fillStyle = '#1c626b';
+      X.fillRect(mp.x, mp.y + 3, mp.w, mp.h - 3);
+      X.fillStyle = '#fff';
+      X.fillRect(mp.x, mp.y, mp.w, 2);
+    }
+  }
+
+  // Gates
+  if (!inChamber) {
+    for (const g of LV.gates) {
+      if (!g.open) {
+        X.fillStyle = '#7a5a40';
+        X.fillRect(g.x, g.y, g.w, g.h);
+        X.strokeStyle = '#e5a958';
+        X.lineWidth = 2;
+        X.strokeRect(g.x, g.y, g.w, g.h);
+      }
+    }
+  }
+
+  // Levers
+  if (!inChamber) {
+    for (const lev of LV.levers) {
+      X.fillStyle = '#333';
+      X.fillRect(lev.x, lev.y + 12, lev.w, 10);
+      X.strokeStyle = lev.active ? '#48bb78' : '#e04b4b';
+      X.lineWidth = 3;
+      X.beginPath();
+      X.moveTo(lev.x + lev.w / 2, lev.y + 12);
+      X.lineTo(lev.x + lev.w / 2 + (lev.active ? 8 : -8), lev.y);
+      X.stroke();
+    }
+  }
+
+  // Breakable Geodes
+  if (!inChamber) {
+    for (const c of LV.chests) {
+      if (!c.broken) drawGeode(c);
+    }
+  }
+
+  // Friendly NPCs
+  if (!inChamber) {
+    for (const npc of LV.npcs) drawNPC(npc);
+  }
+
+  // Boss
+  if (!inChamber && LV.boss && LV.boss.alive) {
+    drawBoss(LV.boss);
+  }
+
+  // Steam Geysers
+  if (!inChamber) {
+    for (const gz of LV.geysers) {
+      X.fillStyle = '#203c44';
+      X.fillRect(gz.x, gz.y, gz.w, gz.h);
+      X.fillStyle = 'rgba(63, 197, 217, 0.4)';
+      X.fillRect(gz.x + 4, gz.y, gz.w - 8, 4);
+    }
+  }
+
+  // Spikes
+  if (!inChamber) {
+    X.fillStyle = '#e8e0d0';
+    for (const s of LV.S) {
+      for (let i = 0; i < 3; i++) {
+        const bx = s.x + i * s.w / 3;
+        X.beginPath();
+        X.moveTo(bx, 360);
+        X.lineTo(bx + s.w / 6, 346);
+        X.lineTo(bx + s.w / 3, 360);
+        X.fill();
+      }
+    }
+  }
+
+  // Bodies
+  if (!inChamber) {
+    for (const b of bodies[lvl]) drawCorpse(b);
+  }
+
+  // Chamber Portal
+  if (!inChamber && LV.chamberDoor) {
+    drawPortalArch(LV.chamberDoor);
+  }
+
+  // Fauna
+  if (!inChamber && LV.animals) {
+    for (const a of LV.animals) {
+      if (a.alive) drawPrehistoricFauna(a);
+    }
+  }
+
+  // Walkers, Springs, Checkpoints
+  if (!inChamber) {
+    for (const t of LV.T) {
+      if (t.dead) continue;
+      if (t.k === 'w') drawCrawler(t);
+      else if (t.k === 'h') drawHazardSpire(t);
+      else if (t.k === 'b') drawSpringboard(t);
+      else if (t.k === 'c') drawCheckpoint(t);
+    }
+  }
+
+  // Amber Coins (Vector rendered)
+  for (const c of LV.coinList) {
+    if (c.collected) continue;
+    const cw = Math.cos(c.rot) * c.r;
+    X.save();
+    X.translate(c.x, c.y);
+    X.fillStyle = '#ffd15c';
+    X.beginPath();
+    X.ellipse(0, 0, Math.max(1.5, Math.abs(cw)), c.r, 0, 0, Math.PI * 2);
+    X.fill();
+    X.strokeStyle = '#e5a958';
+    X.lineWidth = 1.5;
+    X.stroke();
+    X.restore();
+  }
+
+  // Projectiles
+  for (const pr of LV.projectiles) {
+    X.fillStyle = '#ffd15c';
+    X.beginPath(); X.arc(pr.x, pr.y, 3.5, 0, Math.PI * 2); X.fill();
+  }
+
+  // Particles
+  for (const pt of deathParticles) {
+    X.fillStyle = pt.color;
+    X.globalAlpha = pt.life / pt.maxLife;
+    X.beginPath(); X.arc(pt.x, pt.y, pt.size || 3, 0, Math.PI * 2); X.fill();
+  }
+  X.globalAlpha = 1.0;
+
+  // Floating Texts
+  for (const ft of floatingTexts) {
+    X.fillStyle = ft.col;
+    X.globalAlpha = ft.life / ft.maxLife;
+    X.font = 'bold 12px Georgia,serif';
+    X.textAlign = 'center';
+    X.fillText(ft.text, ft.x, ft.y);
+  }
+  X.globalAlpha = 1.0;
+
+  // Goal Flag
+  if (!inChamber) {
+    X.fillStyle = '#f4ebd9';
+    X.fillRect(LV.goal, 250, 4, 110);
+    X.fillStyle = '#e8553a';
+    X.beginPath();
+    X.moveTo(LV.goal + 4, 250);
+    X.lineTo(LV.goal + 44, 265);
+    X.lineTo(LV.goal + 4, 280);
+    X.fill();
+  }
+
+  // Player
+  if (dead <= 0 && !ending) {
+    drawAvatar(p.x + p.w / 2, p.y + p.h, p.face, p.on ? ph : 1.2, p.on);
+  }
+
+  X.restore();
+
+  // Death Notification Overlay
+  if (dead > 0) {
+    X.fillStyle = 'rgba(18, 10, 8, 0.9)';
+    X.fillRect(0, 0, W, H);
+    X.textAlign = 'center';
+    X.fillStyle = '#ff6b6b';
+    X.font = 'bold 20px Georgia,serif';
+    X.fillText('CASUALTY SACRIFICE', W / 2, H / 2 - 25);
+    X.fillStyle = '#f4ebd9';
+    X.font = 'italic 14px Georgia,serif';
+    X.fillText(lastDeathMessage, W / 2, H / 2 + 5);
+  }
+
+  // Level Card Announcement
+  if (card > 0 || ending) {
+    X.fillStyle = 'rgba(10,8,6,.9)';
+    X.fillRect(0, 0, W, H);
+    X.fillStyle = '#f4ebd9';
+    X.textAlign = 'center';
+
+    if (ending) {
+      X.font = 'bold 28px Georgia,serif';
+      X.fillText('KARDASHEV TYPE I REACHED', W / 2, 130);
+      X.font = 'italic 16px Georgia,serif';
+      X.fillText('All 100 Epochs of Evolution Conquered!', W / 2, 170);
+    } else {
+      X.font = 'bold 24px Georgia,serif';
+      X.fillText(E[0], W / 2, 130);
+      X.font = 'italic 14px Georgia,serif';
+      X.fillText(E[1], W / 2, 160);
+      X.font = 'bold 13px Georgia,serif';
+      X.fillStyle = '#ffd15c';
+      X.fillText('OBJECTIVE: ' + E[5], W / 2, H - 90);
+      X.font = '12px Georgia,serif';
+      X.fillStyle = '#3fc5d9';
+      X.fillText('Fallen bodies remain as solid stepping stones. Tap to leap forward.', W / 2, H - 60);
+    }
+  }
+}
+
+// Screen Wake Lock API for Mobile Gameplay
+let wakeLock = null;
+async function requestWakeLock() {
+  if ('wakeLock' in navigator) {
+    try {
+      wakeLock = await navigator.wakeLock.request('screen');
+    } catch(err) {}
+  }
+}
+document.addEventListener('visibilitychange', () => {
+  if (wakeLock !== null && document.visibilityState === 'visible') {
+    requestWakeLock();
+  }
+});
+requestWakeLock();
+
+// Android Back Button / Escape Handling
+window.addEventListener('popstate', (e) => {
+  const openModal = document.querySelector('.game-modal.visible');
+  if (openModal) {
+    openModal.classList.remove('visible');
+    history.pushState(null, '', location.href);
+  }
+});
+history.pushState(null, '', location.href);
+
+// Register Offline Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').then(reg => {
+      console.log('Offline SW registered:', reg.scope);
+    }).catch(err => {
+      console.warn('SW registration failed:', err);
+    });
+  });
+}
+
+let last = 0;
+function loop(t) {
+  const dt = Math.min(0.033, (t - last) / 1000 || 0);
+  last = t;
+  step(dt);
+  draw();
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

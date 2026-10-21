@@ -1,0 +1,49 @@
+{
+  "name": "Rebirth: The Long Road of Humankind",
+  "short_name": "Rebirth",
+  "description": "An epic 100-epoch historical survival platformer from the dawn of primordial life to space singularity. Fallen lives become stepping stones for human progress.",
+  "start_url": "./index.html",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#090706",
+  "theme_color": "#090706",
+  "lang": "en-US",
+  "dir": "ltr",
+  "scope": "./",
+  "categories": [
+    "games",
+    "action",
+    "adventure",
+    "roleplaying"
+  ],
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshot-landscape.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Horizontal Mobile Gameplay across 100 Epochs"
+    }
+  ]
+}
