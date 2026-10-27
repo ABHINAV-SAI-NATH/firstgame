@@ -1,2423 +1,624 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Rebirth: Sword of Humankind - 10 Levels Epic Edition</title>
-<style>
-:root {
-  --bg: #080d16;
-  --panel: rgba(12, 18, 28, 0.85);
-  --border: rgba(251, 197, 49, 0.4);
-  --fg: #f5eedb;
-  --accent: #fbc531;
-  --cyan: #00d2d3;
-  --purple: #9b59b6;
-  --red: #ff4757;
-  --green: #2ed573;
-  --blue: #3867d6;
-}
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html, body {
-  width: 100%; height: 100%; margin: 0; padding: 0;
-  background: var(--bg); color: var(--fg);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Cinzel", Georgia, serif;
-  overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none;
-}
-#game-container {
-  position: relative; width: 100vw; height: 100vh;
-  display: flex; flex-direction: column; background: #000;
-}
-#three-canvas { width: 100%; height: 100%; display: block; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Midnight Royale NYE Gala | Booking Demo</title>
+  <style>
+    :root {
+      --bg: #070a12;
+      --surface: rgba(14, 21, 35, 0.92);
+      --surface-2: rgba(21, 30, 48, 0.9);
+      --text: #f9f4e8;
+      --muted: #d2c8ad;
+      --gold: #f6c96c;
+      --gold-strong: #ffde98;
+      --line: rgba(246, 201, 108, 0.3);
+      --success: #8df0b9;
+      --danger: #ff9f93;
+    }
 
-/* Top HUD */
-#hud-overlay {
-  position: absolute; top: 0; left: 0; right: 0;
-  padding: 12px 18px;
-  display: flex; justify-content: space-between; align-items: flex-start;
-  pointer-events: none; z-index: 20;
-}
-.hud-box {
-  background: var(--panel);
-  border: 1.5px solid var(--border);
-  border-radius: 10px; padding: 6px 14px;
-  display: flex; align-items: center; gap: 10px;
-  box-shadow: 0 4px 18px rgba(0,0,0,0.6);
-  pointer-events: auto;
-}
-.hud-bars { display: flex; flex-direction: column; gap: 4px; }
-.hud-hearts { font-size: 19px; letter-spacing: 2px; line-height: 1; }
-.mana-bar-wrap {
-  width: 110px; height: 8px; background: rgba(0,0,0,0.6);
-  border-radius: 4px; overflow: hidden; border: 1px solid rgba(0,210,211,0.5);
-}
-#hud-mana-fill {
-  width: 100%; height: 100%; background: linear-gradient(90deg, #0984e3, #00d2d3);
-  transition: width 0.15s ease;
-}
-.hud-badge {
-  font-size: 13px; color: var(--cyan); font-weight: 700;
-  text-transform: uppercase; letter-spacing: 1px;
-}
-.hud-coins {
-  color: var(--accent); font-weight: bold; font-size: 15px;
-  display: flex; align-items: center; gap: 4px;
-}
-.hud-btn {
-  background: rgba(245, 238, 219, 0.12);
-  border: 1px solid rgba(245, 238, 219, 0.3);
-  color: var(--fg); padding: 6px 12px; border-radius: 6px;
-  font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s;
-  pointer-events: auto;
-}
-.hud-btn:hover { background: rgba(251, 197, 49, 0.3); border-color: var(--accent); }
+    * {
+      box-sizing: border-box;
+    }
 
-/* Combo Counter */
-#combo-box {
-  position: absolute; top: 75px; left: 24px;
-  font-size: 20px; font-weight: 900; color: #ff9f43;
-  text-shadow: 0 0 10px rgba(255, 159, 67, 0.8), 2px 2px 0 #000;
-  opacity: 0; transform: scale(0.8);
-  transition: opacity 0.2s, transform 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28);
-  pointer-events: none; z-index: 25;
-}
-#combo-box.visible { opacity: 1; transform: scale(1.1); }
+    html {
+      scroll-behavior: smooth;
+    }
 
-/* Boss HP Bar */
-#boss-hud {
-  position: absolute; top: 68px; left: 50%; transform: translateX(-50%);
-  width: min(500px, 80vw); background: rgba(10, 15, 25, 0.85);
-  border: 1.5px solid #ff4757; border-radius: 8px; padding: 6px 14px;
-  display: none; flex-direction: column; align-items: center; gap: 4px;
-  box-shadow: 0 0 20px rgba(255, 71, 87, 0.4); z-index: 22;
-}
-#boss-title { font-size: 13px; font-weight: bold; color: #ff6b81; letter-spacing: 2px; }
-.boss-bar-wrap {
-  width: 100%; height: 12px; background: rgba(0,0,0,0.7);
-  border-radius: 6px; overflow: hidden; border: 1px solid #ff4757;
-}
-#boss-hp-fill {
-  width: 100%; height: 100%;
-  background: linear-gradient(90deg, #ff4757, #ff6b81, #ffa502);
-  transition: width 0.2s ease;
-}
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Roboto, Arial, sans-serif;
+      background: radial-gradient(circle at top right, rgba(180, 138, 51, 0.18), transparent 35%),
+        radial-gradient(circle at bottom left, rgba(95, 60, 145, 0.15), transparent 35%),
+        var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
 
-/* Touch Controls */
-#touch-pad {
-  position: absolute; bottom: 18px; left: 0; right: 0;
-  display: flex; justify-content: space-between; align-items: flex-end;
-  padding: 0 22px; pointer-events: none; z-index: 30;
-}
-.touch-group { display: flex; gap: 14px; align-items: flex-end; pointer-events: auto; }
-button.touch-btn {
-  width: 64px; height: 64px; border-radius: 50%;
-  background: rgba(18, 28, 48, 0.72);
-  border: 2px solid rgba(245, 238, 219, 0.35);
-  color: #fff; font-size: 24px;
-  display: flex; justify-content: center; align-items: center;
-  touch-action: none; cursor: pointer;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.6), inset 0 0 10px rgba(255,255,255,0.06);
-  transition: transform 0.08s, background 0.08s, border-color 0.08s;
-}
-button.touch-btn:active, button.touch-btn.active {
-  transform: scale(0.9);
-  background: rgba(251, 197, 49, 0.35);
-  border-color: var(--accent);
-}
-button.touch-btn.jump-btn {
-  width: 74px; height: 74px;
-  border-color: rgba(0, 210, 211, 0.7);
-  background: rgba(0, 210, 211, 0.22);
-  font-size: 28px;
-}
-button.touch-btn.jump-btn:active, button.touch-btn.jump-btn.active {
-  background: rgba(0, 210, 211, 0.5);
-  border-color: var(--cyan);
-}
-button.touch-btn.atk-btn {
-  border-color: rgba(255, 71, 87, 0.7);
-  background: rgba(255, 71, 87, 0.22);
-  font-size: 26px;
-}
-button.touch-btn.dash-btn {
-  width: 58px; height: 58px;
-  border-color: rgba(251, 197, 49, 0.6);
-  background: rgba(251, 197, 49, 0.18);
-  font-size: 20px;
-}
-button.touch-btn.magic-btn {
-  width: 58px; height: 58px;
-  border-color: rgba(155, 89, 182, 0.7);
-  background: rgba(155, 89, 182, 0.25);
-  font-size: 20px;
-}
+    .stars {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        radial-gradient(2px 2px at 10% 20%, rgba(255, 255, 255, 0.55), transparent),
+        radial-gradient(1.5px 1.5px at 80% 30%, rgba(246, 201, 108, 0.7), transparent),
+        radial-gradient(2px 2px at 60% 70%, rgba(255, 255, 255, 0.35), transparent),
+        radial-gradient(1.5px 1.5px at 22% 84%, rgba(246, 201, 108, 0.65), transparent),
+        radial-gradient(2px 2px at 92% 82%, rgba(255, 255, 255, 0.45), transparent);
+      animation: shimmer 8s linear infinite;
+      opacity: 0.8;
+      z-index: -1;
+    }
 
-/* Center Notifications & Level Cards */
-#center-banner {
-  position: absolute; top: 18%; left: 50%; transform: translateX(-50%);
-  background: rgba(10, 16, 26, 0.94);
-  border: 1.5px solid var(--accent);
-  border-radius: 12px; padding: 16px 32px;
-  text-align: center; pointer-events: none;
-  opacity: 0; transition: opacity 0.4s ease, transform 0.4s ease;
-  transform: translate(-50%, -10px);
-  z-index: 40; box-shadow: 0 10px 40px rgba(0,0,0,0.85);
-  max-width: 88%;
-}
-#center-banner.visible { opacity: 1; transform: translate(-50%, 0); }
-#banner-title { font-size: 22px; font-weight: 800; color: var(--accent); margin-bottom: 6px; letter-spacing: 1px; }
-#banner-subtitle { font-size: 14px; color: var(--fg); opacity: 0.92; line-height: 1.45; }
+    @keyframes shimmer {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
 
-/* Interactive Prompt Hint */
-#interact-hint {
-  position: absolute; bottom: 120px; left: 50%; transform: translateX(-50%);
-  background: rgba(12, 18, 30, 0.85);
-  border: 1px solid var(--cyan); border-radius: 6px;
-  padding: 6px 16px; font-size: 13px; color: var(--cyan);
-  display: none; align-items: center; gap: 6px; z-index: 25;
-  box-shadow: 0 4px 15px rgba(0, 210, 211, 0.3); pointer-events: none;
-}
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
 
-/* Overlays (Death, Level Clear, Level Select) */
-.full-overlay {
-  position: absolute; inset: 0;
-  background: rgba(6, 9, 16, 0.92); backdrop-filter: blur(8px);
-  display: none; flex-direction: column; justify-content: center; align-items: center;
-  text-align: center; z-index: 50; padding: 24px;
-}
-.full-overlay.visible { display: flex; }
-.full-overlay h1 { font-size: 34px; margin: 0 0 12px 0; letter-spacing: 1.5px; }
-.full-overlay p { font-size: 16px; max-width: 540px; line-height: 1.6; margin: 0 0 20px 0; opacity: 0.95; }
-.full-overlay .subtext { color: var(--cyan); font-style: italic; font-size: 14px; margin-bottom: 24px; }
-.overlay-btns { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+    .container {
+      width: min(1120px, 92vw);
+      margin: 0 auto;
+    }
 
-.gold-btn {
-  background: rgba(251, 197, 49, 0.25);
-  border: 1.5px solid var(--accent); color: #fff;
-  padding: 12px 28px; border-radius: 8px; font-size: 16px; font-weight: 700;
-  cursor: pointer; transition: all 0.18s;
-}
-.gold-btn:hover { background: var(--accent); color: #000; transform: translateY(-2px); }
-.cyan-btn {
-  background: rgba(0, 210, 211, 0.25);
-  border: 1.5px solid var(--cyan); color: #fff;
-  padding: 12px 28px; border-radius: 8px; font-size: 16px; font-weight: 700;
-  cursor: pointer; transition: all 0.18s;
-}
-.cyan-btn:hover { background: var(--cyan); color: #000; transform: translateY(-2px); }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(8px);
+      background: rgba(7, 10, 18, 0.85);
+      border-bottom: 1px solid var(--line);
+    }
 
-/* Level Select Grid */
-#level-grid {
-  display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;
-  max-width: 600px; width: 100%; margin: 20px 0;
-}
-@media (max-width: 600px) {
-  #level-grid { grid-template-columns: repeat(3, 1fr); }
-}
-.lvl-card {
-  background: rgba(18, 28, 48, 0.7);
-  border: 1.5px solid rgba(251, 197, 49, 0.3);
-  border-radius: 8px; padding: 12px 8px;
-  cursor: pointer; transition: all 0.15s;
-  display: flex; flex-direction: column; align-items: center; gap: 4px;
-}
-.lvl-card:hover { border-color: var(--accent); transform: scale(1.05); background: rgba(251, 197, 49, 0.2); }
-.lvl-card.locked { opacity: 0.35; cursor: not-allowed; border-color: #555; }
-.lvl-card.locked:hover { transform: none; background: rgba(18, 28, 48, 0.7); }
-.lvl-num { font-size: 18px; font-weight: 900; color: var(--accent); }
-.lvl-name { font-size: 10px; color: var(--fg); opacity: 0.85; text-transform: uppercase; text-align: center; }
+    nav {
+      min-height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      padding: 10px 0;
+    }
 
-/* Control Guide Modal */
-#control-guide {
-  font-size: 13px; opacity: 0.8; margin-top: 20px; line-height: 1.6;
-}
-</style>
+    .brand {
+      font-weight: 700;
+      letter-spacing: 0.6px;
+    }
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script>
-if (typeof THREE === 'undefined') {
-  document.write('<script src="https://unpkg.com/three@0.128.0/build/three.min.js"><\/script>');
-}
-</script>
+    .brand span {
+      color: var(--gold);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .nav-links a:focus-visible,
+    button:focus-visible,
+    select:focus-visible,
+    input:focus-visible {
+      outline: 2px solid var(--gold-strong);
+      outline-offset: 2px;
+      border-radius: 8px;
+    }
+
+    section {
+      padding: 68px 0;
+    }
+
+    .hero {
+      padding-top: 84px;
+      text-align: center;
+    }
+
+    .hero h1 {
+      margin: 0 0 12px;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      line-height: 1.15;
+    }
+
+    .hero p {
+      margin: 0 auto 18px;
+      max-width: 680px;
+      color: var(--muted);
+      font-size: 1.05rem;
+    }
+
+    .event-pill {
+      display: inline-flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      font-size: 0.95rem;
+      color: var(--gold-strong);
+    }
+
+    .event-pill span {
+      border: 1px solid var(--line);
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(246, 201, 108, 0.08);
+    }
+
+    .cta {
+      display: inline-block;
+      background: linear-gradient(135deg, #f6c96c, #f9dfa8);
+      color: #231b0c;
+      font-weight: 700;
+      border: none;
+      border-radius: 999px;
+      padding: 12px 24px;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 8px 24px rgba(246, 201, 108, 0.35);
+    }
+
+    .cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(246, 201, 108, 0.45);
+    }
+
+    .grid {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 18px;
+    }
+
+    h2 {
+      margin: 0 0 16px;
+      font-size: clamp(1.5rem, 3vw, 2rem);
+    }
+
+    .booking-layout {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr;
+      gap: 18px;
+    }
+
+    .mode-toggle {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .mode-btn {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface-2);
+      color: var(--text);
+      padding: 12px;
+      text-align: left;
+      cursor: pointer;
+      transition: border-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .mode-btn.active {
+      border-color: var(--gold);
+      box-shadow: inset 0 0 0 1px rgba(255, 222, 152, 0.45);
+    }
+
+    .mode-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.92rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    select,
+    input[type="number"],
+    input[type="text"],
+    input[type="email"] {
+      width: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      border-radius: 10px;
+      background: rgba(8, 12, 22, 0.9);
+      color: var(--text);
+      padding: 10px;
+      font: inherit;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin: 4px 0 0;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      margin: 8px 0;
+    }
+
+    .summary-total {
+      border-top: 1px dashed var(--line);
+      margin-top: 8px;
+      padding-top: 8px;
+      font-weight: 700;
+      color: var(--gold-strong);
+    }
+
+    .action-btn {
+      margin-top: 14px;
+      width: 100%;
+      padding: 12px;
+      border: 0;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      background: linear-gradient(130deg, #f6c96c, #f9dfa8);
+      color: #271f10;
+    }
+
+    .feedback {
+      min-height: 24px;
+      margin-top: 12px;
+      font-size: 0.92rem;
+    }
+
+    .feedback.error { color: var(--danger); }
+    .feedback.success { color: var(--success); }
+
+    details {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 12px 14px;
+      background: var(--surface);
+    }
+
+    details + details {
+      margin-top: 10px;
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 26px 0 32px;
+      color: var(--muted);
+    }
+
+    .foot {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    @media (max-width: 900px) {
+      .booking-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .field-grid {
+        grid-template-columns: 1fr;
+      }
+
+      nav {
+        justify-content: center;
+      }
+
+      .brand,
+      .nav-links {
+        width: 100%;
+        justify-content: center;
+        text-align: center;
+      }
+    }
+  </style>
 </head>
 <body>
+  <div class="stars" aria-hidden="true"></div>
 
-<div id="game-container">
-  <canvas id="three-canvas"></canvas>
-
-  <!-- HUD -->
-  <div id="hud-overlay">
-    <div class="hud-box">
-      <div class="hud-bars">
-        <div class="hud-hearts" id="hud-hearts">❤️❤️❤️</div>
-        <div class="mana-bar-wrap">
-          <div id="hud-mana-fill"></div>
+  <header>
+    <div class="container">
+      <nav aria-label="Primary navigation">
+        <div class="brand">Midnight <span>Royale</span> NYE Gala</div>
+        <div class="nav-links">
+          <a href="#overview">Overview</a>
+          <a href="#experiences">Experiences</a>
+          <a href="#booking">Booking</a>
+          <a href="#faq">FAQ</a>
         </div>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero container" id="overview">
+      <div class="event-pill" aria-label="Event details">
+        <span>Dec 31 · 8:00 PM - 1:00 AM</span>
+        <span>Grand Aurora Hall, Downtown</span>
       </div>
-      <div>
-        <div class="hud-badge" id="hud-level-text">LEVEL 1</div>
-        <div style="font-size:11px; opacity:0.8;" id="hud-level-name">Awakening</div>
+      <h1>Ring in the New Year with style, sparkle, and unforgettable moments.</h1>
+      <p>
+        Sample frontend booking experience for gala tickets and dining tables. Pricing and content below are sample values for organizer editing.
+      </p>
+      <a href="#booking" class="cta">Book Your Spot</a>
+    </section>
+
+    <section class="container" id="experiences">
+      <h2>Signature Experiences</h2>
+      <div class="grid">
+        <article class="card"><strong>🎻 Live Entertainment</strong><p class="muted">Curated live band and DJ sets through midnight.</p></article>
+        <article class="card"><strong>⏳ Countdown Celebration</strong><p class="muted">Big-screen countdown, confetti drop, and festive visuals.</p></article>
+        <article class="card"><strong>🍽️ Gourmet Dining</strong><p class="muted">Chef-crafted tasting menu options and premium service.</p></article>
+        <article class="card"><strong>🥂 Midnight Toast</strong><p class="muted">Complimentary sample toast for all guests at midnight.</p></article>
       </div>
-    </div>
+    </section>
 
-    <div style="display:flex; gap:8px; align-items:center;">
-      <div class="hud-box">
-        <div class="hud-coins">🪙 <span id="hud-coin-count">0</span></div>
+    <section class="container" id="booking">
+      <h2>Book Tickets or Reserve a Dining Table</h2>
+      <div class="booking-layout">
+        <form class="card" id="booking-form" novalidate>
+          <div class="mode-toggle" role="tablist" aria-label="Booking mode">
+            <button class="mode-btn active" type="button" id="ticket-mode" aria-selected="true" aria-controls="ticket-fields">Gala Tickets</button>
+            <button class="mode-btn" type="button" id="table-mode" aria-selected="false" aria-controls="table-fields">Dining Table</button>
+          </div>
+
+          <div id="ticket-fields">
+            <div class="field-grid">
+              <div>
+                <label for="ticket-tier">Ticket Tier (sample price)</label>
+                <select id="ticket-tier" name="ticket-tier">
+                  <option value="95">Silver Admission - $95</option>
+                  <option value="140">Gold Admission - $140</option>
+                  <option value="220">VIP Lounge - $220</option>
+                </select>
+              </div>
+              <div>
+                <label for="ticket-qty">Ticket Quantity</label>
+                <input id="ticket-qty" name="ticket-qty" type="number" min="1" max="12" value="2" />
+              </div>
+            </div>
+          </div>
+
+          <div id="table-fields" hidden>
+            <div class="field-grid">
+              <div>
+                <label for="table-package">Table Package (sample price)</label>
+                <select id="table-package" name="table-package">
+                  <option value="480">Classic Table - $480</option>
+                  <option value="760">Premium Window Table - $760</option>
+                  <option value="980">Grand Celebration Suite - $980</option>
+                </select>
+              </div>
+              <div>
+                <label for="party-size">Party Size</label>
+                <input id="party-size" name="party-size" type="number" min="2" max="12" value="4" />
+              </div>
+            </div>
+          </div>
+
+          <div class="field-grid">
+            <div>
+              <label for="guest-name">Contact Name</label>
+              <input id="guest-name" name="guest-name" type="text" placeholder="Alex Morgan" required />
+            </div>
+            <div>
+              <label for="guest-email">Email</label>
+              <input id="guest-email" name="guest-email" type="email" placeholder="alex@example.com" required />
+            </div>
+          </div>
+
+          <label>
+            <input id="terms" type="checkbox" /> I understand this is a frontend demo and reservations are subject to confirmation.
+          </label>
+
+          <div id="form-feedback" class="feedback" role="status" aria-live="polite"></div>
+        </form>
+
+        <aside class="card" aria-live="polite" id="summary-card">
+          <h3 style="margin-top:0;">Live Booking Summary</h3>
+          <div class="summary-row"><span>Selection</span><strong id="summary-mode">Gala Tickets</strong></div>
+          <div class="summary-row"><span id="summary-unit-label">Quantity</span><strong id="summary-units">2</strong></div>
+          <div class="summary-row"><span>Rate</span><strong id="summary-rate">$95.00</strong></div>
+          <div class="summary-row"><span>Subtotal</span><strong id="summary-subtotal">$190.00</strong></div>
+          <div class="summary-row"><span>Service Fee (sample 8%)</span><strong id="summary-fee">$15.20</strong></div>
+          <div class="summary-row summary-total"><span>Total</span><strong id="summary-total">$205.20</strong></div>
+          <button class="action-btn" id="reserve-btn" type="submit" form="booking-form">Continue with Ticket Booking</button>
+          <p class="muted" style="margin-bottom:0;">Hook this button to backend APIs later.</p>
+        </aside>
       </div>
-      <div class="hud-box">
-        <div style="font-size:12px;opacity:0.9;">SOULS: <strong style="color:var(--cyan);" id="hud-deaths">1</strong></div>
+    </section>
+
+    <section class="container">
+      <h2>Evening Timeline & Venue Details</h2>
+      <div class="grid">
+        <article class="card">
+          <strong>Schedule</strong>
+          <p class="muted">8:00 PM - Doors & welcome drinks</p>
+          <p class="muted">9:00 PM - Live performances</p>
+          <p class="muted">11:30 PM - Countdown pre-show</p>
+          <p class="muted">12:00 AM - Toast + confetti moment</p>
+        </article>
+        <article class="card">
+          <strong>Venue Info</strong>
+          <p class="muted">Grand Aurora Hall, 123 Celebration Ave, Downtown.</p>
+          <p class="muted">Smart evening attire encouraged. Parking and rideshare drop-off available.</p>
+          <p class="muted">Contact (sample): +1 (000) 123-4567 · events@example.com</p>
+        </article>
       </div>
-      <button class="hud-btn" id="btn-levels">🗺️ MAP</button>
-      <button class="hud-btn" id="btn-sound">🔊</button>
+    </section>
+
+    <section class="container" id="faq">
+      <h2>FAQ</h2>
+      <details>
+        <summary>Can I switch from ticket booking to table reservation?</summary>
+        <p class="muted">Yes. Use the booking mode cards and the summary will update instantly.</p>
+      </details>
+      <details>
+        <summary>Are prices final?</summary>
+        <p class="muted">No. All listed prices are sample content for frontend demonstration.</p>
+      </details>
+      <details>
+        <summary>Is this connected to payments?</summary>
+        <p class="muted">Not yet. This UI is frontend-only and ready to connect to backend services.</p>
+      </details>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container foot">
+      <div>© Midnight Royale NYE Gala · Contact · Instagram · X · Facebook</div>
+      <div>Reservations are subject to confirmation and availability.</div>
     </div>
-  </div>
+  </footer>
 
-  <!-- Combo Display -->
-  <div id="combo-box">3x COMBO!</div>
+  <script>
+    (function () {
+      const state = {
+        mode: 'ticket'
+      };
 
-  <!-- Boss Health Bar -->
-  <div id="boss-hud">
-    <div id="boss-title">ANCIENT RUIN TITAN</div>
-    <div class="boss-bar-wrap">
-      <div id="boss-hp-fill"></div>
-    </div>
-  </div>
+      const ticketModeBtn = document.getElementById('ticket-mode');
+      const tableModeBtn = document.getElementById('table-mode');
+      const ticketFields = document.getElementById('ticket-fields');
+      const tableFields = document.getElementById('table-fields');
+      const ticketTier = document.getElementById('ticket-tier');
+      const ticketQty = document.getElementById('ticket-qty');
+      const tablePackage = document.getElementById('table-package');
+      const partySize = document.getElementById('party-size');
+      const summaryMode = document.getElementById('summary-mode');
+      const summaryUnitLabel = document.getElementById('summary-unit-label');
+      const summaryUnits = document.getElementById('summary-units');
+      const summaryRate = document.getElementById('summary-rate');
+      const summarySubtotal = document.getElementById('summary-subtotal');
+      const summaryFee = document.getElementById('summary-fee');
+      const summaryTotal = document.getElementById('summary-total');
+      const reserveBtn = document.getElementById('reserve-btn');
+      const bookingForm = document.getElementById('booking-form');
+      const feedback = document.getElementById('form-feedback');
+      const guestName = document.getElementById('guest-name');
+      const guestEmail = document.getElementById('guest-email');
+      const terms = document.getElementById('terms');
 
-  <!-- Center Announcement Banner -->
-  <div id="center-banner">
-    <div id="banner-title">CHECKPOINT ATTUNED</div>
-    <div id="banner-subtitle">Ancient obelisk activated. Your soul is bound to this sanctuary.</div>
-  </div>
-
-  <!-- Prompt -->
-  <div id="interact-hint">✨ Press <strong>[E]</strong> or <strong>Attack</strong> to Open</div>
-
-  <!-- Touch Controls -->
-  <div id="touch-pad">
-    <div class="touch-group">
-      <button class="touch-btn" id="t-left">◀</button>
-      <button class="touch-btn" id="t-right">▶</button>
-      <button class="touch-btn" id="t-down" title="Drop / Down Slam">▼</button>
-    </div>
-    <div class="touch-group">
-      <button class="touch-btn magic-btn" id="t-magic" title="Soul Magic">🔮</button>
-      <button class="touch-btn dash-btn" id="t-dash" title="Shadow Dash">⚡</button>
-      <button class="touch-btn atk-btn" id="t-atk" title="Sword Combo">⚔️</button>
-      <button class="touch-btn jump-btn" id="t-jump" title="Jump / Double Jump">▲</button>
-    </div>
-  </div>
-
-  <!-- Death Overlay -->
-  <div class="full-overlay" id="death-overlay">
-    <h1 style="color:var(--red);">MORTAL CASUALTY</h1>
-    <p>Your mortal flesh has perished, but your spirit crystallizes into the earth.</p>
-    <div class="subtext">"Your petrified body remains as a physical stepping stone. Rebirth and conquer."</div>
-    <div class="overlay-btns">
-      <button class="gold-btn" id="btn-respawn">REBIRTH AT CHECKPOINT (Space / Tap)</button>
-      <button class="cyan-btn" id="btn-clear-corpses">CLEAR LEVEL CORPSES</button>
-    </div>
-  </div>
-
-  <!-- Level Complete Overlay -->
-  <div class="full-overlay" id="win-overlay">
-    <h1 style="color:var(--accent);">SANCTUARY CLEARED</h1>
-    <p id="win-msg">You have conquered this ancient realm and mastered its deadly trials!</p>
-    <div class="subtext" id="win-stats">Corpses placed: 0 | Coins gathered: 0</div>
-    <div class="overlay-btns">
-      <button class="cyan-btn" id="btn-next-level">NEXT REALM ➔</button>
-      <button class="gold-btn" id="btn-replay-level">REPLAY REALM</button>
-      <button class="hud-btn" id="btn-win-map">MAP</button>
-    </div>
-  </div>
-
-  <!-- Level Select Overlay -->
-  <div class="full-overlay" id="level-select-overlay">
-    <h1 style="color:var(--cyan);">REALMS OF HUMANKIND</h1>
-    <p>Select any attuned sanctuary or replay prior trials with your earned souls.</p>
-    <div id="level-grid"></div>
-    <div class="overlay-btns">
-      <button class="gold-btn" id="btn-close-map">RESUME ADVENTURE</button>
-    </div>
-    <div id="control-guide">
-      ⌨️ <strong>Controls:</strong> [A]/[D] or [Arrows] Move | [Space] Jump & Double Jump | [J]/[Z] or [LMB] Sword Combo<br>
-      [K]/[X] Soul Bolt (15 Mana) | [L]/[Shift] Dash | [S]/[Down] in Air: Heavy Downward Plunge | [E] Interact
-    </div>
-  </div>
-</div>
-
-<script>
-// ============================================================================
-// 1. PROCEDURAL SOUND SYNTHESIZER (WEB AUDIO API - ZERO EXTERNAL AUDIO FILES)
-// ============================================================================
-class SoundFX {
-  constructor() {
-    this.ctx = null;
-    this.muted = false;
-  }
-  init() {
-    if (!this.ctx) {
-      const AC = window.AudioContext || window.webkitAudioContext;
-      if (AC) this.ctx = new AC();
-    }
-    if (this.ctx && this.ctx.state === 'suspended') {
-      this.ctx.resume();
-    }
-  }
-  playTone(freq, dur, type = 'sine', vol = 0.09, ramp = null) {
-    if (this.muted) return;
-    this.init();
-    if (!this.ctx) return;
-    try {
-      const t = this.ctx.currentTime;
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.type = type;
-      osc.frequency.setValueAtTime(freq, t);
-      if (ramp !== null) {
-        osc.frequency.exponentialRampToValueAtTime(Math.max(10, ramp), t + dur);
+      function money(value) {
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
       }
-      gain.gain.setValueAtTime(vol, t);
-      gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.start(t);
-      osc.stop(t + dur);
-    } catch(e) {}
-  }
-  jump() { this.playTone(280, 0.16, 'triangle', 0.12, 560); }
-  doubleJump() { this.playTone(450, 0.18, 'triangle', 0.14, 820); }
-  sword(combo = 1) {
-    const f = combo === 1 ? 480 : (combo === 2 ? 620 : 780);
-    this.playTone(f, 0.12, 'sawtooth', 0.1, 160);
-  }
-  hit() { this.playTone(190, 0.22, 'square', 0.15, 60); }
-  slam() { this.playTone(120, 0.35, 'square', 0.2, 40); }
-  magic() { this.playTone(600, 0.25, 'sine', 0.12, 1200); }
-  dash() { this.playTone(320, 0.14, 'triangle', 0.1, 80); }
-  coin() {
-    this.playTone(659, 0.08, 'sine', 0.09);
-    setTimeout(() => this.playTone(987, 0.14, 'sine', 0.09), 60);
-  }
-  chest() {
-    [400, 520, 650, 880].forEach((f, i) => {
-      setTimeout(() => this.playTone(f, 0.18, 'triangle', 0.1), i * 70);
-    });
-  }
-  checkpoint() {
-    [440, 554, 659, 880].forEach((f, i) => {
-      setTimeout(() => this.playTone(f, 0.25, 'sine', 0.11), i * 90);
-    });
-  }
-  portal() {
-    [523, 659, 783, 1046, 1318].forEach((f, i) => {
-      setTimeout(() => this.playTone(f, 0.35, 'triangle', 0.12), i * 80);
-    });
-  }
-  death() { this.playTone(260, 0.55, 'sawtooth', 0.18, 45); }
-  bossRoar() {
-    this.playTone(90, 0.65, 'sawtooth', 0.25, 45);
-    setTimeout(() => this.playTone(70, 0.5, 'square', 0.2, 30), 120);
-  }
-}
-const sfx = new SoundFX();
 
-// ============================================================================
-// 2. PERSISTENCE & GLOBAL PROGRESSION
-// ============================================================================
-const SAVE_KEY = 'rebirth_game_save_v2';
-let currentLevelIndex = 0;
-let unlockedLevel = 1; // 1 to 10
-let deaths = 0;
-let coins = 0;
-let levelCorpsesMap = {}; // corpses per level index
-
-try {
-  const d = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null');
-  if (d) {
-    unlockedLevel = Math.max(1, Math.min(10, d.unlockedLevel || 1));
-    deaths = d.deaths || 0;
-    coins = d.coins || 0;
-    levelCorpsesMap = d.corpses || {};
-  }
-} catch(e) {}
-
-function saveGameState() {
-  try {
-    localStorage.setItem(SAVE_KEY, JSON.stringify({
-      unlockedLevel, deaths, coins, corpses: levelCorpsesMap
-    }));
-  } catch(e) {}
-}
-
-// ============================================================================
-// 3. THREE.JS SCENE, CAMERAS, LIGHTING & SHADERS
-// ============================================================================
-const canvas = document.getElementById('three-canvas');
-const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0x0c1524, 0.014);
-
-const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 400);
-camera.position.set(0, 4, 17);
-
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-
-// Vibrant Lights
-const hemiLight = new THREE.HemisphereLight(0x7ed6df, 0x3d354a, 0.85);
-scene.add(hemiLight);
-
-const sunLight = new THREE.DirectionalLight(0xfffae6, 0.95);
-sunLight.position.set(20, 35, 25);
-sunLight.castShadow = true;
-sunLight.shadow.mapSize.width = 1024;
-sunLight.shadow.mapSize.height = 1024;
-sunLight.shadow.camera.near = 5;
-sunLight.shadow.camera.far = 120;
-sunLight.shadow.camera.left = -35;
-sunLight.shadow.camera.right = 35;
-sunLight.shadow.camera.top = 30;
-sunLight.shadow.camera.bottom = -30;
-sunLight.shadow.bias = -0.0004;
-scene.add(sunLight);
-
-// Palette Materials
-const MAT = {
-  grass: new THREE.MeshLambertMaterial({ color: 0x2ed573 }),
-  stone: new THREE.MeshLambertMaterial({ color: 0x576574 }),
-  darkStone: new THREE.MeshLambertMaterial({ color: 0x2f3542 }),
-  ruins: new THREE.MeshLambertMaterial({ color: 0x8395a7 }),
-  wood: new THREE.MeshLambertMaterial({ color: 0x8c531b }),
-  ice: new THREE.MeshLambertMaterial({ color: 0xa8d8ea, transparent: true, opacity: 0.85 }),
-  magmaRock: new THREE.MeshLambertMaterial({ color: 0x2c1410 }),
-  lava: new THREE.MeshBasicMaterial({ color: 0xff3838 }),
-  crystalCyan: new THREE.MeshLambertMaterial({ color: 0x00d2d3, emissive: 0x00d2d3, emissiveIntensity: 0.6 }),
-  crystalPurple: new THREE.MeshLambertMaterial({ color: 0xa55eea, emissive: 0xa55eea, emissiveIntensity: 0.6 }),
-  gold: new THREE.MeshLambertMaterial({ color: 0xfbc531, emissive: 0xfbc531, emissiveIntensity: 0.35 }),
-  torchFlame: new THREE.MeshBasicMaterial({ color: 0xff9f43 }),
-  spikes: new THREE.MeshLambertMaterial({ color: 0x383b40 }),
-  corpseStone: new THREE.MeshLambertMaterial({ color: 0x778ca3 }),
-  corpseRunes: new THREE.MeshLambertMaterial({ color: 0x00d2d3, emissive: 0x00d2d3, emissiveIntensity: 0.8 }),
-  chestWood: new THREE.MeshLambertMaterial({ color: 0xa0522d }),
-  metalTrim: new THREE.MeshLambertMaterial({ color: 0xfbc531, emissive: 0xfbc531, emissiveIntensity: 0.2 }),
-  portalSwirl: new THREE.MeshBasicMaterial({ color: 0x00d2d3, wireframe: true, transparent: true, opacity: 0.75 })
-};
-
-// ============================================================================
-// 4. PARALLAX SYSTEM (Dynamic by Theme)
-// ============================================================================
-const parallaxLayers = {
-  mountains: new THREE.Group(),
-  floatingIsles: new THREE.Group(),
-  clouds: new THREE.Group()
-};
-scene.add(parallaxLayers.mountains);
-scene.add(parallaxLayers.floatingIsles);
-scene.add(parallaxLayers.clouds);
-
-let floatingIslandList = [];
-
-function rebuildParallax(theme = 'grass') {
-  // Clear old
-  while (parallaxLayers.mountains.children.length) parallaxLayers.mountains.remove(parallaxLayers.mountains.children[0]);
-  while (parallaxLayers.floatingIsles.children.length) parallaxLayers.floatingIsles.remove(parallaxLayers.floatingIsles.children[0]);
-  while (parallaxLayers.clouds.children.length) parallaxLayers.clouds.remove(parallaxLayers.clouds.children[0]);
-  floatingIslandList = [];
-
-  let mColor1 = 0x22314e, mColor2 = 0x18243b;
-  let fogColor = 0x0c1524;
-  let sunColor = 0xfffae6;
-
-  if (theme === 'lava') {
-    mColor1 = 0x3d0c0c; mColor2 = 0x200505;
-    fogColor = 0x1f0808; sunColor = 0xff793f;
-    hemiLight.color.setHex(0xff793f);
-    hemiLight.groundColor.setHex(0x3d0c0c);
-  } else if (theme === 'ice') {
-    mColor1 = 0x224466; mColor2 = 0x112233;
-    fogColor = 0x0d1f2d; sunColor = 0xdff9fb;
-    hemiLight.color.setHex(0xc7ecee);
-    hemiLight.groundColor.setHex(0x535c68);
-  } else if (theme === 'sky') {
-    mColor1 = 0x487eb0; mColor2 = 0x273c75;
-    fogColor = 0x192a56; sunColor = 0xf5cd79;
-    hemiLight.color.setHex(0x70a1ff);
-    hemiLight.groundColor.setHex(0x3742fa);
-  } else if (theme === 'crypt') {
-    mColor1 = 0x191924; mColor2 = 0x0f0f18;
-    fogColor = 0x09090e; sunColor = 0xb8e994;
-    hemiLight.color.setHex(0x78e08f);
-    hemiLight.groundColor.setHex(0x1e272e);
-  } else {
-    // Normal Fantasy
-    hemiLight.color.setHex(0x7ed6df);
-    hemiLight.groundColor.setHex(0x3d354a);
-  }
-  scene.fog.color.setHex(fogColor);
-  sunLight.color.setHex(sunColor);
-
-  // Background mountains (Z = -55)
-  for (let i = -10; i <= 32; i++) {
-    const h = 20 + Math.abs(Math.sin(i * 1.6)) * 16;
-    const rad = 11 + Math.abs(Math.cos(i * 2.2)) * 7;
-    const mGeo = new THREE.ConeGeometry(rad, h, 5);
-    const mMat = new THREE.MeshLambertMaterial({ color: i % 2 === 0 ? mColor1 : mColor2 });
-    const mountain = new THREE.Mesh(mGeo, mMat);
-    mountain.position.set(i * 14, h / 2 - 6, -55);
-    parallaxLayers.mountains.add(mountain);
-  }
-
-  // Floating fantasy isles (Z = -26)
-  for (let i = -6; i <= 24; i++) {
-    const isl = new THREE.Group();
-    const rad = 2.8 + (Math.sin(i * 3) + 1) * 1.5;
-    const rGeo = new THREE.ConeGeometry(rad, rad * 1.6, 5);
-    const rMesh = new THREE.Mesh(rGeo, MAT.darkStone);
-    rMesh.rotation.x = Math.PI;
-    isl.add(rMesh);
-
-    const gMesh = new THREE.Mesh(new THREE.CylinderGeometry(rad, rad * 0.9, 0.5, 6),
-      theme === 'ice' ? MAT.ice : (theme === 'lava' ? MAT.magmaRock : MAT.grass)
-    );
-    gMesh.position.y = 0.25;
-    isl.add(gMesh);
-
-    isl.position.set(i * 16 + Math.sin(i) * 5, 10 + Math.cos(i * 1.3) * 6, -26);
-    isl.userData = { baseY: isl.position.y, seed: i * 1.7 };
-    parallaxLayers.floatingIsles.add(isl);
-    floatingIslandList.push(isl);
-  }
-
-  // Clouds
-  for (let i = -8; i <= 24; i++) {
-    const cGrp = new THREE.Group();
-    for (let c = 0; c < 3; c++) {
-      const puff = new THREE.Mesh(
-        new THREE.DodecahedronGeometry(2.0 + c * 0.6, 1),
-        new THREE.MeshBasicMaterial({ color: theme === 'lava' ? 0x633939 : 0xe0eafc, transparent: true, opacity: 0.35 })
-      );
-      puff.position.set(c * 2.2, Math.sin(c) * 0.5, 0);
-      cGrp.add(puff);
-    }
-    cGrp.position.set(i * 20, 20 + Math.sin(i) * 5, -36);
-    parallaxLayers.clouds.add(cGrp);
-  }
-}
-
-// ============================================================================
-// 5. WORLD OBJECTS, COLLIDERS & INTERACTIVE PROPS
-// ============================================================================
-let colliders = [];
-let worldCoins = [];
-let worldEnemies = [];
-let worldTorches = [];
-let worldCrystals = [];
-let worldChests = [];
-let worldSwitches = [];
-let worldMushrooms = [];
-let worldMovingPlatforms = [];
-let worldFallingPlatforms = [];
-let worldParticles = [];
-let worldMagicProjectiles = [];
-let worldEnemyProjectiles = [];
-let worldCorpses = [];
-let currentBoss = null;
-let activePortal = null;
-let activeCheckpoint = { x: 0, y: 1.5, rune: null, activated: false };
-
-// Helper to spawn solid platform
-function createPlatform(x, y, w, h, matType = 'grass') {
-  const group = new THREE.Group();
-  let baseMat = MAT.stone;
-  let topMat = MAT.grass;
-
-  if (matType === 'lava') { baseMat = MAT.magmaRock; topMat = MAT.magmaRock; }
-  else if (matType === 'ice') { baseMat = MAT.darkStone; topMat = MAT.ice; }
-  else if (matType === 'crypt') { baseMat = MAT.darkStone; topMat = MAT.ruins; }
-  else if (matType === 'ruins') { baseMat = MAT.ruins; topMat = MAT.ruins; }
-
-  const stone = new THREE.Mesh(new THREE.BoxGeometry(w, h, 2.6), baseMat);
-  stone.position.y = -h / 2;
-  stone.castShadow = true;
-  stone.receiveShadow = true;
-  group.add(stone);
-
-  const topH = 0.4;
-  const top = new THREE.Mesh(new THREE.BoxGeometry(w + 0.15, topH, 2.8), topMat);
-  top.position.y = -topH / 2;
-  top.receiveShadow = true;
-  group.add(top);
-
-  group.position.set(x + w / 2, y, 0);
-  scene.add(group);
-
-  colliders.push({
-    minX: x, maxX: x + w,
-    minY: y - h, maxY: y,
-    isSpike: false, isLava: false, isPlatform: true, isIce: matType === 'ice'
-  });
-  return group;
-}
-
-// Moving Platform
-function createMovingPlatform(x, y, w, rangeX, rangeY, speed = 2.0) {
-  const group = new THREE.Group();
-  const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, 0.7, 2.4), MAT.ruins);
-  mesh.castShadow = true;
-  mesh.receiveShadow = true;
-  group.add(mesh);
-  group.position.set(x, y, 0);
-  scene.add(group);
-
-  const obj = {
-    group,
-    w, h: 0.7,
-    startX: x, startY: y,
-    rangeX, rangeY,
-    speed,
-    timer: 0,
-    prevX: x, prevY: y,
-    curX: x, curY: y,
-    collider: {
-      minX: x - w / 2, maxX: x + w / 2,
-      minY: y - 0.7, maxY: y,
-      isMoving: true
-    }
-  };
-  colliders.push(obj.collider);
-  worldMovingPlatforms.push(obj);
-  return obj;
-}
-
-// Crumbling / Falling Platform
-function createFallingPlatform(x, y, w) {
-  const group = new THREE.Group();
-  const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, 0.6, 2.2), MAT.wood);
-  mesh.castShadow = true;
-  group.add(mesh);
-  group.position.set(x, y, 0);
-  scene.add(group);
-
-  const obj = {
-    group, mesh,
-    x, y, w, h: 0.6,
-    state: 'idle', // idle, shaking, falling, respawning
-    timer: 0,
-    origY: y,
-    collider: {
-      minX: x - w / 2, maxX: x + w / 2,
-      minY: y - 0.6, maxY: y,
-      isFallingPlatform: true
-    }
-  };
-  colliders.push(obj.collider);
-  worldFallingPlatforms.push(obj);
-}
-
-// Bouncy Mushroom
-function createMushroom(x, y) {
-  const group = new THREE.Group();
-  // Stem
-  const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.45, 0.8, 8), MAT.wood);
-  stem.position.y = 0.4;
-  group.add(stem);
-  // Cap
-  const cap = new THREE.Mesh(
-    new THREE.SphereGeometry(0.85, 8, 8, 0, Math.PI * 2, 0, Math.PI * 0.5),
-    new THREE.MeshLambertMaterial({ color: 0xff4757, emissive: 0xff4757, emissiveIntensity: 0.3 })
-  );
-  cap.position.y = 0.8;
-  cap.scale.y = 0.6;
-  group.add(cap);
-
-  group.position.set(x, y, 0);
-  scene.add(group);
-  worldMushrooms.push({ x, y: y + 0.8, group, cap, squish: 0 });
-}
-
-// Spikes & Lava Pit Hazards
-function createSpikes(x, y, w) {
-  const group = new THREE.Group();
-  const count = Math.floor(w / 0.5);
-  for (let i = 0; i < count; i++) {
-    const spike = new THREE.Mesh(new THREE.ConeGeometry(0.24, 0.8, 4), MAT.spikes);
-    spike.position.set(x + i * 0.5 + 0.25, y + 0.4, 0);
-    spike.castShadow = true;
-    group.add(spike);
-  }
-  scene.add(group);
-  colliders.push({ minX: x, maxX: x + w, minY: y, maxY: y + 0.8, isSpike: true });
-}
-
-function createLavaHazard(x, y, w) {
-  const group = new THREE.Group();
-  const lavaMesh = new THREE.Mesh(new THREE.BoxGeometry(w, 1.2, 3), MAT.lava);
-  lavaMesh.position.set(x + w / 2, y - 0.6, 0);
-  group.add(lavaMesh);
-  scene.add(group);
-  colliders.push({ minX: x, maxX: x + w, minY: y - 1.2, maxY: y, isLava: true });
-}
-
-// Ancient Bridge
-function createBridge(x, y, w) {
-  const group = new THREE.Group();
-  const plankCount = Math.floor(w / 0.8);
-  for (let i = 0; i < plankCount; i++) {
-    const px = x + i * 0.8 + 0.4;
-    const sag = Math.sin((i / plankCount) * Math.PI) * 0.32;
-    const plank = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.18, 2.2), MAT.wood);
-    plank.position.set(px, y - sag, 0);
-    plank.castShadow = true;
-    group.add(plank);
-  }
-  scene.add(group);
-  colliders.push({ minX: x, maxX: x + w, minY: y - 0.5, maxY: y, isBridge: true });
-}
-
-// Treasure Chest
-function createChest(x, y, loot = 25) {
-  const group = new THREE.Group();
-  const base = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.6, 0.8), MAT.chestWood);
-  base.position.y = 0.3;
-  base.castShadow = true;
-  group.add(base);
-
-  const lid = new THREE.Group();
-  lid.position.set(0, 0.6, -0.4);
-  const lidMesh = new THREE.Mesh(new THREE.BoxGeometry(1.24, 0.35, 0.8), MAT.metalTrim);
-  lidMesh.position.set(0, 0.17, 0.4);
-  lid.add(lidMesh);
-  group.add(lid);
-
-  group.position.set(x, y, 0);
-  scene.add(group);
-  worldChests.push({ group, lid, x, y, loot, opened: false });
-}
-
-// Pressure Switch / Stone Lever
-function createSwitch(x, y, targetGate) {
-  const group = new THREE.Group();
-  const plate = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.8, 0.18, 8), MAT.gold);
-  plate.position.y = 0.09;
-  group.add(plate);
-  group.position.set(x, y, 0);
-  scene.add(group);
-  worldSwitches.push({ group, plate, x, y, targetGate, pressed: false });
-}
-
-// Checkpoint Obelisk
-function createCheckpoint(x, y) {
-  const group = new THREE.Group();
-  const base = new THREE.Mesh(new THREE.BoxGeometry(2, 0.6, 2), MAT.stone);
-  base.position.y = 0.3;
-  group.add(base);
-
-  const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.85, 4.2, 4), MAT.stone);
-  pillar.position.y = 2.4;
-  pillar.rotation.y = Math.PI / 4;
-  group.add(pillar);
-
-  const rune = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.9, 0.48), new THREE.MeshLambertMaterial({
-    color: 0x485460, emissive: 0x485460, emissiveIntensity: 0.1
-  }));
-  rune.position.y = 2.4;
-  rune.rotation.y = Math.PI / 4;
-  group.add(rune);
-
-  group.position.set(x, y, 0);
-  scene.add(group);
-  activeCheckpoint = { x, y: y + 0.6, rune, activated: false, group };
-}
-
-// Finish Level Portal
-function createLevelPortal(x, y) {
-  const group = new THREE.Group();
-
-  // Stone Arch
-  const pL = new THREE.Mesh(new THREE.BoxGeometry(0.8, 5.0, 0.8), MAT.ruins);
-  pL.position.set(-1.8, 2.5, 0);
-  group.add(pL);
-  const pR = new THREE.Mesh(new THREE.BoxGeometry(0.8, 5.0, 0.8), MAT.ruins);
-  pR.position.set(1.8, 2.5, 0);
-  group.add(pR);
-  const pTop = new THREE.Mesh(new THREE.BoxGeometry(4.4, 0.8, 1.0), MAT.ruins);
-  pTop.position.set(0, 5.0, 0);
-  group.add(pTop);
-
-  // Swirling Vortex Disc
-  const vortexGeo = new THREE.TorusGeometry(1.6, 0.4, 8, 24);
-  const vortex = new THREE.Mesh(vortexGeo, MAT.portalSwirl);
-  vortex.position.set(0, 2.6, 0);
-  group.add(vortex);
-
-  // Light
-  const pLight = new THREE.PointLight(0x00d2d3, 2.0, 10);
-  pLight.position.set(0, 2.6, 0.5);
-  group.add(pLight);
-
-  group.position.set(x, y, 0);
-  scene.add(group);
-  activePortal = { group, vortex, x, y };
-}
-
-// Torch
-function createTorch(x, y) {
-  const group = new THREE.Group();
-  const bracket = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.8, 0.2), MAT.wood);
-  bracket.rotation.z = -0.3;
-  group.add(bracket);
-
-  const flame = new THREE.Mesh(new THREE.ConeGeometry(0.25, 0.6, 5), MAT.torchFlame);
-  flame.position.set(0.12, 0.5, 0);
-  group.add(flame);
-
-  const light = new THREE.PointLight(0xffa502, 1.4, 8);
-  light.position.set(0.12, 0.6, 0.4);
-  group.add(light);
-
-  group.position.set(x, y, -0.8);
-  scene.add(group);
-  worldTorches.push({ flame, light, baseIntensity: 1.4 });
-}
-
-// Coin
-function createCoin(x, y) {
-  const geo = new THREE.CylinderGeometry(0.34, 0.34, 0.1, 8);
-  const mesh = new THREE.Mesh(geo, MAT.gold);
-  mesh.rotation.x = Math.PI / 2;
-  mesh.position.set(x, y, 0);
-  scene.add(mesh);
-  worldCoins.push({ mesh, x, y, collected: false });
-}
-
-// Ruined Pillar
-function createRuins(x, y) {
-  const group = new THREE.Group();
-  const bMesh = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.6, 1.6), MAT.ruins);
-  bMesh.position.y = 0.3;
-  group.add(bMesh);
-
-  const cMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.65, 4.5, 7), MAT.ruins);
-  cMesh.position.y = 2.8;
-  cMesh.castShadow = true;
-  group.add(cMesh);
-
-  const tMesh = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.6, 1.6), MAT.ruins);
-  tMesh.position.y = 5.2;
-  group.add(tMesh);
-
-  group.position.set(x, y, -0.6);
-  scene.add(group);
-}
-
-// ============================================================================
-// 6. SWORDIGO HERO CHARACTER RIG & COMPLETE ANIMATION SYSTEM
-// ============================================================================
-const playerGroup = new THREE.Group();
-scene.add(playerGroup);
-
-// Torso / Tunic
-const torso = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.95, 0.52), new THREE.MeshLambertMaterial({ color: 0x1e3799 }));
-torso.position.y = 1.05;
-torso.castShadow = true;
-playerGroup.add(torso);
-
-// Hero Head & Hair Band
-const head = new THREE.Mesh(new THREE.BoxGeometry(0.58, 0.58, 0.58), new THREE.MeshLambertMaterial({ color: 0xf6b93b }));
-head.position.y = 1.88;
-head.castShadow = true;
-playerGroup.add(head);
-
-const hair = new THREE.Mesh(new THREE.BoxGeometry(0.64, 0.24, 0.64), new THREE.MeshLambertMaterial({ color: 0x3d1c02 }));
-hair.position.y = 2.14;
-playerGroup.add(hair);
-
-// Scarf / Capelet that flutters with speed
-const scarf = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.2, 0.8), new THREE.MeshLambertMaterial({ color: 0x00d2d3 }));
-scarf.position.set(0, 1.5, -0.4);
-playerGroup.add(scarf);
-
-// Arms
-const leftArm = new THREE.Group();
-leftArm.position.set(-0.52, 1.35, 0);
-const lArmMesh = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.72, 0.24), new THREE.MeshLambertMaterial({ color: 0x1e3799 }));
-lArmMesh.position.y = -0.3;
-lArmMesh.castShadow = true;
-leftArm.add(lArmMesh);
-playerGroup.add(leftArm);
-
-const rightArm = new THREE.Group();
-rightArm.position.set(0.52, 1.35, 0);
-const rArmMesh = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.72, 0.24), new THREE.MeshLambertMaterial({ color: 0x1e3799 }));
-rArmMesh.position.y = -0.3;
-rArmMesh.castShadow = true;
-rightArm.add(rArmMesh);
-
-// Glowing Fantasy Sword
-const swordGroup = new THREE.Group();
-const hilt = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.3, 0.12), MAT.wood);
-hilt.position.y = -0.58;
-swordGroup.add(hilt);
-const guard = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.12, 0.22), MAT.gold);
-guard.position.y = -0.42;
-swordGroup.add(guard);
-const blade = new THREE.Mesh(new THREE.BoxGeometry(0.24, 1.25, 0.08), new THREE.MeshLambertMaterial({
-  color: 0x00d2d3, emissive: 0x00d2d3, emissiveIntensity: 0.6
-}));
-blade.position.y = 0.25;
-blade.castShadow = true;
-swordGroup.add(blade);
-
-swordGroup.position.set(0.1, -0.4, 0.3);
-swordGroup.rotation.x = Math.PI / 4;
-rightArm.add(swordGroup);
-playerGroup.add(rightArm);
-
-// Legs
-const leftLeg = new THREE.Group();
-leftLeg.position.set(-0.22, 0.65, 0);
-const lLegMesh = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.75, 0.26), new THREE.MeshLambertMaterial({ color: 0x2c3e50 }));
-lLegMesh.position.y = -0.32;
-lLegMesh.castShadow = true;
-leftLeg.add(lLegMesh);
-playerGroup.add(leftLeg);
-
-const rightLeg = new THREE.Group();
-rightLeg.position.set(0.22, 0.65, 0);
-const rLegMesh = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.75, 0.26), new THREE.MeshLambertMaterial({ color: 0x2c3e50 }));
-rLegMesh.position.y = -0.32;
-rLegMesh.castShadow = true;
-rightLeg.add(rLegMesh);
-playerGroup.add(rightLeg);
-
-// Glowing Slash Effect
-const slashGeo = new THREE.RingGeometry(0.8, 1.6, 16, 1, 0, Math.PI * 0.95);
-const slashMat = new THREE.MeshBasicMaterial({ color: 0x00d2d3, transparent: true, opacity: 0, side: THREE.DoubleSide });
-const slashMesh = new THREE.Mesh(slashGeo, slashMat);
-slashMesh.position.set(0.7, 1.2, 0.1);
-playerGroup.add(slashMesh);
-
-// Downward slam shockwave mesh
-const slamRingGeo = new THREE.RingGeometry(0.2, 1.8, 16);
-const slamRingMat = new THREE.MeshBasicMaterial({ color: 0xfffa65, transparent: true, opacity: 0, side: THREE.DoubleSide });
-const slamRing = new THREE.Mesh(slamRingGeo, slamRingMat);
-slamRing.rotation.x = -Math.PI / 2;
-slamRing.position.y = 0.1;
-scene.add(slamRing);
-
-// Player State
-const player = {
-  x: -3, y: 1.5,
-  vx: 0, vy: 0,
-  w: 0.85, h: 2.15,
-  onGround: false,
-  face: 1,
-  runTimer: 0,
-  hp: 3, maxHp: 3,
-  mana: 50, maxMana: 50,
-  invulnTimer: 0,
-  // Double Jump
-  canDoubleJump: true,
-  // Attack Combo (1, 2, 3)
-  isAttacking: false,
-  comboCount: 0,
-  comboTimer: 0,
-  atkDuration: 0.24,
-  atkTimeLeft: 0,
-  // Downward Slam
-  isSlamming: false,
-  // Dash
-  isDashing: false,
-  dashTimer: 0,
-  dashCooldown: 0,
-  // Wall Slide
-  onWall: 0 // -1 left wall, 1 right wall, 0 none
-};
-
-// ============================================================================
-// 7. PARTICLES & COMBAT EFFECTS
-// ============================================================================
-function spawnHitSparks(x, y, color = 0xfffa65, count = 8) {
-  for (let i = 0; i < count; i++) {
-    const pGeo = new THREE.BoxGeometry(0.12, 0.12, 0.12);
-    const pMat = new THREE.MeshBasicMaterial({ color });
-    const mesh = new THREE.Mesh(pGeo, pMat);
-    mesh.position.set(x, y, 0);
-    scene.add(mesh);
-    const ang = Math.random() * Math.PI * 2;
-    const spd = 3 + Math.random() * 5;
-    worldParticles.push({
-      mesh,
-      vx: Math.cos(ang) * spd,
-      vy: Math.sin(ang) * spd + 2,
-      life: 0.35, maxLife: 0.35
-    });
-  }
-}
-
-function spawnDashGhost(x, y, face) {
-  const ghost = new THREE.Mesh(
-    new THREE.BoxGeometry(0.7, 1.8, 0.4),
-    new THREE.MeshBasicMaterial({ color: 0x00d2d3, transparent: true, opacity: 0.45 })
-  );
-  ghost.position.set(x, y + 1.0, 0);
-  scene.add(ghost);
-  worldParticles.push({ mesh: ghost, vx: 0, vy: 0, life: 0.22, maxLife: 0.22, isGhost: true });
-}
-
-// Soul Bolt Magic
-function castMagicBolt() {
-  if (player.mana < 15 || player.hp <= 0) return;
-  player.mana -= 15;
-  updateHUDMana();
-  sfx.magic();
-
-  const boltGeo = new THREE.SphereGeometry(0.35, 8, 8);
-  const boltMat = new THREE.MeshBasicMaterial({ color: 0xa55eea });
-  const mesh = new THREE.Mesh(boltGeo, boltMat);
-  mesh.position.set(player.x + player.face * 0.9, player.y + 1.2, 0);
-  scene.add(mesh);
-
-  worldMagicProjectiles.push({
-    mesh,
-    vx: player.face * 18,
-    life: 2.0
-  });
-}
-
-// ============================================================================
-// 8. THE SIGNATURE CORPSE-PLATFORM MECHANIC
-// ============================================================================
-function spawnCorpse(x, y) {
-  const corpse = new THREE.Group();
-  const bodyMesh = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.5, 1.2), MAT.corpseStone);
-  bodyMesh.position.y = 0.25;
-  bodyMesh.castShadow = true;
-  bodyMesh.receiveShadow = true;
-  corpse.add(bodyMesh);
-
-  const rune = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.08, 0.5), MAT.corpseRunes);
-  rune.position.y = 0.51;
-  corpse.add(rune);
-
-  corpse.position.set(x, y, 0);
-  scene.add(corpse);
-  worldCorpses.push(corpse);
-
-  // Add physical stepping platform collider
-  colliders.push({
-    minX: x - 0.8, maxX: x + 0.8,
-    minY: y, maxY: y + 0.5,
-    isSpike: false, isCorpse: true
-  });
-
-  if (!levelCorpsesMap[currentLevelIndex]) levelCorpsesMap[currentLevelIndex] = [];
-  levelCorpsesMap[currentLevelIndex].push({ x, y });
-  saveGameState();
-}
-
-function clearCurrentLevelCorpses() {
-  for (const c of worldCorpses) scene.remove(c);
-  worldCorpses = [];
-  colliders = colliders.filter(c => !c.isCorpse);
-  levelCorpsesMap[currentLevelIndex] = [];
-  saveGameState();
-  respawnPlayer();
-}
-
-function killPlayer(reason = 'perished') {
-  if (player.hp <= 0) return;
-  player.hp = 0;
-  deaths++;
-  sfx.death();
-  document.getElementById('hud-deaths').textContent = deaths + 1;
-
-  spawnHitSparks(player.x, player.y + 1, 0xff4757, 18);
-  spawnCorpse(player.x, player.y);
-
-  document.getElementById('death-overlay').classList.add('visible');
-}
-
-function respawnPlayer() {
-  document.getElementById('death-overlay').classList.remove('visible');
-  player.x = activeCheckpoint.x;
-  player.y = activeCheckpoint.y + 0.5;
-  player.vx = 0; player.vy = 0;
-  player.hp = player.maxHp;
-  player.mana = player.maxMana;
-  player.invulnTimer = 1.2;
-  player.isSlamming = false;
-  player.isDashing = false;
-  updateHUDHearts();
-  updateHUDMana();
-}
-
-// ============================================================================
-// 9. ENEMY ROSTER & BOSS ARCHITECTURE
-// ============================================================================
-function spawnEnemy(x, y, type = 'slime') {
-  const group = new THREE.Group();
-  let hp = 2;
-  let vx = -2.0;
-
-  if (type === 'slime') {
-    const eMesh = new THREE.Mesh(new THREE.DodecahedronGeometry(0.65, 1), new THREE.MeshLambertMaterial({
-      color: 0xff4757, emissive: 0x880000, emissiveIntensity: 0.2
-    }));
-    eMesh.position.y = 0.6;
-    eMesh.castShadow = true;
-    group.add(eMesh);
-    const eye = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.12, 0.12), new THREE.MeshBasicMaterial({ color: 0xfffa65 }));
-    eye.position.set(-0.2, 0.7, 0.55); group.add(eye);
-    const eye2 = eye.clone(); eye2.position.x = 0.2; group.add(eye2);
-  } else if (type === 'skeleton') {
-    hp = 4; vx = -2.4;
-    const body = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.9, 0.35), new THREE.MeshLambertMaterial({ color: 0xdcdde1 }));
-    body.position.y = 0.95;
-    group.add(body);
-    const skull = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.48, 0.48), new THREE.MeshLambertMaterial({ color: 0xf5f6fa }));
-    skull.position.y = 1.65;
-    group.add(skull);
-    const sSword = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.9, 0.08), MAT.stone);
-    sSword.position.set(0.4, 0.9, 0.3);
-    group.add(sSword);
-  } else if (type === 'bat') {
-    hp = 2; vx = -3.2;
-    const bBody = new THREE.Mesh(new THREE.SphereGeometry(0.4, 6, 6), new THREE.MeshLambertMaterial({ color: 0x2f3640 }));
-    bBody.position.y = 0.4;
-    group.add(bBody);
-    const wingL = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.1, 0.3), new THREE.MeshLambertMaterial({ color: 0x718093 }));
-    wingL.position.set(-0.6, 0.5, 0);
-    group.add(wingL);
-    const wingR = wingL.clone(); wingR.position.x = 0.6;
-    group.add(wingR);
-  } else if (type === 'golem') {
-    hp = 7; vx = -1.4;
-    const gBody = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.4, 0.9), MAT.magmaRock);
-    gBody.position.y = 1.1;
-    group.add(gBody);
-    const core = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.4), new THREE.MeshLambertMaterial({ color: 0xff3838, emissive: 0xff3838, emissiveIntensity: 0.8 }));
-    core.position.set(0, 1.1, 0.45);
-    group.add(core);
-  }
-
-  group.position.set(x, y, 0);
-  scene.add(group);
-
-  worldEnemies.push({
-    group,
-    type,
-    x, y,
-    vx,
-    originX: x,
-    patrolRange: type === 'bat' ? 7 : 4.5,
-    alive: true,
-    hp, maxHp: hp,
-    animTime: Math.random() * 5,
-    attackTimer: 0
-  });
-}
-
-// Boss: Ruin Titan
-function spawnTitanBoss(x, y) {
-  const group = new THREE.Group();
-
-  // Torso
-  const torso = new THREE.Mesh(new THREE.BoxGeometry(2.4, 3.2, 1.6), MAT.darkStone);
-  torso.position.y = 2.4;
-  torso.castShadow = true;
-  group.add(torso);
-
-  // Core Heart
-  const core = new THREE.Mesh(new THREE.OctahedronGeometry(0.7, 0), new THREE.MeshLambertMaterial({
-    color: 0xff4757, emissive: 0xff4757, emissiveIntensity: 1.0
-  }));
-  core.position.set(0, 2.6, 0.9);
-  group.add(core);
-
-  // Head
-  const bHead = new THREE.Mesh(new THREE.BoxGeometry(1.4, 1.2, 1.2), MAT.ruins);
-  bHead.position.y = 4.4;
-  group.add(bHead);
-
-  // Massive Stone Arms
-  const armL = new THREE.Mesh(new THREE.BoxGeometry(0.8, 2.8, 0.8), MAT.stone);
-  armL.position.set(-1.8, 2.2, 0);
-  group.add(armL);
-
-  const armR = new THREE.Mesh(new THREE.BoxGeometry(0.8, 2.8, 0.8), MAT.stone);
-  armR.position.set(1.8, 2.2, 0);
-  group.add(armR);
-
-  group.position.set(x, y, 0);
-  scene.add(group);
-
-  currentBoss = {
-    group, torso, core, armL, armR,
-    x, y,
-    hp: 45, maxHp: 45,
-    state: 'idle', // idle, slam, summon, laser
-    timer: 0,
-    face: -1
-  };
-
-  document.getElementById('boss-hud').style.display = 'flex';
-  updateBossHP();
-  sfx.bossRoar();
-}
-
-function updateBossHP() {
-  if (!currentBoss) return;
-  const pct = Math.max(0, (currentBoss.hp / currentBoss.maxHp) * 100);
-  document.getElementById('boss-hp-fill').style.width = pct + '%';
-}
-
-// ============================================================================
-// 10. THE 10 FULL HAND-CRAFTED LEVELS
-// ============================================================================
-const LEVELS = [
-  {
-    num: 1,
-    title: "Awakening in the Ruins",
-    desc: "Ancient stone pathways. Leap across the chasm and master your sword.",
-    theme: "grass",
-    build: () => {
-      createPlatform(-8, 0, 18, 5, 'grass');
-      createCheckpoint(-2, 0);
-      createTorch(-5, 2.5);
-      createTorch(4, 2.5);
-      createRuins(6, 0);
-      createCoin(-0.5, 1.2);
-      createCoin(1.5, 1.2);
-
-      // Chasm with bridge
-      createBridge(10, 0, 7);
-
-      // Terrace with first enemy & chest
-      createPlatform(17, 0, 14, 5, 'grass');
-      createChest(20, 0, 30);
-      spawnEnemy(25, 0, 'slime');
-      createTorch(23, 2.5);
-
-      // High Step with portal
-      createPlatform(31, 2.2, 10, 7.2, 'grass');
-      createCoin(34, 3.4);
-      createLevelPortal(37, 2.2);
-    }
-  },
-  {
-    num: 2,
-    title: "The Chasm of Brambles",
-    desc: "Lethal spike ravines. Use stepping stones or sacrifice a soul to bridge the deep spikes.",
-    theme: "grass",
-    build: () => {
-      createPlatform(-8, 0, 14, 5, 'grass');
-      createCheckpoint(-3, 0);
-      createTorch(-5, 2.5);
-
-      // Spike Trench (corpse puzzle!)
-      createPlatform(6, -3, 12, 3, 'grass');
-      createSpikes(6, 0, 12);
-      // Floating single stone
-      createPlatform(11, 2.4, 2.5, 0.8, 'ruins');
-      createCoin(12.2, 3.8);
-
-      // Middle Fortress
-      createPlatform(18, 0, 14, 5, 'grass');
-      createTorch(20, 2.5);
-      spawnEnemy(24, 0, 'slime');
-      spawnEnemy(28, 0, 'slime');
-      createChest(29, 0, 40);
-
-      // Moving Platform across deep canyon
-      createMovingPlatform(35, 1.5, 3.5, 6, 0, 2.2);
-
-      // End Citadel
-      createPlatform(44, 0, 14, 5, 'grass');
-      createRuins(47, 0);
-      createLevelPortal(52, 0);
-    }
-  },
-  {
-    num: 3,
-    title: "Sunken Crypts",
-    desc: "Crumbling wooden rafters and ancient skeleton sentinels.",
-    theme: "crypt",
-    build: () => {
-      createPlatform(-8, 0, 14, 5, 'crypt');
-      createCheckpoint(-3, 0);
-      createTorch(-5, 2.5);
-      spawnEnemy(3, 0, 'skeleton');
-
-      // Crumbling platforms
-      createFallingPlatform(8, 0.8, 3.2);
-      createFallingPlatform(13, 1.8, 3.2);
-      createCoin(13, 3.2);
-      createFallingPlatform(18, 2.8, 3.2);
-
-      // Mid Dungeon
-      createPlatform(23, 2.5, 16, 7.5, 'crypt');
-      createTorch(25, 5.0);
-      spawnEnemy(28, 2.5, 'skeleton');
-      spawnEnemy(34, 2.5, 'bat');
-      createChest(35, 2.5, 50);
-
-      // Bridge over spike pit
-      createSpikes(39, 0, 10);
-      createBridge(39, 2.5, 10);
-
-      // Sanctuary
-      createPlatform(49, 2.5, 14, 7.5, 'crypt');
-      createRuins(53, 2.5);
-      createLevelPortal(58, 2.5);
-    }
-  },
-  {
-    num: 4,
-    title: "Windy Aerie & Floating Isles",
-    desc: "Vertical ascents, bounce mushrooms, and winged harpies.",
-    theme: "sky",
-    build: () => {
-      createPlatform(-8, 0, 12, 5, 'grass');
-      createCheckpoint(-2, 0);
-
-      // Bounce mushroom up to high ledge
-      createMushroom(3, 0);
-      createPlatform(6, 4.5, 8, 1, 'ruins');
-      createCoin(9, 6.0);
-      spawnEnemy(10, 6.5, 'bat');
-
-      // Moving vertical platform
-      createMovingPlatform(17, 4.0, 3.2, 0, 4.5, 2.4);
-
-      // High floating terrace
-      createPlatform(22, 8.0, 12, 1, 'grass');
-      createTorch(24, 10.0);
-      spawnEnemy(27, 8.0, 'slime');
-      createMushroom(31, 8.0);
-
-      // Cloud peak
-      createFallingPlatform(36, 12.0, 3.5);
-      createFallingPlatform(42, 12.5, 3.5);
-      createCoin(42, 14.0);
-
-      // Summit Portal
-      createPlatform(48, 11.5, 12, 15, 'grass');
-      createRuins(51, 11.5);
-      createChest(53, 11.5, 60);
-      createLevelPortal(56, 11.5);
-    }
-  },
-  {
-    num: 5,
-    title: "The Molten Foundry",
-    desc: "Deadly lava lakes and fiery Obsidian Golems. Slain bodies petrify into heat-proof stone.",
-    theme: "lava",
-    build: () => {
-      createPlatform(-8, 0, 14, 5, 'lava');
-      createCheckpoint(-3, 0);
-      createTorch(-5, 2.5);
-
-      // Lava Trench
-      createLavaHazard(6, 0, 14);
-      // Moving platform through lava
-      createMovingPlatform(12, 1.2, 3.5, 5, 0, 2.0);
-
-      // Golem Outpost
-      createPlatform(20, 0, 16, 5, 'lava');
-      createTorch(22, 2.5);
-      spawnEnemy(26, 0, 'golem');
-      createChest(32, 0, 75);
-
-      // Double Crumble Bridge over Lava
-      createLavaHazard(36, 0, 12);
-      createFallingPlatform(39, 1.2, 3.0);
-      createFallingPlatform(44, 1.6, 3.0);
-      createCoin(44, 3.0);
-
-      // Foundry Heart
-      createPlatform(48, 0, 14, 5, 'lava');
-      createRuins(51, 0);
-      spawnEnemy(54, 0, 'slime');
-      createLevelPortal(58, 0);
-    }
-  },
-  {
-    num: 6,
-    title: "Forgotten Catacombs",
-    desc: "Pressure plates and locked ancient stone drawbridges.",
-    theme: "crypt",
-    build: () => {
-      createPlatform(-8, 0, 16, 5, 'crypt');
-      createCheckpoint(-2, 0);
-      createTorch(-5, 2.5);
-      spawnEnemy(4, 0, 'skeleton');
-
-      // Spike pit with a lever puzzle
-      createSpikes(8, 0, 8);
-      createPlatform(16, 0, 10, 5, 'crypt');
-      createSwitch(19, 0, null); // pressure plate
-      createChest(22, 0, 80);
-
-      // High gate step
-      createPlatform(26, 3.0, 10, 8, 'crypt');
-      spawnEnemy(29, 3.0, 'bat');
-
-      // Moving platform
-      createMovingPlatform(38, 3.5, 3.5, 6, 0, 2.5);
-
-      // Exit Tomb
-      createPlatform(46, 1.5, 16, 6.5, 'crypt');
-      createRuins(50, 1.5);
-      spawnEnemy(54, 1.5, 'skeleton');
-      createLevelPortal(58, 1.5);
-    }
-  },
-  {
-    num: 7,
-    title: "The Whispering Cavern",
-    desc: "Swarm of toxic slimes, bounce mushrooms, and winding subterranean chasms.",
-    theme: "grass",
-    build: () => {
-      createPlatform(-8, 0, 12, 5, 'grass');
-      createCheckpoint(-2, 0);
-
-      // Mushroom chain
-      createMushroom(3, 0);
-      createPlatform(6, 3.5, 6, 1, 'grass');
-      createMushroom(9, 3.5);
-      createPlatform(12, 7.5, 8, 1, 'grass');
-      createCoin(15, 9.2);
-
-      // Lower Slime Pit
-      createPlatform(20, 0, 18, 5, 'grass');
-      createTorch(22, 2.5);
-      spawnEnemy(24, 0, 'slime');
-      spawnEnemy(28, 0, 'slime');
-      spawnEnemy(32, 0, 'slime');
-      createChest(35, 0, 90);
-
-      // Crumbling Steps
-      createFallingPlatform(40, 2.0, 3.0);
-      createFallingPlatform(45, 3.8, 3.0);
-      createFallingPlatform(50, 5.2, 3.0);
-
-      // Deep Sanctuary
-      createPlatform(55, 4.0, 14, 9, 'grass');
-      createRuins(58, 4.0);
-      createLevelPortal(63, 4.0);
-    }
-  },
-  {
-    num: 8,
-    title: "Frozen Citadel",
-    desc: "Slippery glacial ice sheets and relentless Frost Guardians.",
-    theme: "ice",
-    build: () => {
-      createPlatform(-8, 0, 14, 5, 'ice');
-      createCheckpoint(-3, 0);
-      createTorch(-5, 2.5);
-
-      // Ice platform with skeleton
-      createPlatform(6, 0, 16, 5, 'ice');
-      spawnEnemy(10, 0, 'skeleton');
-      spawnEnemy(16, 0, 'bat');
-
-      // Spike Trench with ice stepper
-      createSpikes(22, 0, 10);
-      createMovingPlatform(27, 2.2, 3.2, 5, 0, 3.0);
-
-      // Upper Frozen Peak
-      createPlatform(34, 1.8, 16, 6.8, 'ice');
-      createChest(38, 1.8, 100);
-      spawnEnemy(42, 1.8, 'skeleton');
-
-      // Bridge over abyss
-      createBridge(50, 1.8, 8);
-
-      // Throne of Ice
-      createPlatform(58, 0, 16, 5, 'ice');
-      createRuins(62, 0);
-      createLevelPortal(68, 0);
-    }
-  },
-  {
-    num: 9,
-    title: "The Sky Temple Ascent",
-    desc: "The ultimate trial before the Colossus. High velocity moving platforms, flying sentinels, and abyss drops.",
-    theme: "sky",
-    build: () => {
-      createPlatform(-8, 0, 12, 5, 'grass');
-      createCheckpoint(-2, 0);
-
-      // Dual Moving Platforms
-      createMovingPlatform(8, 2.0, 3.2, 0, 4.0, 2.6);
-      createMovingPlatform(16, 6.0, 3.2, 5.0, 0, 2.8);
-
-      // Mid Temple
-      createPlatform(24, 5.0, 14, 2, 'ruins');
-      createTorch(26, 7.0);
-      spawnEnemy(28, 5.0, 'bat');
-      spawnEnemy(32, 5.0, 'bat');
-      createChest(34, 5.0, 120);
-
-      // Triple Falling Platforms
-      createFallingPlatform(40, 7.0, 3.0);
-      createFallingPlatform(45, 8.5, 3.0);
-      createFallingPlatform(50, 10.0, 3.0);
-
-      // Pinnacle of Ascension
-      createPlatform(56, 9.0, 16, 15, 'ruins');
-      createRuins(60, 9.0);
-      spawnEnemy(64, 9.0, 'golem');
-      createLevelPortal(68, 9.0);
-    }
-  },
-  {
-    num: 10,
-    title: "The Ruin Titan's Sanctum (BOSS TRIAL)",
-    desc: "The ancient Colossus awakens. Avoid fist slams and shockwaves. Strike the glowing core!",
-    theme: "lava",
-    build: () => {
-      // Massive Grand Arena
-      createPlatform(-12, 0, 52, 6, 'lava');
-      createCheckpoint(-6, 0);
-      createTorch(-9, 2.5);
-      createTorch(4, 2.5);
-      createTorch(18, 2.5);
-      createTorch(32, 2.5);
-
-      // Elevated platforms for dodging shockwaves
-      createPlatform(5, 3.5, 4.5, 0.8, 'ruins');
-      createPlatform(19, 3.5, 4.5, 0.8, 'ruins');
-
-      // Spawn Boss Colossus!
-      spawnTitanBoss(25, 0);
-    }
-  }
-];
-
-// Load Level Function
-function loadLevel(index) {
-  if (index < 0 || index >= LEVELS.length) index = 0;
-  currentLevelIndex = index;
-
-  // Cleanup old scene objects
-  colliders = [];
-  for (const c of worldCoins) scene.remove(c.mesh);
-  worldCoins = [];
-  for (const en of worldEnemies) scene.remove(en.group);
-  worldEnemies = [];
-  for (const tr of worldTorches) scene.remove(tr.group || tr.flame.parent);
-  worldTorches = [];
-  for (const ch of worldChests) scene.remove(ch.group);
-  worldChests = [];
-  for (const sw of worldSwitches) scene.remove(sw.group);
-  worldSwitches = [];
-  for (const mu of worldMushrooms) scene.remove(mu.group);
-  worldMushrooms = [];
-  for (const mp of worldMovingPlatforms) scene.remove(mp.group);
-  worldMovingPlatforms = [];
-  for (const fp of worldFallingPlatforms) scene.remove(fp.group);
-  worldFallingPlatforms = [];
-  for (const p of worldParticles) scene.remove(p.mesh);
-  worldParticles = [];
-  for (const mb of worldMagicProjectiles) scene.remove(mb.mesh);
-  worldMagicProjectiles = [];
-  for (const ep of worldEnemyProjectiles) scene.remove(ep.mesh);
-  worldEnemyProjectiles = [];
-  for (const c of worldCorpses) scene.remove(c);
-  worldCorpses = [];
-  if (currentBoss) {
-    scene.remove(currentBoss.group);
-    currentBoss = null;
-    document.getElementById('boss-hud').style.display = 'none';
-  }
-  if (activePortal) {
-    scene.remove(activePortal.group);
-    activePortal = null;
-  }
-  if (activeCheckpoint.group) {
-    scene.remove(activeCheckpoint.group);
-  }
-
-  // Clear level terrain meshes
-  const toRemove = [];
-  scene.traverse(child => {
-    if (child !== scene && child !== camera && child !== playerGroup &&
-        child !== hemiLight && child !== sunLight &&
-        child !== parallaxLayers.mountains &&
-        child !== parallaxLayers.floatingIsles &&
-        child !== parallaxLayers.clouds &&
-        child !== slamRing) {
-      if (!child.isDescendantOf || (!child.isDescendantOf(parallaxLayers.mountains) &&
-          !child.isDescendantOf(parallaxLayers.floatingIsles) &&
-          !child.isDescendantOf(parallaxLayers.clouds) &&
-          !child.isDescendantOf(playerGroup))) {
-        toRemove.push(child);
+      function clampNumber(value, fallback, min, max) {
+        const parsed = Number.parseInt(value, 10);
+        if (Number.isNaN(parsed)) return fallback;
+        return Math.min(Math.max(parsed, min), max);
       }
-    }
-  });
-  toRemove.forEach(o => scene.remove(o));
 
-  const lvl = LEVELS[currentLevelIndex];
-  rebuildParallax(lvl.theme);
-  lvl.build();
-
-  // Restore saved corpses for this specific level
-  const saved = levelCorpsesMap[currentLevelIndex] || [];
-  saved.forEach(c => spawnCorpse(c.x, c.y));
-
-  // Reset Player
-  player.x = activeCheckpoint.x;
-  player.y = activeCheckpoint.y + 0.5;
-  player.vx = 0; player.vy = 0;
-  player.hp = player.maxHp;
-  player.mana = player.maxMana;
-  player.invulnTimer = 1.0;
-  player.isSlamming = false;
-  player.isDashing = false;
-
-  updateHUDHearts();
-  updateHUDMana();
-  document.getElementById('hud-level-text').textContent = `LEVEL ${lvl.num}`;
-  document.getElementById('hud-level-name').textContent = lvl.title;
-
-  showBanner(`LEVEL ${lvl.num}: ${lvl.title}`, lvl.desc);
-}
-
-// Banner Announcement
-function showBanner(title, subtitle) {
-  const b = document.getElementById('center-banner');
-  document.getElementById('banner-title').textContent = title;
-  document.getElementById('banner-subtitle').textContent = subtitle;
-  b.classList.add('visible');
-  setTimeout(() => b.classList.remove('visible'), 4000);
-}
-
-// ============================================================================
-// 11. COMBAT, COMBO & INPUT SYSTEM
-// ============================================================================
-const keys = { left: false, right: false, down: false };
-
-function handleAttack() {
-  if (player.hp <= 0) return;
-
-  // Check Chest Interaction if nearby
-  for (const ch of worldChests) {
-    if (!ch.opened && Math.hypot(player.x - ch.x, player.y - ch.y) < 1.8) {
-      ch.opened = true;
-      sfx.chest();
-      ch.lid.rotation.x = -Math.PI * 0.65;
-      coins += ch.loot;
-      document.getElementById('hud-coin-count').textContent = coins;
-      spawnHitSparks(ch.x, ch.y + 0.8, 0xfbc531, 20);
-      showBanner("TREASURE CLAIMED!", `Discovered ${ch.loot} gold amber coins!`);
-      saveGameState();
-      return;
-    }
-  }
-
-  // Normal / Combo Attack
-  if (player.comboTimer > 0 && player.comboCount < 3) {
-    player.comboCount++;
-  } else {
-    player.comboCount = 1;
-  }
-  player.comboTimer = 0.5;
-  player.isAttacking = true;
-  player.atkTimeLeft = player.atkDuration;
-  sfx.sword(player.comboCount);
-
-  // Attack hitbox check
-  const hitDist = player.comboCount === 3 ? 2.5 : 1.9;
-  const dmg = player.comboCount === 3 ? 2 : 1;
-
-  for (const en of worldEnemies) {
-    if (!en.alive) continue;
-    const dist = Math.hypot((player.x + player.face * 1.1) - en.x, player.y - en.y);
-    if (dist < hitDist) {
-      en.hp -= dmg;
-      en.vx = player.face * (player.comboCount === 3 ? 7 : 4.5);
-      sfx.hit();
-      spawnHitSparks(en.x, en.y + 0.8, 0xff4757, 10);
-      showComboText(`${player.comboCount}x COMBO!`);
-
-      if (en.hp <= 0) {
-        en.alive = false;
-        scene.remove(en.group);
-        coins += (en.type === 'golem' ? 30 : (en.type === 'skeleton' ? 20 : 10));
-        document.getElementById('hud-coin-count').textContent = coins;
-        player.mana = Math.min(player.maxMana, player.mana + 10);
-        updateHUDMana();
-        saveGameState();
-        sfx.coin();
+      function setMode(mode) {
+        state.mode = mode;
+        const isTicket = mode === 'ticket';
+        ticketModeBtn.classList.toggle('active', isTicket);
+        tableModeBtn.classList.toggle('active', !isTicket);
+        ticketModeBtn.setAttribute('aria-selected', String(isTicket));
+        tableModeBtn.setAttribute('aria-selected', String(!isTicket));
+        ticketFields.hidden = !isTicket;
+        tableFields.hidden = isTicket;
+        reserveBtn.textContent = isTicket ? 'Continue with Ticket Booking' : 'Continue with Table Reservation';
+        updateSummary();
       }
-    }
-  }
 
-  // Boss hit check
-  if (currentBoss && currentBoss.hp > 0) {
-    const bDist = Math.hypot((player.x + player.face * 1.2) - currentBoss.x, player.y - currentBoss.y);
-    if (bDist < 3.2) {
-      currentBoss.hp -= dmg;
-      sfx.hit();
-      spawnHitSparks(currentBoss.x, currentBoss.y + 2.5, 0xfffa65, 12);
-      updateBossHP();
-      showComboText(`${player.comboCount}x CRITICAL!`);
+      function updateSummary() {
+        const isTicket = state.mode === 'ticket';
+        let units;
+        let rate;
 
-      if (currentBoss.hp <= 0) {
-        // Boss Defeated!
-        sfx.portal();
-        coins += 500;
-        document.getElementById('hud-coin-count').textContent = coins;
-        saveGameState();
-        spawnHitSparks(currentBoss.x, currentBoss.y + 2.5, 0xfffa65, 50);
-        scene.remove(currentBoss.group);
-        currentBoss = null;
-        document.getElementById('boss-hud').style.display = 'none';
-        triggerLevelComplete();
-      }
-    }
-  }
-}
-
-function handleJump() {
-  if (player.hp <= 0) {
-    respawnPlayer();
-    return;
-  }
-  if (player.onGround) {
-    player.vy = 13.5;
-    player.onGround = false;
-    player.canDoubleJump = true;
-    sfx.jump();
-  } else if (player.canDoubleJump) {
-    player.vy = 12.8;
-    player.canDoubleJump = false;
-    sfx.doubleJump();
-    spawnHitSparks(player.x, player.y, 0x00d2d3, 8);
-  }
-}
-
-function handleDash() {
-  if (player.dashCooldown > 0 || player.hp <= 0) return;
-  player.isDashing = true;
-  player.dashTimer = 0.22;
-  player.dashCooldown = 0.65;
-  player.invulnTimer = 0.3;
-  sfx.dash();
-  spawnDashGhost(player.x, player.y, player.face);
-}
-
-function handleDownSlam() {
-  if (!player.onGround && !player.isSlamming) {
-    player.isSlamming = true;
-    player.vy = -24;
-    sfx.slam();
-  }
-}
-
-function showComboText(text) {
-  const c = document.getElementById('combo-box');
-  c.textContent = text;
-  c.classList.add('visible');
-  clearTimeout(showComboText._timer);
-  showComboText._timer = setTimeout(() => c.classList.remove('visible'), 1200);
-}
-
-function updateHUDHearts() {
-  const hearts = '❤️'.repeat(Math.max(0, player.hp)) + '🖤'.repeat(player.maxHp - player.hp);
-  document.getElementById('hud-hearts').textContent = hearts;
-}
-
-function updateHUDMana() {
-  const pct = Math.max(0, (player.mana / player.maxMana) * 100);
-  document.getElementById('hud-mana-fill').style.width = pct + '%';
-}
-
-function triggerLevelComplete() {
-  sfx.portal();
-  if (currentLevelIndex + 1 > unlockedLevel) {
-    unlockedLevel = Math.min(10, currentLevelIndex + 2);
-    saveGameState();
-  }
-  const winOverlay = document.getElementById('win-overlay');
-  const lvl = LEVELS[currentLevelIndex];
-  document.getElementById('win-msg').textContent = `You have conquered Level ${lvl.num}: ${lvl.title}!`;
-  const corpseCount = (levelCorpsesMap[currentLevelIndex] || []).length;
-  document.getElementById('win-stats').textContent = `Stepping Corpses Left: ${corpseCount} | Gold Hoard: ${coins}`;
-  winOverlay.classList.add('visible');
-}
-
-// Keyboard Bindings
-window.addEventListener('keydown', e => {
-  const k = e.key;
-  if (k === 'ArrowLeft' || k === 'a' || k === 'A') keys.left = true;
-  if (k === 'ArrowRight' || k === 'd' || k === 'D') keys.right = true;
-  if (k === 'ArrowDown' || k === 's' || k === 'S') { keys.down = true; handleDownSlam(); }
-  if (k === 'ArrowUp' || k === 'w' || k === 'W' || k === ' ') { handleJump(); e.preventDefault(); }
-  if (k === 'j' || k === 'J' || k === 'z' || k === 'Z' || k === 'f' || k === 'F') handleAttack();
-  if (k === 'k' || k === 'K' || k === 'x' || k === 'X') castMagicBolt();
-  if (k === 'l' || k === 'L' || k === 'c' || k === 'C' || k === 'Shift') handleDash();
-  if (k === 'e' || k === 'E') handleAttack(); // interact with chests
-});
-window.addEventListener('keyup', e => {
-  const k = e.key;
-  if (k === 'ArrowLeft' || k === 'a' || k === 'A') keys.left = false;
-  if (k === 'ArrowRight' || k === 'd' || k === 'D') keys.right = false;
-  if (k === 'ArrowDown' || k === 's' || k === 'S') keys.down = false;
-});
-
-// Touch Pad Bindings
-function bindTouch(id, onStart, onEnd) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.addEventListener('pointerdown', e => { e.preventDefault(); el.classList.add('active'); onStart(); });
-  ['pointerup', 'pointercancel', 'pointerleave'].forEach(evt => {
-    el.addEventListener(evt, () => { el.classList.remove('active'); if (onEnd) onEnd(); });
-  });
-}
-bindTouch('t-left', () => keys.left = true, () => keys.left = false);
-bindTouch('t-right', () => keys.right = true, () => keys.right = false);
-bindTouch('t-down', () => handleDownSlam());
-bindTouch('t-jump', () => handleJump());
-bindTouch('t-atk', () => handleAttack());
-bindTouch('t-dash', () => handleDash());
-bindTouch('t-magic', () => castMagicBolt());
-
-// UI Buttons
-document.getElementById('btn-sound').addEventListener('click', () => {
-  sfx.muted = !sfx.muted;
-  document.getElementById('btn-sound').textContent = sfx.muted ? '🔇' : '🔊';
-});
-document.getElementById('btn-respawn').addEventListener('click', respawnPlayer);
-document.getElementById('btn-clear-corpses').addEventListener('click', clearCurrentLevelCorpses);
-
-document.getElementById('btn-next-level').addEventListener('click', () => {
-  document.getElementById('win-overlay').classList.remove('visible');
-  loadLevel(currentLevelIndex + 1);
-});
-document.getElementById('btn-replay-level').addEventListener('click', () => {
-  document.getElementById('win-overlay').classList.remove('visible');
-  loadLevel(currentLevelIndex);
-});
-
-// Level Select Map Modal
-function openLevelSelect() {
-  const grid = document.getElementById('level-grid');
-  grid.innerHTML = '';
-  LEVELS.forEach((lvl, idx) => {
-    const card = document.createElement('div');
-    const isLocked = (idx + 1) > unlockedLevel;
-    card.className = `lvl-card ${isLocked ? 'locked' : ''}`;
-    card.innerHTML = `
-      <div class="lvl-num">${isLocked ? '🔒' : lvl.num}</div>
-      <div class="lvl-name">${lvl.title}</div>
-    `;
-    if (!isLocked) {
-      card.addEventListener('click', () => {
-        document.getElementById('level-select-overlay').classList.remove('visible');
-        document.getElementById('win-overlay').classList.remove('visible');
-        loadLevel(idx);
-      });
-    }
-    grid.appendChild(card);
-  });
-  document.getElementById('level-select-overlay').classList.add('visible');
-}
-document.getElementById('btn-levels').addEventListener('click', openLevelSelect);
-document.getElementById('btn-win-map').addEventListener('click', openLevelSelect);
-document.getElementById('btn-close-map').addEventListener('click', () => {
-  document.getElementById('level-select-overlay').classList.remove('visible');
-});
-
-// ============================================================================
-// 12. MAIN SIMULATION & ANIMATION LOOP
-// ============================================================================
-let lastTime = performance.now();
-
-function update(dt) {
-  const t = performance.now() / 1000;
-
-  // Passive Mana Regen
-  if (player.mana < player.maxMana) {
-    player.mana = Math.min(player.maxMana, player.mana + dt * 4);
-    updateHUDMana();
-  }
-
-  // Dash & Combo Timers
-  if (player.dashCooldown > 0) player.dashCooldown -= dt;
-  if (player.comboTimer > 0) {
-    player.comboTimer -= dt;
-    if (player.comboTimer <= 0) player.comboCount = 0;
-  }
-
-  // 1. Player Physics & Traversal
-  if (player.hp > 0) {
-    // Dash Burst
-    if (player.isDashing) {
-      player.dashTimer -= dt;
-      player.vx = player.face * 22;
-      player.vy = 0;
-      if (player.dashTimer <= 0) player.isDashing = false;
-    } else {
-      const moveDir = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
-      const speed = 8.2;
-      player.vx = moveDir * speed;
-      if (moveDir !== 0) player.face = moveDir;
-
-      // Downward Slam or Normal Gravity
-      if (player.isSlamming) {
-        player.vy = -26;
-      } else {
-        player.vy -= 28 * dt;
-      }
-    }
-
-    // Integrate X
-    player.x += player.vx * dt;
-    for (const c of colliders) {
-      if (player.x + player.w / 2 > c.minX && player.x - player.w / 2 < c.maxX &&
-          player.y + player.h > c.minY && player.y < c.maxY) {
-        if (!c.isSpike && !c.isLava) {
-          if (player.vx > 0) player.x = c.minX - player.w / 2;
-          else if (player.vx < 0) player.x = c.maxX + player.w / 2;
-          player.vx = 0;
+        if (isTicket) {
+          units = clampNumber(ticketQty.value, 1, 1, 12);
+          ticketQty.value = String(units);
+          rate = Number(ticketTier.value);
+          summaryMode.textContent = 'Gala Tickets';
+          summaryUnitLabel.textContent = 'Quantity';
+        } else {
+          units = clampNumber(partySize.value, 2, 2, 12);
+          partySize.value = String(units);
+          rate = Number(tablePackage.value);
+          summaryMode.textContent = 'Dining Table Reservation';
+          summaryUnitLabel.textContent = 'Party Size';
         }
+
+        const subtotal = rate * units;
+        const fee = subtotal * 0.08;
+        const total = subtotal + fee;
+
+        summaryUnits.textContent = String(units);
+        summaryRate.textContent = money(rate);
+        summarySubtotal.textContent = money(subtotal);
+        summaryFee.textContent = money(fee);
+        summaryTotal.textContent = money(total);
       }
-    }
 
-    // Integrate Y
-    player.y += player.vy * dt;
-    player.onGround = false;
+      bookingForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+        feedback.className = 'feedback';
 
-    for (const c of colliders) {
-      if (player.x + player.w / 2 > c.minX && player.x - player.w / 2 < c.maxX &&
-          player.y < c.maxY && player.y + player.h > c.minY) {
-        if (c.isSpike || c.isLava) {
-          killPlayer(c.isLava ? 'lava' : 'spikes');
+        if (!guestName.value.trim()) {
+          feedback.textContent = 'Please enter a contact name.';
+          feedback.classList.add('error');
+          guestName.focus();
           return;
         }
 
-        if (player.vy < 0) {
-          player.y = c.maxY;
-          player.vy = 0;
-          player.onGround = true;
-
-          // Downward Slam Impact
-          if (player.isSlamming) {
-            player.isSlamming = false;
-            sfx.slam();
-            slamRing.position.set(player.x, player.y + 0.1, 0);
-            slamRing.scale.set(1, 1, 1);
-            slamRing.material.opacity = 0.9;
-
-            // Damage nearby enemies in AOE
-            for (const en of worldEnemies) {
-              if (en.alive && Math.hypot(player.x - en.x, player.y - en.y) < 3.8) {
-                en.hp -= 3;
-                en.vx = Math.sign(en.x - player.x) * 8;
-                spawnHitSparks(en.x, en.y + 0.8, 0xff9f43, 14);
-                if (en.hp <= 0) {
-                  en.alive = false;
-                  scene.remove(en.group);
-                  coins += 15;
-                  document.getElementById('hud-coin-count').textContent = coins;
-                }
-              }
-            }
-          }
-        } else if (player.vy > 0) {
-          player.y = c.minY - player.h;
-          player.vy = 0;
+        if (!guestEmail.validity.valid) {
+          feedback.textContent = 'Please enter a valid email address.';
+          feedback.classList.add('error');
+          guestEmail.focus();
+          return;
         }
-      }
-    }
 
-    // Check Abyss
-    if (player.y < -14) {
-      killPlayer('abyss');
-      return;
-    }
-
-    // Interactive Hint Proximity (Chests)
-    let nearChest = false;
-    for (const ch of worldChests) {
-      if (!ch.opened && Math.hypot(player.x - ch.x, player.y - ch.y) < 2.0) {
-        nearChest = true; break;
-      }
-    }
-    document.getElementById('interact-hint').style.display = nearChest ? 'flex' : 'none';
-
-    // Bouncy Mushrooms
-    for (const mu of worldMushrooms) {
-      if (Math.hypot(player.x - mu.x, player.y - mu.y) < 1.2 && player.vy < 0) {
-        player.vy = 18.5;
-        player.onGround = false;
-        player.canDoubleJump = true;
-        sfx.jump();
-        mu.squish = 0.4;
-        spawnHitSparks(mu.x, mu.y, 0xff4757, 10);
-      }
-    }
-
-    // Coins Collection
-    for (const c of worldCoins) {
-      if (!c.collected && Math.hypot(player.x - c.x, (player.y + 1) - c.y) < 1.3) {
-        c.collected = true;
-        scene.remove(c.mesh);
-        coins += 5;
-        document.getElementById('hud-coin-count').textContent = coins;
-        saveGameState();
-        sfx.coin();
-        spawnHitSparks(c.x, c.y, 0xfbc531, 8);
-      }
-    }
-
-    // Checkpoint Obelisk
-    if (!activeCheckpoint.activated && Math.hypot(player.x - activeCheckpoint.x, player.y - activeCheckpoint.y) < 2.2) {
-      activeCheckpoint.activated = true;
-      sfx.checkpoint();
-      if (activeCheckpoint.rune) {
-        activeCheckpoint.rune.material.color.setHex(0x00d2d3);
-        activeCheckpoint.rune.material.emissive.setHex(0x00d2d3);
-        activeCheckpoint.rune.material.emissiveIntensity = 1.0;
-      }
-      showBanner("CHECKPOINT ATTUNED", "Ancient obelisk activated. Your soul is bound here.");
-    }
-
-    // Level Finish Portal
-    if (activePortal && Math.hypot(player.x - activePortal.x, player.y - activePortal.y) < 2.0) {
-      triggerLevelComplete();
-    }
-
-    // Invulnerability Blink
-    if (player.invulnTimer > 0) {
-      player.invulnTimer -= dt;
-      playerGroup.visible = Math.floor(t * 16) % 2 === 0;
-    } else {
-      playerGroup.visible = true;
-    }
-
-    // Enemy Collisions
-    for (const en of worldEnemies) {
-      if (en.alive && Math.hypot(player.x - en.x, (player.y + 0.8) - (en.y + 0.6)) < 1.2) {
-        if (player.invulnTimer <= 0) {
-          player.hp--;
-          updateHUDHearts();
-          sfx.hit();
-          player.vy = 7.0;
-          player.vx = -player.face * 7.0;
-          player.invulnTimer = 1.1;
-          spawnHitSparks(player.x, player.y + 1, 0xff4757, 10);
-          if (player.hp <= 0) {
-            killPlayer('enemy');
-            return;
-          }
+        if (!terms.checked) {
+          feedback.textContent = 'Please confirm the frontend-demo reservation note to continue.';
+          feedback.classList.add('error');
+          terms.focus();
+          return;
         }
-      }
-    }
 
-    // Boss Collisions & Attacks
-    if (currentBoss && currentBoss.hp > 0) {
-      if (Math.hypot(player.x - currentBoss.x, player.y - currentBoss.y) < 2.5) {
-        if (player.invulnTimer <= 0) {
-          player.hp -= 2;
-          updateHUDHearts();
-          sfx.hit();
-          player.vy = 9.0;
-          player.vx = -player.face * 9.0;
-          player.invulnTimer = 1.2;
-          if (player.hp <= 0) {
-            killPlayer('boss');
-            return;
-          }
-        }
-      }
-    }
-  }
+        feedback.textContent = 'Looks good! Next step: connect this form to your backend booking endpoint.';
+        feedback.classList.add('success');
+      });
 
-  // 2. Character Model Rig Animations
-  playerGroup.position.set(player.x, player.y, 0);
-  playerGroup.scale.x = player.face;
+      ticketModeBtn.addEventListener('click', function () { setMode('ticket'); });
+      tableModeBtn.addEventListener('click', function () { setMode('table'); });
+      [ticketTier, ticketQty, tablePackage, partySize].forEach(function (element) {
+        element.addEventListener('input', updateSummary);
+        element.addEventListener('change', updateSummary);
+      });
 
-  // Scarf flutter
-  scarf.rotation.z = Math.sin(t * 12) * 0.2 - (player.vx * 0.05);
-
-  if (player.vx !== 0 && player.onGround) {
-    player.runTimer += dt * 15;
-    leftLeg.rotation.x = Math.sin(player.runTimer) * 0.7;
-    rightLeg.rotation.x = -Math.sin(player.runTimer) * 0.7;
-    leftArm.rotation.x = -Math.sin(player.runTimer) * 0.6;
-  } else if (!player.onGround) {
-    leftLeg.rotation.x = -0.45;
-    rightLeg.rotation.x = 0.45;
-    leftArm.rotation.x = 0.6;
-  } else {
-    // Idle breathing
-    leftLeg.rotation.x = 0;
-    rightLeg.rotation.x = 0;
-    leftArm.rotation.x = Math.sin(t * 3.2) * 0.1;
-    head.rotation.y = Math.sin(t * 2.0) * 0.12;
-  }
-
-  // Sword Attack Slash Animation
-  if (player.isAttacking) {
-    player.atkTimeLeft -= dt;
-    const progress = 1 - (player.atkTimeLeft / player.atkDuration);
-    rightArm.rotation.x = Math.sin(progress * Math.PI) * 1.8;
-    slashMesh.material.opacity = Math.sin(progress * Math.PI) * 0.9;
-    slashMesh.rotation.z = -progress * 2.0;
-
-    if (player.atkTimeLeft <= 0) {
-      player.isAttacking = false;
-      rightArm.rotation.x = 0;
-      slashMesh.material.opacity = 0;
-    }
-  }
-
-  // Slam Shockwave Ring Fade
-  if (slamRing.material.opacity > 0) {
-    slamRing.scale.x += dt * 10;
-    slamRing.scale.y += dt * 10;
-    slamRing.material.opacity -= dt * 3.5;
-  }
-
-  // 3. Moving Platforms Simulation
-  for (const mp of worldMovingPlatforms) {
-    mp.timer += dt * mp.speed;
-    mp.prevX = mp.curX;
-    mp.prevY = mp.curY;
-    mp.curX = mp.startX + Math.sin(mp.timer) * mp.rangeX;
-    mp.curY = mp.startY + Math.sin(mp.timer) * mp.rangeY;
-    mp.group.position.set(mp.curX, mp.curY, 0);
-
-    mp.collider.minX = mp.curX - mp.w / 2;
-    mp.collider.maxX = mp.curX + mp.w / 2;
-    mp.collider.minY = mp.curY - mp.h;
-    mp.collider.maxY = mp.curY;
-
-    // Carry player along if standing on it
-    if (player.onGround && player.x > mp.collider.minX && player.x < mp.collider.maxX &&
-        Math.abs(player.y - mp.curY) < 0.2) {
-      player.x += (mp.curX - mp.prevX);
-      player.y += (mp.curY - mp.prevY);
-    }
-  }
-
-  // 4. Crumbling / Falling Platforms
-  for (const fp of worldFallingPlatforms) {
-    if (fp.state === 'idle') {
-      if (player.onGround && player.x > fp.collider.minX && player.x < fp.collider.maxX &&
-          Math.abs(player.y - fp.y) < 0.2) {
-        fp.state = 'shaking';
-        fp.timer = 0.55;
-      }
-    } else if (fp.state === 'shaking') {
-      fp.timer -= dt;
-      fp.group.position.x = fp.x + (Math.random() - 0.5) * 0.15;
-      if (fp.timer <= 0) {
-        fp.state = 'falling';
-        fp.timer = 2.5; // time until respawn
-      }
-    } else if (fp.state === 'falling') {
-      fp.group.position.y -= dt * 12;
-      fp.collider.minY = -999;
-      fp.collider.maxY = -999;
-      fp.timer -= dt;
-      if (fp.timer <= 0) {
-        // Respawn
-        fp.state = 'idle';
-        fp.group.position.set(fp.x, fp.origY, 0);
-        fp.collider.minY = fp.origY - fp.h;
-        fp.collider.maxY = fp.origY;
-      }
-    }
-  }
-
-  // 5. Mushroom Animation
-  for (const mu of worldMushrooms) {
-    if (mu.squish > 0) {
-      mu.squish -= dt * 2.5;
-      mu.cap.scale.y = 0.6 - mu.squish * 0.4;
-    }
-  }
-
-  // 6. Magic Projectiles
-  for (let i = worldMagicProjectiles.length - 1; i >= 0; i--) {
-    const mb = worldMagicProjectiles[i];
-    mb.mesh.position.x += mb.vx * dt;
-    mb.life -= dt;
-
-    // Hit enemies
-    for (const en of worldEnemies) {
-      if (en.alive && Math.hypot(mb.mesh.position.x - en.x, mb.mesh.position.y - (en.y + 0.6)) < 1.0) {
-        en.hp -= 3;
-        en.vx = Math.sign(mb.vx) * 6;
-        sfx.hit();
-        spawnHitSparks(en.x, en.y + 0.6, 0xa55eea, 12);
-        mb.life = 0;
-        if (en.hp <= 0) {
-          en.alive = false;
-          scene.remove(en.group);
-          coins += 15;
-          document.getElementById('hud-coin-count').textContent = coins;
-        }
-      }
-    }
-
-    // Hit boss
-    if (currentBoss && currentBoss.hp > 0 && Math.hypot(mb.mesh.position.x - currentBoss.x, mb.mesh.position.y - (currentBoss.y + 2.5)) < 2.0) {
-      currentBoss.hp -= 3;
-      sfx.hit();
-      spawnHitSparks(currentBoss.x, currentBoss.y + 2.5, 0xa55eea, 14);
-      updateBossHP();
-      mb.life = 0;
-      if (currentBoss.hp <= 0) {
-        triggerLevelComplete();
-      }
-    }
-
-    if (mb.life <= 0) {
-      scene.remove(mb.mesh);
-      worldMagicProjectiles.splice(i, 1);
-    }
-  }
-
-  // 7. Enemies Patrol & Attacks
-  for (const en of worldEnemies) {
-    if (!en.alive) continue;
-    en.animTime += dt * 5;
-
-    if (en.type === 'bat') {
-      en.x += en.vx * dt;
-      if (Math.abs(en.x - en.originX) > en.patrolRange) en.vx *= -1;
-      en.group.position.set(en.x, en.y + Math.sin(en.animTime) * 0.8, 0);
-      en.group.children[1].rotation.z = Math.sin(en.animTime * 2.5) * 0.8;
-      en.group.children[2].rotation.z = -Math.sin(en.animTime * 2.5) * 0.8;
-    } else {
-      en.x += en.vx * dt;
-      if (Math.abs(en.x - en.originX) > en.patrolRange) en.vx *= -1;
-      en.group.position.x = en.x;
-      en.group.position.y = en.y + Math.abs(Math.sin(en.animTime)) * (en.type === 'slime' ? 0.45 : 0.15);
-      if (en.type === 'slime') {
-        en.group.scale.y = 1 + Math.sin(en.animTime * 2) * 0.18;
-      }
-    }
-  }
-
-  // 8. Ruin Titan Boss AI Behavior
-  if (currentBoss && currentBoss.hp > 0) {
-    currentBoss.timer += dt;
-    currentBoss.core.rotation.y += dt * 2.5;
-
-    // Face player
-    currentBoss.face = player.x < currentBoss.x ? -1 : 1;
-    currentBoss.group.scale.x = currentBoss.face;
-
-    // Slam attack rhythm
-    const cycle = currentBoss.timer % 4.0;
-    if (cycle < 1.8) {
-      // Idle roar / hover
-      currentBoss.armR.position.y = 2.2 + Math.sin(t * 3) * 0.3;
-    } else if (cycle < 2.5) {
-      // Wind up fist high in the air
-      currentBoss.armR.position.y = 4.2;
-    } else if (cycle < 2.8) {
-      // Ground Slam!
-      currentBoss.armR.position.y = 0.5;
-      if (Math.abs(cycle - 2.5) < dt * 2) {
-        sfx.slam();
-        slamRing.position.set(currentBoss.x + currentBoss.face * 2.0, currentBoss.y + 0.1, 0);
-        slamRing.scale.set(1.5, 1.5, 1.5);
-        slamRing.material.opacity = 0.9;
-        // Shockwave hits player if on ground
-        if (player.onGround && Math.hypot(player.x - currentBoss.x, player.y - currentBoss.y) < 14.0) {
-          if (player.invulnTimer <= 0) {
-            player.hp--;
-            updateHUDHearts();
-            player.vy = 8.0;
-            player.invulnTimer = 1.0;
-            sfx.hit();
-          }
-        }
-      }
-    } else {
-      // Recover arm
-      currentBoss.armR.position.y = 2.2;
-    }
-  }
-
-  // 9. Floating Island Drifts & Particles
-  for (const isl of floatingIslandList) {
-    isl.position.y = isl.userData.baseY + Math.sin(t * 0.9 + isl.userData.seed) * 0.55;
-  }
-  for (const tr of worldTorches) {
-    const flicker = Math.sin(t * 18 + tr.light.position.x) * 0.3;
-    tr.light.intensity = tr.baseIntensity + flicker;
-    tr.flame.scale.set(1 + flicker * 0.3, 1 + flicker * 0.5, 1 + flicker * 0.3);
-  }
-  for (const c of worldCoins) {
-    if (!c.collected) c.mesh.rotation.z += dt * 2.6;
-  }
-  if (activePortal) {
-    activePortal.vortex.rotation.z += dt * 2.0;
-  }
-
-  // Update Particles
-  for (let i = worldParticles.length - 1; i >= 0; i--) {
-    const p = worldParticles[i];
-    p.life -= dt;
-    if (!p.isGhost) {
-      p.mesh.position.x += p.vx * dt;
-      p.mesh.position.y += p.vy * dt;
-      p.vy -= 16 * dt;
-    } else {
-      p.mesh.material.opacity = (p.life / p.maxLife) * 0.45;
-    }
-    if (p.life <= 0) {
-      scene.remove(p.mesh);
-      worldParticles.splice(i, 1);
-    }
-  }
-
-  // 10. Smooth Dynamic 2.5D Camera Tracking
-  const targetCamX = player.x + player.face * 2.0;
-  const targetCamY = Math.max(3.2, player.y + 2.4);
-  camera.position.x += (targetCamX - camera.position.x) * 0.08;
-  camera.position.y += (targetCamY - camera.position.y) * 0.08;
-  camera.lookAt(camera.position.x, camera.position.y - 0.4, 0);
-
-  // Parallax Shifts
-  parallaxLayers.mountains.position.x = camera.position.x * 0.88;
-  parallaxLayers.floatingIsles.position.x = camera.position.x * 0.68;
-  parallaxLayers.clouds.position.x = (camera.position.x * 0.42) + Math.sin(t * 0.04) * 6;
-}
-
-// Window resize handler
-window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-});
-
-// Render Loop
-function animate() {
-  requestAnimationFrame(animate);
-  const now = performance.now();
-  const dt = Math.min(0.04, (now - lastTime) / 1000);
-  lastTime = now;
-
-  update(dt);
-  renderer.render(scene, camera);
-}
-
-// Start Game
-loadLevel(0);
-animate();
-</script>
+      updateSummary();
+    })();
+  </script>
 </body>
 </html>
